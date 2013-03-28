@@ -1,0 +1,71 @@
+zimmer@pontius:~/Development/dirac-pipeline/db$ python diracinfosites.py
+Name of DIRAC site LCG.PISA.it
+Name of CEs: ['gridce0.pi.infn.it', 'gridce2.pi.infn.it', 'gridce1.pi.infn.it']
+	VO-glast.org-Calet
+	VO-glast.org-GlastRelease-17-35-24-lp39-redhat5-i686-32bit-gcc41-Optimized
+	VO-glast.org-GlastRelease-v18r1p1-rhel4_gcc34opt
+	VO-glast.org-GlastRelease-v19r1p0-rhel4_gcc34opt
+	VO-glast.org-GlastRelease-v19r3p9-rhel4_gcc34opt
+	VO-glast.org-ScienceTools-v9r21p0-rhel4_gcc34opt
+	VO-glast.org-calibrations-moot-pointing_history-110404
+
+
+Name of DIRAC site LCG.MSFG.fr
+Name of CEs: ['lptace01.msfg.fr']
+	vo-glast.org-msfg
+
+
+Name of DIRAC site LCG.NAPOLI.it
+Name of CEs: ['pamelace01.na.infn.it']
+	VO-glast.org-Calet
+	VO-glast.org-INFN-NAPOLI-PAMELA
+
+
+Name of DIRAC site LCG.CNAF.it
+Name of CEs: ['ce06-lcg.cr.cnaf.infn.it', 'ce04-lcg.cr.cnaf.infn.it', 'ce07-lcg.cr.cnaf.infn.it', 'ce08-lcg.cr.cnaf.infn.it', 'ce09-lcg.cr.cnaf.infn.it', 'ce01-lcg.cr.cnaf.infn.it', 'ce05-lcg.cr.cnaf.infn.it']
+	VO-glast.org-Calet
+	VO-glast.org-GlastRelease-20-08-08-redhat5-i686-32bit-gcc41-Optimized
+	VO-glast.org-GlastRelease-v15r39-rh9_gcc32opt
+	VO-glast.org-GlastRelease-v15r39p1-rh9_gcc32opt
+	VO-glast.org-GlastRelease-v15r47p12gr12xmlGeoDbs014800-rhel4_gcc34opt
+	VO-glast.org-GlastRelease-v15r47p12gr13-rhel4_gcc34opt
+	VO-glast.org-GlastRelease-v15r47p7-rh9_gcc32opt
+	VO-glast.org-GlastRelease-v17r31-rh9_gcc32opt
+	VO-glast.org-GlastRelease-v18r1p1-rhel4_gcc34opt
+	VO-glast.org-GlastRelease-v18r8p5-rhel4_gcc34opt
+	VO-glast.org-GlastRelease-v19r1p0-rhel4_gcc34opt
+	VO-glast.org-GlastRelease-v19r3p9-rhel4_gcc34opt
+	VO-glast.org-ScienceTools-v9r21p0-rhel4_gcc34opt
+	VO-glast.org-calibrations-moot-pointing_history-101013
+
+
+Name of DIRAC site LCG.BARI.it
+Name of CEs: ['cream-ce-1.ba.infn.it']
+
+
+Name of DIRAC site LCG.CNR.it
+Name of CEs: ['gridce.ilc.cnr.it']
+
+
+Name of DIRAC site LCG.OBSPM.fr
+Name of CEs: ['cream-ce-grid.obspm.fr']
+
+
+Name of DIRAC site LCG.IN2P3.fr
+Name of CEs: ['llrcream.in2p3.fr']
+
+
+Name of DIRAC site LCG.PERUGIA.it
+Name of CEs: ['cream-ce.pg.infn.it']
+	VO-glast.org-Calet
+	VO-glast.org-GlastRelease-20-08-08-redhat5-i686-32bit-gcc41-Optimized
+
+
+Name of DIRAC site LCG.TRIESTE.it
+Name of CEs: ['ce1.ts.infn.it']
+	VO-glast.org-GlastRelease-20-08-08-redhat5-i686-32bit-gcc41-Optimized
+
+
+Name of DIRAC site LCG.LAL.fr
+Name of CEs: ['grid36.lal.in2p3.fr']
+
