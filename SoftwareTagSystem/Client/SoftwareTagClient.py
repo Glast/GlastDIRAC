@@ -16,4 +16,4 @@ class SoftwareTagClient (Client):
   """
   def __init__(self, **kwargs ):
     Client.__init__(self, **kwargs )
-    self.setServer("SoftwareTagSystem/SoftwareTag")
+    self.setServer("SoftwareTag/SoftwareTag")
