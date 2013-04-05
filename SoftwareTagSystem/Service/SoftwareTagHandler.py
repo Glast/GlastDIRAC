@@ -5,7 +5,7 @@ Service code for GLAST stuff
 __RCSID__ = " $Id: $ "
 
 from DIRAC.Core.DISET.RequestHandler                    import RequestHandler
-from GlastDIRAC.SoftwareTagService.DB.GlastAdditionnalInfoDB import GlastAdditionnalInfoDB #Fix path
+from GlastDIRAC.SoftwareTagSystem.DB.GlastAdditionnalInfoDB import GlastAdditionnalInfoDB #Fix path
 from DIRAC import S_OK
 from types import StringTypes, DictType
 
