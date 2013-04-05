@@ -11,9 +11,9 @@ removeTagAtSite(tag,site)
 
 from DIRAC.Core.Base.Client                               import Client
 
-class GlastClient (Client):
-  """ Client of the GlastHandler.
+class SoftwareTagClient (Client):
+  """ Client of the SoftwareTagHandler.
   """
   def __init__(self, **kwargs ):
     Client.__init__(self, **kwargs )
-    self.setServer("Glast/Glast")
+    self.setServer("SoftwareTagSystem/SoftwareTag")
