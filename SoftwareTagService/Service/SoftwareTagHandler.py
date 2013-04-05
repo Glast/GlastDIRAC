@@ -5,7 +5,7 @@ Service code for GLAST stuff
 __RCSID__ = " $Id: $ "
 
 from DIRAC.Core.DISET.RequestHandler                    import RequestHandler
-from Glast.DB.GlastAdditionnalInfoDB                    import GlastAdditionnalInfoDB #Fix path
+from GlastDIRAC.SoftwareTagService.DB.GlastAdditionnalInfoDB import GlastAdditionnalInfoDB #Fix path
 from DIRAC import S_OK
 from types import StringTypes, DictType
 
@@ -16,7 +16,7 @@ def initializeGlastHandler( ServiceInfo ):
   glastdb = GlastAdditionnalInfoDB()
   return S_OK()
 
-class GlastHandler(RequestHandler):
+class SoftwareTagHandler(RequestHandler):
 
   types_getSitesForTag = [StringTypes]
   def export_getSitesForTag(self, tag):
