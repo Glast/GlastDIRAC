@@ -1,7 +1,10 @@
 [v1r0p2]
 
-*All
+*PipelineSystem
 CHANGE: move dirac-pipeline to new module PipelineSystem, pipeline components now part of extension
+
+*SoftwareTagSystem
+CHANGE: Added scripts
 
 [v1r0p1]
 
