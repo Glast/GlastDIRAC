@@ -20,6 +20,7 @@ class GlastAdditionnalInfoDB ( DB ):
     DB.__init__( self, self.dbname, 'SoftwareTag/GlastAdditionnalInfoDB', maxQueueSize  )
     self._createTables( { "SoftwareTags_has_Sites" :{"Fields":{"idRelation":"INT NOT NULL AUTO_INCREMENT",
                                                                "SiteName":"VARCHAR(45) NOT NULL",
+                                                               "Status":"VARCHAR(45) NOT NULL",
                                                                "Software_Tag":"VARCHAR(60) NOT NULL"},
                                                      "PrimaryKey" : ['idRelation'],
                                                      'Indexes' : { "Index":["idRelation","Software_Tag","SiteName"]}
@@ -62,22 +63,23 @@ class GlastAdditionnalInfoDB ( DB ):
     res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
     if not res['OK']:
       return S_ERROR("Site was not found")
-    res = self.getFields("SoftwareTags_has_Sites", "SiteName", {"Software_Tag": tag}, 
+    res = self.getFields("SoftwareTags_has_Sites", "SiteName", {"Software_Tag": tag},{"Status":"OK"}, 
                          conn = self.__getConnection( connection ))
     return res
-    
+
+
   def getTagsAtSite(self, site, connection = False):
     """ Get the software tags that where registered at a given site
     """
     res = self._checkProperty("SiteName", site, self.__getConnection( connection ))
     if not res['OK']:
       return S_ERROR("Site was not found")
-    res = self.getFields("SoftwareTags_has_Sites", "Software_Tag", {"Sites_Name": site}, 
+    res = self.getFields("SoftwareTags_has_Sites", "Software_Tag", {"Sites_Name": site},{"Status":"OK"}, 
                          conn = self.__getConnection( connection ))
     return res
   
   def addTagAtSite(self, tag, site, connection = False):
-    """ Register a tag at a site
+    """ Register a tag at a site, with status=Okay
     """
     #res = self._checkTag(tag, connection)
     #if not res['OK']:
@@ -85,7 +87,7 @@ class GlastAdditionnalInfoDB ( DB ):
     #res = self._checkSite(site, connection)
     #if not res['OK']:
     #  return S_ERROR("Site was not found")
-    res = self.insertFields("SoftwareTags_has_Sites", ['SiteName', 'Software_Tag'], [site, tag], 
+    res = self.insertFields("SoftwareTags_has_Sites", ['SiteName', 'Software_Tag','Status'], [site, tag,"Okay"], 
                             conn = self.__getConnection( connection ))
     return res
   
@@ -105,3 +107,14 @@ class GlastAdditionnalInfoDB ( DB ):
                              conn = self.__getConnection( connection ))
     return res
   
+  def updateStatus(self,tag,site,status,connect=False):
+      """ to interact with the status field """
+      res = self.updateFields("SoftwareTags_has_Sites", ['SiteName','Software_Tag','Status'],[site,tag,status])
+      if not res['OK']:
+          return S_ERROR("Error updating Status")
+  def getSites(self,connect=False):
+      """ get the list of registered sites in the DB """
+      res = self.getFields("SoftwareTags_has_Sites", ["Site"],{"Status":status},conn=connection)
+      if not res['OK']: 
+        return S_ERROR("could not get list of sites from DB")
+        

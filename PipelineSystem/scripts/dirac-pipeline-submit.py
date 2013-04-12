@@ -33,20 +33,6 @@ def extract_inputfiles(fname):
         file_list.append(thisLine)
     return file_list
 
-def selectSitesFromDB(release):
-    # may need some more stuff
-    # here i do all DB stuff
-    import MySQLdb
-    conn = MySQLdb.connect(
-        db='test', username='ianb')
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT site FROM griddb WHERE (tag=%s AND status='OK')")
-    result = cur.fetchall() # should return the sites available to Dirac
-    if len(result)==0:
-        raise Exception("Could not find any sites matching release %s and status 'OK'"%release)
-    return result
-
 if __name__ == "__main__":
     import sys, os, shutil, glob
     from DIRAC.Core.Base import Script
@@ -59,6 +45,7 @@ if __name__ == "__main__":
     from DIRAC.Interfaces.API.Job import Job
     from DIRAC.Interfaces.API.Dirac import Dirac
     from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
+    from GlastDIRAC.SoftwareTagSystem.SoftwareTagClient import SoftwareTagClient
     proxy = None
     opts = options(specialOptions) # converts the "DIRAC registerSwitch()" to something similar to OptionParser
     #print opts.__dict__
@@ -120,7 +107,11 @@ if __name__ == "__main__":
 
     if not opts.release is None:
         release = opts.release
-        sites = selectSitesFromDB(release)
+        cl = SoftwareTagClient()
+        result = cl.getSitesForTag(tag)
+        if not result['OK']:
+            raise Exception(result)
+        sites = result[ 'Value' ]
         j.setDestination(sites)
 
     if not opts.stagein is None:

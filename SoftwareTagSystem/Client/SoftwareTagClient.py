@@ -6,6 +6,8 @@ getSitesForTag(tag)
 getTagsAtSite(tag)
 addTagAtSite(tag,site)
 removeTagAtSite(tag,site)
+getSites()
+updateStatus(tag,site,status)
 
 """
 

@@ -1,3 +1,12 @@
+[v1r0p4]
+
+*SoftwareTagSystem
+CHANGE: SoftwareTagClient exposes 2 new methods: updateStatus(site,tag,status) and getSites()
+NEW: added dirac-glast-tag-admin to expose UI for tag handling.
+*PipelineSystem
+CHANGE: replace old SQL queries with new SoftwareTagSystem
+TODO: move certficate stuff outside this code - perhaps some configuration script?
+
 [v1r0p3]
 
 *All
