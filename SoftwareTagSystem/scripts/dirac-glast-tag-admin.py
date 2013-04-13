@@ -30,9 +30,9 @@ class Params(object):
         return S_OK()
     def registerswitch(self):
         Script.registerSwitch("T:", 'Tag=', 'Tag to affect', self.setTag)
-        Script.registerSwitch("S:", 'Sites=', 'Site(s) to consider, comma separated', self.setSite)
-        Script.registerSwitch("",'Status=','Status to change, among %s'%statuslist,self.setStatus)
-        Script.setUsageMessage("-T and --Status are mandatory")
+        Script.registerSwitch("S:", 'site=', 'Site(s) to consider, comma separated', self.setSite)
+        Script.registerSwitch("",'action=','which action to perform, among %s'%statuslist,self.setStatus)
+        Script.setUsageMessage("-T and --action are mandatory")
     
 if __name__ == "__main__":
     cli_p = Params()
