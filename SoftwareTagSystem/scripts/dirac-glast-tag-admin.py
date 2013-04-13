@@ -80,4 +80,3 @@ if __name__ == "__main__":
         client.updateStatus(tag,site,status)
 
     dexit(0)
-    
