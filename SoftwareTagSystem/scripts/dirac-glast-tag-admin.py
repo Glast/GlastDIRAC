@@ -110,7 +110,3 @@ if __name__ == "__main__":
         client.updateStatus(tag,site,status)
 
     dexit(0)
-<<<<<<< Upstream, based on origin/master
-=======
-    
->>>>>>> d3e91c4 committing merged copy.

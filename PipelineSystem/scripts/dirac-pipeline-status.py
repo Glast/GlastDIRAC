@@ -86,11 +86,15 @@ if __name__ == "__main__":
     from DIRAC.Core.DISET.RPCClient import RPCClient
     from DIRAC.Interfaces.API.Dirac import Dirac
     import DIRAC.Core.Utilities.Time as Time
-    # use stored certificates.
-    from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
-    proxy = None
     # use stored certificates
-    result = gProxyManager.downloadProxyToFile('/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865','glast_user',requiredTimeLeft=10000)
+    from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
+    from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
+    proxy = None
+    op = Operations()
+    #TODO: replace glast.org with VO-agnostic statement
+    shifter = op.getValue("glast.org/Pipeline/Shifter")
+    shifter_group = op.getValue("glast.org/Pipeline/ShifterGroup")
+    result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
     if not result['OK']:
         raise Exception(result)
     proxy = result[ 'Value' ]

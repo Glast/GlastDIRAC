@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # S.Zimmer 10/2012 The Oskar Klein Center for Cosmoparticle Physics
-#TODO: add correct X509_USER_PROXY path to submission script
-#TODO: update DB query
-
-
+#TODO: replace glast.org with VO-agnostic call
 
 class options:
     def __init__(self,DICT,**kwargs):
@@ -46,12 +43,15 @@ if __name__ == "__main__":
     from DIRAC.Interfaces.API.Dirac import Dirac
     from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
     from GlastDIRAC.SoftwareTagSystem.SoftwareTagClient import SoftwareTagClient
+    from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
+
     proxy = None
     opts = options(specialOptions) # converts the "DIRAC registerSwitch()" to something similar to OptionParser
-    #print opts.__dict__
-    #sys.exit()
-    # use stored certificates
-    result = gProxyManager.downloadProxyToFile('/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865','glast_user',requiredTimeLeft=10000)
+    op = Operations()
+    #TODO: replace glast.org with VO-agnostic statement
+    shifter = op.getValue("glast.org/Pipeline/Shifter")
+    shifter_group = op.getValue("glast.org/Pipeline/ShifterGroup")
+    result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
     if not result['OK']:
         raise Exception(result)
     proxy = result[ 'Value' ]
