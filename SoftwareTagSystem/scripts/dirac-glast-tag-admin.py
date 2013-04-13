@@ -10,7 +10,7 @@ including the --site= parameter, it will only act on the site
 from DIRAC.Core.Base import Script
 from DIRAC import S_OK
 
-statuslist = ["add",'remove','flagOK','flagBad']
+statuslist = ["addTag",'removeTag','flagOK','flagBad']
 
 class Params(object):
     def __init__(self):
@@ -65,10 +65,10 @@ if __name__ == "__main__":
     mode = cli_p.status
     
     tag = cli_p.tag
-    if mode == "add":
+    if mode == "addTag":
         for site in sites:
             client.addTagAtSite(tag,site)
-    elif mode == "remove":
+    elif mode == "removeTag":
         for site in sites:
             client.removeTagAtSite(tag,site)
     elif mode.startswith("flag"):
