@@ -29,10 +29,10 @@ class Params(object):
         self.status = opt
         return S_OK()
     def registerswitch(self):
-        Script.registerSwitch("T:", 'Tag=', 'Tag to affect', self.setTag)
-        Script.registerSwitch("S:", 'site=', 'Site(s) to consider, comma separated', self.setSite)
+        Script.registerSwitch("", 'tag=', 'tag name', self.setTag)
+        Script.registerSwitch("", 'site=', 'site(s) to consider, comma separated', self.setSite)
         Script.registerSwitch("",'action=','which action to perform, among %s'%statuslist,self.setStatus)
-        Script.setUsageMessage("-T and --action are mandatory")
+        Script.setUsageMessage("--tag and --action are mandatory")
     
 if __name__ == "__main__":
     cli_p = Params()
