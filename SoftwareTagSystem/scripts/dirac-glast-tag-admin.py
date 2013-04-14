@@ -10,7 +10,6 @@ including the --site= parameter, it will only act on the site
 from DIRAC.Core.Base import Script
 from DIRAC import S_OK
 
-<<<<<<< Upstream, based on origin/master
 statuslist = ["addTag",'removeTag','flagOK','flagBad']
 
 class Params(object):
@@ -34,32 +33,9 @@ class Params(object):
         Script.registerSwitch("", 'site=', 'site(s) to consider, comma separated', self.setSite)
         Script.registerSwitch("",'action=','which action to perform, among %s'%statuslist,self.setStatus)
         Script.setUsageMessage("--tag and --action are mandatory")
-=======
-statuslist = ["add",'remove','flagOK','flagBad']
 
-class Params(object):
-    def __init__(self):
-        self.site = []
-        self.tag = ''
-        self.status = ""
-    def setSite(self,opt):
-        self.site = opt.split(',')
-        return S_OK()
-    def setTag(self,opt):
-        self.tag = opt
-        return S_OK()
-    def setStatus(self,opt):
-        if not opt in statuslist:
-            return S_ERROR("Status must be among %s" % statuslist)
-        self.status = opt
-        return S_OK()
-    def registerswitch(self):
-        Script.registerSwitch("T:", 'Tag=', 'Tag to affect', self.setTag)
-        Script.registerSwitch("S:", 'Sites=', 'Site(s) to consider, comma separated', self.setSite)
-        Script.registerSwitch("",'Status=','Status to change, among %s'%statuslist,self.setStatus)
-        Script.setUsageMessage("-T and --Status are mandatory")
->>>>>>> d3e91c4 committing merged copy.
-    
+statuslist = ["add",'remove','flagOK','flagBad']
+ 
 if __name__ == "__main__":
     cli_p = Params()
     cli_p.registerswitch()
@@ -91,14 +67,10 @@ if __name__ == "__main__":
     mode = cli_p.status
     
     tag = cli_p.tag
-<<<<<<< Upstream, based on origin/master
     if mode == "addTag":
-=======
-    if mode == "add":
->>>>>>> d3e91c4 committing merged copy.
         for site in sites:
             client.addTagAtSite(tag,site)
-    elif mode == "remove":
+    elif mode == "removeTag":
         for site in sites:
             client.removeTagAtSite(tag,site)
     elif mode.startswith("flag"):
