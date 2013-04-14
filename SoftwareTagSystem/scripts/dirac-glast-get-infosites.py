@@ -50,10 +50,12 @@ def main(vo):
 
 if __name__ == "__main__":
     from DIRAC.Core.Security.ProxyInfo import getVOfromProxyGroup
+    from DIRAC import gLogger, exit as dexit
     vo = "glast.org"
     res = getVOfromProxyGroup()
     if not res['OK']:
         gLogger.error('Could not get VO from CS, assuming glast.org')
+        dexit(1)
     else:
         vo = res['Value']
     d = main(vo)
