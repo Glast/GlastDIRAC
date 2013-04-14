@@ -49,8 +49,8 @@ if __name__ == "__main__":
     opts = options(specialOptions) # converts the "DIRAC registerSwitch()" to something similar to OptionParser
     op = Operations()
     #TODO: replace glast.org with VO-agnostic statement
-    shifter = op.getValue("glast.org/Pipeline/Shifter")
-    shifter_group = op.getValue("glast.org/Pipeline/ShifterGroup")
+    shifter = op.getValue("Pipeline/Shifter","/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865")
+    shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
     result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
     if not result['OK']:
         raise Exception(result)
