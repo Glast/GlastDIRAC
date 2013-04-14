@@ -1,22 +1,16 @@
-[v1r0p5]
+[v1r0p4]
 
 *All
 CHANGE: replace raise() with gLogger.error() followed by exit() calls.
 *SoftwareTagSystem
 CHANGE: simplify dirac-glast-tag-admin
 CHANGE: protect service calls to be limited to software-manager/vo-manager
-*PipelineSystem
-CHANGE: replace shifter-specific info with Operations/Pipeline/Shifter and Operations/Pipeline/ShifterGroup properties
-CHANGE: replaced explicit glast.org values with DIRAC.Core.Security.ProxyInfo.getVOfromProxyGroup()
-
-[v1r0p4]
-
-*SoftwareTagSystem
 CHANGE: SoftwareTagClient exposes 2 new methods: updateStatus(site,tag,status) and getSites()
 NEW: added dirac-glast-tag-admin to expose UI for tag handling.
 *PipelineSystem
 CHANGE: replace old SQL queries with new SoftwareTagSystem
-TODO: move certficate stuff outside this code - perhaps some configuration script?
+CHANGE: replace shifter-specific info with Operations/Pipeline/Shifter and Operations/Pipeline/ShifterGroup properties
+CHANGE: replaced explicit glast.org values with DIRAC.Core.Security.ProxyInfo.getVOfromProxyGroup()
 
 [v1r0p3]
 
