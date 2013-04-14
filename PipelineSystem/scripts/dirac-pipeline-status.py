@@ -77,6 +77,7 @@ def setSpecialOption( optVal ):
 if __name__ == "__main__":
 
     from DIRAC.Core.Base import Script
+    from DIRAC import gLogger, exit as dexit
     specialOptions = {}
     Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: user, xml, dayspassed) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
@@ -96,7 +97,8 @@ if __name__ == "__main__":
     shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
     result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
     if not result['OK']:
-        raise Exception(result)
+        gLogger.error(result['Message'])
+        dexit(1)
     proxy = result[ 'Value' ]
     os.environ['X509_USER_PROXY'] = proxy
     print("*INFO* using proxy %s"%proxy)
@@ -116,7 +118,8 @@ if __name__ == "__main__":
     try:
         d = Dirac()
     except AttributeError:
-        raise Exception("Error loading Dirac monitor")
+        gLogger.error("Error loading Dirac monitor")
+        dexit(1)
 
     w = RPCClient("WorkloadManagement/JobMonitoring")
     my_dict = {}
@@ -130,8 +133,8 @@ if __name__ == "__main__":
     res = w.getJobs(my_dict,delTime)
     
     if not res['OK']:
-        print(res['Message'])
-        exit(1)
+        gLogger.error(res['Message'])
+        dexit(1)
 
     job_list = res['Value']
 
@@ -139,8 +142,8 @@ if __name__ == "__main__":
     res = d.status(job_list)   
 
     if not res['OK']:
-        print(res['Message'])
-        exit(1)
+        gLogger.error(res['Message'])
+        dexit(1)
 
     status = res['Value']
     statuses = []
@@ -150,14 +153,14 @@ if __name__ == "__main__":
         status_j=status[int(j)]
         res = w.getJobParameters(int(j))
         if not res['OK']:
-            print(res['Message'])
-            break
+            gLogger.error(res['Message'])
+            dexit(1)
         status_j.update(res['Value'])
         res = w.getJobLoggingInfo(int(j))
         #print res
         if not res['OK']:
-            print(res['Message'])
-            break
+            gLogger.error(res['Message'])
+            dexit(1)
         logs = res['Value']
         logging_obj = []
         for l in logs:

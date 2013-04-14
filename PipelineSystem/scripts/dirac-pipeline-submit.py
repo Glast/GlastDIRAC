@@ -33,6 +33,7 @@ def extract_inputfiles(fname):
 if __name__ == "__main__":
     import sys, os, shutil, glob
     from DIRAC.Core.Base import Script
+    from DIRAC import gLogger, exit as dexit
     specialOptions = {}
     Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: release, cpu, site, stagein, name, debug, env, bannedSites) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
@@ -53,7 +54,8 @@ if __name__ == "__main__":
     shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
     result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
     if not result['OK']:
-        raise Exception(result)
+        gLogger.error(result['Message'])
+        dexit(1)
     proxy = result[ 'Value' ]
     os.environ['X509_USER_PROXY'] = proxy
     print("*INFO* using proxy %s"%proxy)
@@ -110,7 +112,8 @@ if __name__ == "__main__":
         cl = SoftwareTagClient()
         result = cl.getSitesForTag(tag)
         if not result['OK']:
-            raise Exception(result)
+            gLogger.error(result['Message'])
+            dexit(1)
         sites = result[ 'Value' ]
         j.setDestination(sites)
 
@@ -125,7 +128,8 @@ if __name__ == "__main__":
                 input_stage_files+=extract_file(f)
         for f in input_stage_files:
             if not f.startswith("LFN"):
-                raise Exception("*ERROR* required inputfiles to be defined through LFN, could not find LFN in %s"%f)
+                gLogger.error("*ERROR* required inputfiles to be defined through LFN, could not find LFN in %s"%f)
+                dexit(1)
         j.setInputData(input_stage_files)
 
     if opts.debug:
@@ -135,7 +139,8 @@ if __name__ == "__main__":
         try:
             d = Dirac()
         except AttributeError:
-            raise Exception("Error loading Dirac monitor")
+            gLogger.error("Error loading Dirac monitor")
+            dexit(1)
 
         print("Your job %s (\"%s\") has been submitted."%(str(d.submit(j)['Value']),executable))
                                                          

@@ -49,7 +49,14 @@ def main(vo):
     return ret_dict
 
 if __name__ == "__main__":
-    d = main("glast.org")
+    from DIRAC.Core.Security.ProxyInfo import getVOfromProxyGroup
+    vo = "glast.org"
+    res = getVOfromProxyGroup()
+    if not res['OK']:
+        gLogger.error('Could not get VO from CS, assuming glast.org')
+    else:
+        vo = res['Value']
+    d = main(vo)
     for key in d:
         print('Name of DIRAC site %s\nName of CEs: %s'%(key,str(d[key]["CE"])))
         for tag in d[key]["Tags"]:
