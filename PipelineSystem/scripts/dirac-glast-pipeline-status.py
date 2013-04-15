@@ -97,6 +97,7 @@ if __name__ == "__main__":
     shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
     result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
     if not result['OK']:
+        gLogger.info(res)
         gLogger.error(result['Message'])
         dexit(1)
     proxy = result[ 'Value' ]
@@ -118,6 +119,7 @@ if __name__ == "__main__":
     try:
         d = Dirac()
     except AttributeError:
+        gLogger.info(d)
         gLogger.error("Error loading Dirac monitor")
         dexit(1)
 
@@ -133,6 +135,7 @@ if __name__ == "__main__":
     res = w.getJobs(my_dict,delTime)
     
     if not res['OK']:
+        gLogger.info(res)
         gLogger.error(res['Message'])
         dexit(1)
 
@@ -142,6 +145,7 @@ if __name__ == "__main__":
     res = d.status(job_list)   
 
     if not res['OK']:
+        gLogger.info(res)
         gLogger.error(res['Message'])
         dexit(1)
 
@@ -153,12 +157,14 @@ if __name__ == "__main__":
         status_j=status[int(j)]
         res = w.getJobParameters(int(j))
         if not res['OK']:
+            gLogger.info(res)
             gLogger.error(res['Message'])
             dexit(1)
         status_j.update(res['Value'])
         res = w.getJobLoggingInfo(int(j))
         #print res
         if not res['OK']:
+            gLogger.info(res)
             gLogger.error(res['Message'])
             dexit(1)
         logs = res['Value']

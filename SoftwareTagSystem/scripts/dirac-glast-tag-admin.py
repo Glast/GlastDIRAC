@@ -46,10 +46,12 @@ if __name__ == "__main__":
     from DIRAC.Core.Security.ProxyInfo import getProxyInfo
     res = getProxyInfo()
     if not res['OK']:
+        gLogger.info(res)
         gLogger.error("Bad proxy, or no proxy")
         dexit(1)
     group = res['Value']['group']
     if not group == 'SomeDIRACgroup' :
+        gLogger.info(res)
         gLogger.error('Invalid group, cannot proceed')
         dexit(1)
 
