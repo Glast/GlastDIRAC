@@ -38,12 +38,7 @@ class SoftwareTagHandler(RequestHandler):
   def export_updateStatus(self, tag, site, status):
     return glastdb.updateStatus(tag, site, status)
   
-  types_getSites = []
-  def export_getSites(self):
-    return glastdb.getSites()
- 
-  types_getTags = []
-  def export_getTags(self):
-    return glastdb.getTags()
-
-  
+  types_getEntriesFromField = [StringTypes]
+  def export_getEntriesFromField(self,field):
+    return glastdb.getEntriesFromField(field)
+   

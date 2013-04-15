@@ -6,8 +6,7 @@ getSitesForTag(tag,status='OK')
 getTagsAtSite(tag,status='OK')
 addTagAtSite(tag,site)
 removeTagAtSite(tag,site)
-getSites()
-getTags()
+getEntriesFromField(field)
 updateStatus(tag,site,status)
 
 """

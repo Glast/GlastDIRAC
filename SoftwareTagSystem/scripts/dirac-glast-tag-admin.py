@@ -65,7 +65,7 @@ if __name__ == "__main__":
     if cli_p.site:
         sites = cli_p.site
     else:
-        sites = client.getSites()
+        sites = client.getEntriesFromField("SiteName")
     mode = cli_p.status
     
     tag = cli_p.tag
