@@ -97,7 +97,7 @@ if __name__ == "__main__":
     shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
     result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
     if not result['OK']:
-        gLogger.info(res)
+        gLogger.info(result)
         gLogger.error(result['Message'])
         dexit(1)
     proxy = result[ 'Value' ]
