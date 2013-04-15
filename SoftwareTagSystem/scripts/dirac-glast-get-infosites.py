@@ -4,6 +4,7 @@ from DIRAC.ConfigurationSystem.Client.Helpers.Resources import getQueues
 from DIRAC.Core.Utilities.Grid import ldapsearchBDII
 from DIRAC import gConfig, gLogger, exit as dexit
 from DIRAC.Core.Security.ProxyInfo import getVOfromProxyGroup
+from DIRAC.Core.Base import Script
 
 def ldapCEs(vo): 
     # returns the list of CEs that are associated with the correct VO
@@ -50,6 +51,7 @@ def main(vo):
     return ret_dict
 
 if __name__ == "__main__":
+    Script.parseCommandLine()
     vo = "glast.org"
     res = getVOfromProxyGroup()
     if not res['OK']:
