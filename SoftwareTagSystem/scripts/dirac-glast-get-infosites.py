@@ -27,7 +27,7 @@ def main(vo):
     #res1 = gConfig.getSections( 'Resources/Sites/LCG/', listOrdered = True )
     res = getQueues()
     if not res['OK']:
-        gLogger.info(res)
+        gLogger.error(res['Message'])
         gLogger.error("Cannot obtain Queues")
         dexit(1)
     sites = res['Value'].keys()
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     vo = "glast.org"
     res = getVOfromProxyGroup()
     if not res['OK']:
-        gLogger.info(res)
+        gLogger.error(res['Message'])
         gLogger.error('Could not get VO from CS, assuming glast.org')
         dexit(1)
     else:
