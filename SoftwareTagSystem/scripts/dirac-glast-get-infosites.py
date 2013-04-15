@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from DIRAC.Core.Base import Script
-from DIRAC.ConfigurationSystem.Client.Helpers.Resources import  getQueues
+from DIRAC.ConfigurationSystem.Client.Helpers.Resources import getQueues
 from DIRAC.Core.Utilities.Grid import ldapsearchBDII
 from DIRAC import gConfig, gLogger, exit as dexit
 from DIRAC.Core.Security.ProxyInfo import getVOfromProxyGroup
@@ -8,14 +8,14 @@ from DIRAC.Core.Security.ProxyInfo import getVOfromProxyGroup
 def ldapCEs(vo): 
     # returns the list of CEs that are associated with the correct VO
     res = ldapsearchBDII( filt = "(&(objectClass=GlueCE)(GlueCEAccessControlBaseRule=VO:%s))"%vo, attr = "GlueCEUniqueID", host = None, base = None)
-    celist = [res['Value'][i]['attr']['GlueCEUniqueID'].split(":")[0] for i,value in enumerate(res['Value'])]
+    celist = [res['Value'][i]['attr']['GlueCEUniqueID'].split(":")[0] for i,value in enumerate(res['Value']) if res['OK']]
     return celist
 
 def ldapTag(ce,vo):
     # returns the list of tags that are associated with this CE
     res = ldapsearchBDII( filt = "(&(objectClass=GlueSubCluster)(GlueChunkKey=GlueClusterUniqueID=%s))"%ce, attr = "GlueHostApplicationSoftwareRuntimeEnvironment")
     tags = []
-    if len(res['Value'])!=0:
+    if res['OK'] and len(res['Value'])!=0:
         tagdict = res['Value'][-1]
         if tagdict['attr'].has_key('GlueHostApplicationSoftwareRunTimeEnvironment'):
             tags = [tag for tag in tagdict['attr']['GlueHostApplicationSoftwareRunTimeEnvironment'] if vo in tag]
@@ -26,6 +26,7 @@ def main(vo):
     #res1 = gConfig.getSections( 'Resources/Sites/LCG/', listOrdered = True )
     res = getQueues()
     if not res['OK']:
+        gLogger.info(res)
         gLogger.error("Cannot obtain Queues")
         dexit(1)
     sites = res['Value'].keys()
@@ -52,9 +53,11 @@ if __name__ == "__main__":
     vo = "glast.org"
     res = getVOfromProxyGroup()
     if not res['OK']:
+        gLogger.info(res)
         gLogger.error('Could not get VO from CS, assuming glast.org')
         dexit(1)
     else:
+        gLogger.info(res)
         vo = res['Value']
     d = main(vo)
     for key in d:
