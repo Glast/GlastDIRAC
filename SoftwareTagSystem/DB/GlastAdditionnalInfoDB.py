@@ -20,7 +20,7 @@ class GlastAdditionnalInfoDB ( DB ):
     DB.__init__( self, self.dbname, 'SoftwareTag/GlastAdditionnalInfoDB', maxQueueSize  )
     self._createTables( { "SoftwareTags_has_Sites" :{"Fields":{"idRelation":"INT NOT NULL AUTO_INCREMENT",
                                                                "SiteName":"VARCHAR(45) NOT NULL",
-                                                               "Status":ENUM("OK","BAD"),
+                                                               "Status":"ENUM('OK','BAD')",
                                                                "Software_Tag":"VARCHAR(60) NOT NULL"},
                                                      "PrimaryKey" : ['idRelation'],
                                                      'Indexes' : { "Index":["idRelation","Software_Tag","SiteName"]}
