@@ -7,6 +7,7 @@ getTagsAtSite(tag,status='OK')
 addTagAtSite(tag,site)
 removeTagAtSite(tag,site)
 getSites()
+getTags()
 updateStatus(tag,site,status)
 
 """

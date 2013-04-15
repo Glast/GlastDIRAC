@@ -19,11 +19,11 @@ def initializeSoftwareTagHandler( ServiceInfo ):
 class SoftwareTagHandler(RequestHandler):
 
   types_getSitesForTag = [StringTypes]
-  def export_getSitesForTag(self, tag,status='OK'):
+  def export_getSitesForTag(self, tag,status):
     return glastdb.getSitesForTag(tag,status=status)
   
   types_getTagsAtSite = [StringTypes]
-  def export_getTagsAtSite(self, site,status='OK'):
+  def export_getTagsAtSite(self, site,status):
     return glastdb.getTagsAtSite(site,status=status)
   
   types_addTagAtSite = [StringTypes, StringTypes]
@@ -37,4 +37,13 @@ class SoftwareTagHandler(RequestHandler):
   types_updateStatus = [StringTypes, StringTypes, StringTypes]
   def export_updateStatus(self, tag, site, status):
     return glastdb.updateStatus(tag, site, status)
+  
+  types_getSites = []
+  def export_getSites(self):
+    return glastdb.getSites()
+ 
+  types_getTags = []
+  def export_getTags(self):
+    return glastdb.getTags()
+
   

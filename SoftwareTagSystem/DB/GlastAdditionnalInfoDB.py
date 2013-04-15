@@ -74,7 +74,7 @@ class GlastAdditionnalInfoDB ( DB ):
     res = self._checkProperty("SiteName", site, self.__getConnection( connection ))
     if not res['OK']:
       return S_ERROR("Site was not found")
-    res = self.getFields("SoftwareTags_has_Sites", "Software_Tag", {"Sites_Name": site},{"Status":status}, 
+    res = self.getFields("SoftwareTags_has_Sites", "Software_Tag", {"SiteName": site},{"Status":status}, 
                          conn = self.__getConnection( connection ))
     return res
   
@@ -103,7 +103,7 @@ class GlastAdditionnalInfoDB ( DB ):
     
     
     res = self.deleteEntries("SoftwareTags_has_Sites",
-                             {"Software_Tag":tag, "Sites_Name": site}, 
+                             {"Software_Tag":tag, "SiteName": site}, 
                              conn = self.__getConnection( connection ))
     return res
   
@@ -112,9 +112,20 @@ class GlastAdditionnalInfoDB ( DB ):
       res = self.updateFields("SoftwareTags_has_Sites", ['SiteName','Software_Tag','Status'],[site,tag,status])
       if not res['OK']:
           return S_ERROR("Error updating Status")
+  
   def getSites(self,connect=False):
       """ get the list of registered sites in the DB """
-      res = self.getFields("SoftwareTags_has_Sites", ["Site"],{"Status":status},conn=connection)
+      res = self.getFields("SoftwareTags_has_Sites", ["SiteName"],conn=connect)
       if not res['OK']: 
         return S_ERROR("could not get list of sites from DB")
-        
+      list = [site for site in res['Value'] if not site in list]
+      return S_OK(list)  
+
+  def getTags(self,connect=False):
+      """ get list of tags in the DB """
+      res = self.getFields("SoftwareTags_has_Sites",["Software_Tag"],conn=connect)
+      if not res['OK']: 
+        return S_ERROR("could not get list of sites from DB")
+      list = [site for site in res['Value'] if not site in list]
+      return S_OK(list)  
+      
