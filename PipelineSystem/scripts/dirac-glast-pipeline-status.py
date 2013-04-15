@@ -116,9 +116,8 @@ if __name__ == "__main__":
         xmlfile = xdom.parse(StringIO.StringIO('<?xml version="1.0" ?><joblist/>'))
         firstChild = xmlfile.firstChild
     
-    try:
-        d = Dirac()
-    except AttributeError:
+    d = Dirac()
+    if not d['OK']:
         gLogger.info(d)
         gLogger.error("Error loading Dirac monitor")
         dexit(1)
