@@ -2,6 +2,8 @@
 from DIRAC.Core.Base import Script
 from DIRAC.ConfigurationSystem.Client.Helpers.Resources import  getQueues
 from DIRAC.Core.Utilities.Grid import ldapsearchBDII
+from DIRAC import gConfig, gLogger, exit as dexit
+from DIRAC.Core.Security.ProxyInfo import getVOfromProxyGroup
 
 def ldapCEs(vo): 
     # returns the list of CEs that are associated with the correct VO
@@ -20,14 +22,12 @@ def ldapTag(ce,vo):
     return tags
 
 def main(vo):
-    # thanks to Stephane for suggesting this fix!
-    Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')
-    Script.parseCommandLine()
-    
-    from DIRAC import gConfig
-    
+    # thanks to Stephane for suggesting this fix!  
     #res1 = gConfig.getSections( 'Resources/Sites/LCG/', listOrdered = True )
     res = getQueues()
+    if not res['OK']:
+        gLogger.error("Cannot obtain Queues")
+        dexit(1)
     sites = res['Value'].keys()
     values = [res['Value'][key].keys() for key in sites]
     sites_ce = dict(zip(sites,values))
@@ -49,8 +49,6 @@ def main(vo):
     return ret_dict
 
 if __name__ == "__main__":
-    from DIRAC.Core.Security.ProxyInfo import getVOfromProxyGroup
-    from DIRAC import gLogger, exit as dexit
     vo = "glast.org"
     res = getVOfromProxyGroup()
     if not res['OK']:
