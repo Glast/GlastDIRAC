@@ -136,11 +136,10 @@ if __name__ == "__main__":
         print('*DEBUG* just showing the JDL of the job to be submitted')
         print(j._toJDL())
     else:
-        try:
-            d = Dirac()
-        except AttributeError:
+        d = Dirac()
+        if not d['OK']:
+            gLogger.info(d)
             gLogger.error("Error loading Dirac monitor")
             dexit(1)
-
         print("Your job %s (\"%s\") has been submitted."%(str(d.submit(j)['Value']),executable))
                                                          
