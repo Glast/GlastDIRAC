@@ -57,24 +57,24 @@ class GlastAdditionnalInfoDB ( DB ):
   
   ##################################################################
   ## Public methods that will need to be exported to the service 
-  def getSitesForTag(self, tag, connection = False):
+  def getSitesForTag(self, tag, status='OK', connection = False):
     """ Get the Sites that have a given tag
     """
     res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
     if not res['OK']:
       return S_ERROR("Site was not found")
-    res = self.getFields("SoftwareTags_has_Sites", "SiteName", {"Software_Tag": tag},{"Status":"OK"}, 
+    res = self.getFields("SoftwareTags_has_Sites", "SiteName", {"Software_Tag": tag},{"Status":status}, 
                          conn = self.__getConnection( connection ))
     return res
 
 
-  def getTagsAtSite(self, site, connection = False):
+  def getTagsAtSite(self, site, status='OK',connection = False):
     """ Get the software tags that where registered at a given site
     """
     res = self._checkProperty("SiteName", site, self.__getConnection( connection ))
     if not res['OK']:
       return S_ERROR("Site was not found")
-    res = self.getFields("SoftwareTags_has_Sites", "Software_Tag", {"Sites_Name": site},{"Status":"OK"}, 
+    res = self.getFields("SoftwareTags_has_Sites", "Software_Tag", {"Sites_Name": site},{"Status":status}, 
                          conn = self.__getConnection( connection ))
     return res
   
@@ -87,7 +87,7 @@ class GlastAdditionnalInfoDB ( DB ):
     #res = self._checkSite(site, connection)
     #if not res['OK']:
     #  return S_ERROR("Site was not found")
-    res = self.insertFields("SoftwareTags_has_Sites", ['SiteName', 'Software_Tag','Status'], [site, tag,"Okay"], 
+    res = self.insertFields("SoftwareTags_has_Sites", ['SiteName', 'Software_Tag'], [site, tag], 
                             conn = self.__getConnection( connection ))
     return res
   

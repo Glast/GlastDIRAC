@@ -11,7 +11,7 @@ from types import StringTypes, DictType
 
 glastdb = False
 
-def initializeGlastHandler( ServiceInfo ):
+def initializeSoftwareTagHandler( ServiceInfo ):
   global glastdb
   glastdb = GlastAdditionnalInfoDB()
   return S_OK()
@@ -19,12 +19,12 @@ def initializeGlastHandler( ServiceInfo ):
 class SoftwareTagHandler(RequestHandler):
 
   types_getSitesForTag = [StringTypes]
-  def export_getSitesForTag(self, tag):
-    return glastdb.getSitesForTag(tag)
+  def export_getSitesForTag(self, tag,status='OK'):
+    return glastdb.getSitesForTag(tag,status=status)
   
   types_getTagsAtSite = [StringTypes]
-  def export_getTagsAtSite(self, site):
-    return glastdb.getTagsAtSite(site)
+  def export_getTagsAtSite(self, site,status='OK'):
+    return glastdb.getTagsAtSite(site,status=status)
   
   types_addTagAtSite = [StringTypes, StringTypes]
   def export_addTagAtSite(self, tag, site):
@@ -33,4 +33,8 @@ class SoftwareTagHandler(RequestHandler):
   types_removeTagAtSite = [StringTypes, StringTypes]
   def export_removeTagAtSite(self, tag, site):
     return glastdb.removeTagAtSite(tag, site)
+
+  types_updateStatus = [StringTypes, StringTypes, StringTypes]
+  def export_updateStatus(self, tag, site, status):
+    return glastdb.updateStatus(tag, site, status)
   
