@@ -10,7 +10,7 @@ including the --site= parameter, it will only act on the site
 from DIRAC.Core.Base import Script
 from DIRAC import S_OK
 
-statuslist = ["addTag",'removeTag','flagOK','flagBad']
+actionlist = ["addTag",'removeTag','flagOK','flagBad']
 
 class Params(object):
     def __init__(self):
@@ -24,17 +24,17 @@ class Params(object):
         self.tag = opt
         return S_OK()
     def setStatus(self,opt):
-        if not opt in statuslist:
-            return S_ERROR("Status must be among %s" % statuslist)
+        if not opt in actionlist:
+            return S_ERROR("action must be among %s" % actionlist)
         self.status = opt
         return S_OK()
     def registerswitch(self):
         Script.registerSwitch("", 'tag=', 'tag name', self.setTag)
         Script.registerSwitch("", 'site=', 'site(s) to consider, comma separated', self.setSite)
-        Script.registerSwitch("",'action=','which action to perform, among %s'%statuslist,self.setStatus)
+        Script.registerSwitch("",'action=','which action to perform, among %s'%actionlist,self.setStatus)
         Script.setUsageMessage("--tag and --action are mandatory")
 
-statuslist = ["add",'remove','flagOK','flagBad']
+actionlist = ["addTag",'removeTag','flagOK','flagBad']
  
 if __name__ == "__main__":
     cli_p = Params()
@@ -46,12 +46,12 @@ if __name__ == "__main__":
     from DIRAC.Core.Security.ProxyInfo import getProxyInfo
     res = getProxyInfo()
     if not res['OK']:
-        gLogger.info(res)
+        gLogger.error(res["Message"])
         gLogger.error("Bad proxy, or no proxy")
         dexit(1)
     group = res['Value']['group']
     if not group == 'SomeDIRACgroup' :
-        gLogger.info(res)
+        gLogger.error("Message")
         gLogger.error('Invalid group, cannot proceed')
         dexit(1)
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     if cli_p.site:
         sites = cli_p.site
     else:
-        sites = client.getSites()
+        sites = client.getEntriesFromField("SiteName")
     mode = cli_p.status
     
     tag = cli_p.tag
@@ -78,9 +78,9 @@ if __name__ == "__main__":
     elif mode.startswith("flag"):
         status = None
         if mode == "flagOK":
-            status = "Okay"
+            status = "OK"
         else:
-            status = "Bad"
+            status = "BAD"
         client.updateStatus(tag,site,status)
 
     dexit(0)

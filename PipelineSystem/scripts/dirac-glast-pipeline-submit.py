@@ -55,6 +55,7 @@ if __name__ == "__main__":
     result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
     if not result['OK']:
         gLogger.error(result['Message'])
+        gLogger.error("No valid proxy found.")
         dexit(1)
     proxy = result[ 'Value' ]
     os.environ['X509_USER_PROXY'] = proxy
@@ -113,6 +114,7 @@ if __name__ == "__main__":
         result = cl.getSitesForTag(tag)
         if not result['OK']:
             gLogger.error(result['Message'])
+            gLogger.error("Could not get sites for Tag %s"%tag)
             dexit(1)
         sites = result[ 'Value' ]
         j.setDestination(sites)
@@ -136,11 +138,9 @@ if __name__ == "__main__":
         print('*DEBUG* just showing the JDL of the job to be submitted')
         print(j._toJDL())
     else:
-        try:
-            d = Dirac()
-        except AttributeError:
+        d = Dirac()
+        if not d['OK']:
+            gLogger.error(d['Message'])
             gLogger.error("Error loading Dirac monitor")
             dexit(1)
-
         print("Your job %s (\"%s\") has been submitted."%(str(d.submit(j)['Value']),executable))
-                                                         

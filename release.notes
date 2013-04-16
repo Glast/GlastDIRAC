@@ -1,3 +1,12 @@
+[v1r0p6]
+
+*All
+NEW: this is a pre-alpha release that should provide basic functionality.
+CHANGE: bugfixes & updated configurations. 
+CHANGE: SoftwareTagClient exposes generic getEntriesForField() to be used with tags and site names.
+*SoftwareTagSystem
+FIX: dirac-glast-get-infosites does not return proper tags for EMI-2 CEs
+
 [v1r0p5]
 
 *All

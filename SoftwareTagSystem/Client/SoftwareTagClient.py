@@ -2,11 +2,11 @@
 Client for the glast software tables
 Exposes for free the methods 
 
-getSitesForTag(tag)
-getTagsAtSite(tag)
+getSitesForTag(tag,status='OK')
+getTagsAtSite(tag,status='OK')
 addTagAtSite(tag,site)
 removeTagAtSite(tag,site)
-getSites()
+getEntriesFromField(field)
 updateStatus(tag,site,status)
 
 """

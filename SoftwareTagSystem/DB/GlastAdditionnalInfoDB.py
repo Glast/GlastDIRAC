@@ -18,9 +18,10 @@ class GlastAdditionnalInfoDB ( DB ):
     self.dbname = 'GlastAdditionnalInfoDB'
     self.logger = gLogger.getSubLogger('GlastAdditionnalInfoDB')
     DB.__init__( self, self.dbname, 'SoftwareTag/GlastAdditionnalInfoDB', maxQueueSize  )
+    self.fields = ["SiteName","Status","Software_Tag"]
     self._createTables( { "SoftwareTags_has_Sites" :{"Fields":{"idRelation":"INT NOT NULL AUTO_INCREMENT",
                                                                "SiteName":"VARCHAR(45) NOT NULL",
-                                                               "Status":"VARCHAR(45) NOT NULL",
+                                                               "Status":"ENUM('OK','BAD') DEFAULT 'OK'",
                                                                "Software_Tag":"VARCHAR(60) NOT NULL"},
                                                      "PrimaryKey" : ['idRelation'],
                                                      'Indexes' : { "Index":["idRelation","Software_Tag","SiteName"]}
@@ -57,24 +58,24 @@ class GlastAdditionnalInfoDB ( DB ):
   
   ##################################################################
   ## Public methods that will need to be exported to the service 
-  def getSitesForTag(self, tag, connection = False):
+  def getSitesForTag(self, tag, status='OK', connection = False):
     """ Get the Sites that have a given tag
     """
     res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
     if not res['OK']:
       return S_ERROR("Site was not found")
-    res = self.getFields("SoftwareTags_has_Sites", "SiteName", {"Software_Tag": tag},{"Status":"OK"}, 
+    res = self.getFields("SoftwareTags_has_Sites", "SiteName", {"Software_Tag": tag},{"Status":status}, 
                          conn = self.__getConnection( connection ))
     return res
 
 
-  def getTagsAtSite(self, site, connection = False):
+  def getTagsAtSite(self, site, status='OK',connection = False):
     """ Get the software tags that where registered at a given site
     """
     res = self._checkProperty("SiteName", site, self.__getConnection( connection ))
     if not res['OK']:
       return S_ERROR("Site was not found")
-    res = self.getFields("SoftwareTags_has_Sites", "Software_Tag", {"Sites_Name": site},{"Status":"OK"}, 
+    res = self.getFields("SoftwareTags_has_Sites", "Software_Tag", {"SiteName": site},{"Status":status}, 
                          conn = self.__getConnection( connection ))
     return res
   
@@ -87,7 +88,7 @@ class GlastAdditionnalInfoDB ( DB ):
     #res = self._checkSite(site, connection)
     #if not res['OK']:
     #  return S_ERROR("Site was not found")
-    res = self.insertFields("SoftwareTags_has_Sites", ['SiteName', 'Software_Tag','Status'], [site, tag,"Okay"], 
+    res = self.insertFields("SoftwareTags_has_Sites", ['SiteName', 'Software_Tag'], [site, tag], 
                             conn = self.__getConnection( connection ))
     return res
   
@@ -103,7 +104,7 @@ class GlastAdditionnalInfoDB ( DB ):
     
     
     res = self.deleteEntries("SoftwareTags_has_Sites",
-                             {"Software_Tag":tag, "Sites_Name": site}, 
+                             {"Software_Tag":tag, "SiteName": site}, 
                              conn = self.__getConnection( connection ))
     return res
   
@@ -112,9 +113,15 @@ class GlastAdditionnalInfoDB ( DB ):
       res = self.updateFields("SoftwareTags_has_Sites", ['SiteName','Software_Tag','Status'],[site,tag,status])
       if not res['OK']:
           return S_ERROR("Error updating Status")
-  def getSites(self,connect=False):
-      """ get the list of registered sites in the DB """
-      res = self.getFields("SoftwareTags_has_Sites", ["Site"],{"Status":status},conn=connection)
-      if not res['OK']: 
-        return S_ERROR("could not get list of sites from DB")
-        
+
+  def getEntriesFromField(self,field=None,connect=False):
+      if not field in self.fields:
+          return S_ERROR("Could not find field %s in DB"%str(field))
+      res = self.getFields("SoftwareTags_has_Sites",[field],conn=connect)
+      if not res['OK']:
+          return S_ERROR(res['Message'])
+      else:
+          klist = []
+          klist = [value for value in res['Value'] if not value in klist]
+          return S_OK(klist)
+  
