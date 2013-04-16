@@ -144,4 +144,3 @@ if __name__ == "__main__":
             gLogger.error("Error loading Dirac monitor")
             dexit(1)
         print("Your job %s (\"%s\") has been submitted."%(str(d.submit(j)['Value']),executable))
-    from DIRAC.Core.Security import Properties                         
