@@ -1,3 +1,9 @@
+[v1r0p6]
+
+*All
+CHANGE: bugfixes & updated configurations. 
+CHANGE: SoftwareTagClient exposes generic getEntriesForField() to be used with tags and site names.
+
 [v1r0p5]
 
 *All
