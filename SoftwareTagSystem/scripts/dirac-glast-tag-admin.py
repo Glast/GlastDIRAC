@@ -50,7 +50,7 @@ if __name__ == "__main__":
         gLogger.error("Bad proxy, or no proxy")
         dexit(1)
     group = res['Value']['group']
-    if not group == 'SomeDIRACgroup' :
+    if not group == 'glast_sgm' :
         gLogger.error("Message")
         gLogger.error('Invalid group, cannot proceed')
         dexit(1)
