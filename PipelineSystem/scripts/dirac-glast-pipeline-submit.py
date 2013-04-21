@@ -59,7 +59,7 @@ if __name__ == "__main__":
         dexit(1)
     proxy = result[ 'Value' ]
     os.environ['X509_USER_PROXY'] = proxy
-    print("*INFO* using proxy %s"%proxy)
+    gLogger.info("using proxy %s"%proxy)
     j = Job(stdout="logFile.txt",stderr="logFile.txt") # specifies the logfile
     
     input_sandbox_files = []

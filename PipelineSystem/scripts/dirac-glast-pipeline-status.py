@@ -102,7 +102,7 @@ if __name__ == "__main__":
         dexit(1)
     proxy = result[ 'Value' ]
     os.environ['X509_USER_PROXY'] = proxy
-    print("*INFO* using proxy %s"%proxy)
+    gLogger.info("using proxy %s"%proxy)
     #sys.exit()
     do_xml = False
     
