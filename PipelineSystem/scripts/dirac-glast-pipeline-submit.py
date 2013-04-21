@@ -43,7 +43,7 @@ if __name__ == "__main__":
     from DIRAC.Interfaces.API.Job import Job
     from DIRAC.Interfaces.API.Dirac import Dirac
     from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
-    from GlastDIRAC.SoftwareTagSystem.SoftwareTagClient import SoftwareTagClient
+    from GlastDIRAC.SoftwareTagSystem.Client import SoftwareTagClient
     from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
 
     proxy = None

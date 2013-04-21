@@ -1,3 +1,9 @@
+[v1r0p7]
+
+*SoftwareTagSystem
+FIX: dirac-glast-tag-admin now limited to users which belong to group glast_sgm (sw manager group)
+todo: dirac-glast-get-infosites does not return proper tags for EMI2 CEs, see also JIRA: https://jira.slac.stanford.edu/browse/LPG-14 or https://github.com/Glast/GlastDIRAC/issues/11
+
 [v1r0p6]
 
 *All
