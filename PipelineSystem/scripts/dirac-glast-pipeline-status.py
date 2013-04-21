@@ -117,11 +117,6 @@ if __name__ == "__main__":
         firstChild = xmlfile.firstChild
     
     d = Dirac()
-    if not d['OK']:
-        gLogger.info(d["Message"])
-        gLogger.error("Error loading Dirac monitor")
-        dexit(1)
-
     w = RPCClient("WorkloadManagement/JobMonitoring")
     my_dict = {}
     #my_dict['Status']=['Done','Completed','Stalled','Failed','Killed','Waiting','Running','Checking']
