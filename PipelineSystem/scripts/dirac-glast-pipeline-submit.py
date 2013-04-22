@@ -90,7 +90,8 @@ if __name__ == "__main__":
 
     if len(args)>0:
         executable = args[0]
-        input_sandbox_files.append(executable) # add executable to input sandbox
+        input_sandbox_files.append(executable.replace("bash ","")) # add executable to input sandbox
+        # BUG: pipeline.process instance creates pipeline_wrapper --> sets automatically 'bash pipeline_wrapper' as cmd
         input_sandbox_files.append("jobmeta.inf") # that one is generated with every single job (or at least should be)
         j.setExecutable(executable)
 
@@ -137,6 +138,11 @@ if __name__ == "__main__":
     if opts.debug:
         print('*DEBUG* just showing the JDL of the job to be submitted')
         print(j._toJDL())
-    else:
-        d = Dirac()
-        print("Your job %s (\"%s\") has been submitted."%(str(d.submit(j)['Value']),executable))
+    
+    d = Dirac()
+    res = d.submit(j)
+    if not res['OK']:
+        gLogger.error("Error during Job Submission")
+        gLogger.error(res['Message'])
+        dexit(1)
+    print("Your job %s (\"%s\") has been submitted."%(str(res['Value']),executable))
