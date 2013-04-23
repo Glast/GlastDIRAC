@@ -89,11 +89,19 @@ if __name__ == "__main__":
     #print input_sandbox_files #DEBUG
 
     if len(args)>0:
-        executable = args[0]
-        input_sandbox_files.append(executable.replace("bash ","")) # add executable to input sandbox
-        # BUG: pipeline.process instance creates pipeline_wrapper --> sets automatically 'bash pipeline_wrapper' as cmd
+        executable = args[0].replace("bash ","").replace("./","")
         input_sandbox_files.append("jobmeta.inf") # that one is generated with every single job (or at least should be)
-        j.setExecutable(executable)
+        # BUG: pipeline.process instance creates pipeline_wrapper --> sets automatically 'bash pipeline_wrapper' as cmd
+        if pipeline_dict.has_key("PIPELINE_WORKDIR"):
+            pipeline_wrapper = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"pipeline_wrapper")
+            pipeline_script = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")
+            input_sandbox_files.append(pipeline_script)
+            input_sandbox_files.append(pipeline_wrapper)
+            j.setExecutable(str("bash %s"%pipeline_wrapper))
+                
+        else:
+            input_sandbox_files.append(executable)
+            j.setExecutable(executable)
 
     j.setName("MC job")
     if not opts.name is None:
@@ -145,4 +153,6 @@ if __name__ == "__main__":
         gLogger.error("Error during Job Submission")
         gLogger.error(res['Message'])
         dexit(1)
-    print("Your job %s (\"%s\") has been submitted."%(str(res['Value']),executable))
+    JobID = res['Value']
+    print("Your job %s (\"%s\") has been submitted."%(str(JobID),executable))
+    
