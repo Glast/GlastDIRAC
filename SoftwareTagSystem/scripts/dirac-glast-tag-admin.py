@@ -15,8 +15,17 @@ actionlist = ["addTag",'removeTag','flagOK','flagBad']
 class Params(object):
     def __init__(self):
         self.site = []
-        self.tag = ''
-        self.status = ""
+        self.tag = None
+        self.status = "OK"
+        self.action = None
+    def getTag(self):
+        return self.tag
+    def getStatus(self):
+        return self.status
+    def getSite(self):
+        return self.site
+    def getAction(self):
+        return self.action
     def setSite(self,opt):
         self.site = opt.split(',')
         return S_OK()
@@ -24,24 +33,25 @@ class Params(object):
         self.tag = opt
         return S_OK()
     def setStatus(self,opt):
+        self.status = opt
+        return S_OK()
+    def setAction(self,opt):
         if not opt in actionlist:
             return S_ERROR("action must be among %s" % actionlist)
-        self.status = opt
+        self.action = opt
         return S_OK()
     def registerswitch(self):
         Script.registerSwitch("", 'tag=', 'tag name', self.setTag)
         Script.registerSwitch("", 'site=', 'site(s) to consider, comma separated', self.setSite)
-        Script.registerSwitch("",'action=','which action to perform, among %s'%actionlist,self.setStatus)
+        Script.registerSwitch("",'action=','which action to perform, among %s'%actionlist,self.setAction)
         Script.setUsageMessage("--tag and --action are mandatory")
 
-actionlist = ["addTag",'removeTag','flagOK','flagBad']
  
 if __name__ == "__main__":
     cli_p = Params()
     cli_p.registerswitch()
     # thanks to Stephane for suggesting this fix!
     Script.parseCommandLine()
-
     from DIRAC import gLogger, exit as dexit
     from DIRAC.Core.Security.ProxyInfo import getProxyInfo
     res = getProxyInfo()
@@ -50,19 +60,18 @@ if __name__ == "__main__":
         gLogger.error("Bad proxy, or no proxy")
         dexit(1)
     group = res['Value']['group']
-    if not group == 'glast_sgm' :
-        gLogger.error("Message")
+    if not group == 'glastsgm_user' :
+        gLogger.error(res["Message"])
         gLogger.error('Invalid group, cannot proceed')
         dexit(1)
 
     from GlastDIRAC.SoftwareTagSystem.Client import SoftwareTagClient
-    
-    if not cli_p.tag or not cli_p.status:
+    if cli_p.getTag() is None or cli_p.getAction() is None:
         Script.showHelp()
         dexit(1)
-    client = SoftwareTagClient()
+    client = SoftwareTagClient.SoftwareTagClient()
     sites = []
-    if cli_p.site:
+    if not cli_p.getSite() is None:
         sites = cli_p.site
     else:
         sites = client.getEntriesFromField("SiteName")

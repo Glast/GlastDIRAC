@@ -1,3 +1,10 @@
+[v1r0p8]
+*SoftwareTagSystem
+NEW: dirac-glast-tag-list UI for read-only access to DB
+CHANGE: bugfixes to dirac-glast-tag-admin
+*PipelineSystem
+FIX: several bugfixes
+
 [v1r0p7]
 
 *SoftwareTagSystem
