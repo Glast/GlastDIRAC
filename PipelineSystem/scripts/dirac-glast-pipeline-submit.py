@@ -69,6 +69,7 @@ if __name__ == "__main__":
         import json
         f = open(specialOptions["env"],"r")
         pipeline_dict = json.load(f)
+        pipeline_dict["P2_ECHO"]="echo" # this is needed to ensure correct functionality together with dirac-sys-sendmail
         j.setExecutionEnv(pipeline_dict) # that sets the env vars
     if not pipeline_dict is None:
         if pipeline_dict.has_key("GPL_CONFIGDIR"):
