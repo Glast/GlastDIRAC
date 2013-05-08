@@ -119,14 +119,9 @@ if __name__ == "__main__":
     d = Dirac()
     w = RPCClient("WorkloadManagement/JobMonitoring")
     my_dict = {}
-    #my_dict['Status']=['Done','Completed','Stalled','Failed','Killed','Waiting','Running','Checking']
+    my_dict['Status']=['Stalled','Waiting','Running','Checking'] # only monitor transient states
     my_dict['Owner']=[user]
-    if specialOptions.has_key("dayspassed"):
-        delay = int(specialOptions["dayspassed"])
-    else:
-        delay = 3
-    delTime = str( Time.dateTime() - delay * Time.day )
-    res = w.getJobs(my_dict,delTime)
+    res = w.getJobs(my_dict)
     
     if not res['OK']:
         gLogger.info(res["Message"])
