@@ -59,7 +59,7 @@ if __name__ == "__main__":
         dexit(1)
     proxy = result[ 'Value' ]
     os.environ['X509_USER_PROXY'] = proxy
-    print("*INFO* using proxy %s"%proxy)
+    gLogger.info("using proxy %s"%proxy)
     j = Job(stdout="logFile.txt",stderr="logFile.txt") # specifies the logfile
     
     input_sandbox_files = []
@@ -69,6 +69,7 @@ if __name__ == "__main__":
         import json
         f = open(specialOptions["env"],"r")
         pipeline_dict = json.load(f)
+        pipeline_dict["P2_ECHO"]="echo" # this is needed to ensure correct functionality together with dirac-sys-sendmail
         j.setExecutionEnv(pipeline_dict) # that sets the env vars
     if not pipeline_dict is None:
         if pipeline_dict.has_key("GPL_CONFIGDIR"):
@@ -89,10 +90,19 @@ if __name__ == "__main__":
     #print input_sandbox_files #DEBUG
 
     if len(args)>0:
-        executable = args[0]
-        input_sandbox_files.append(executable) # add executable to input sandbox
+        executable = args[0].replace("bash ","").replace("./","")
         input_sandbox_files.append("jobmeta.inf") # that one is generated with every single job (or at least should be)
-        j.setExecutable(executable)
+        # BUG: pipeline.process instance creates pipeline_wrapper --> sets automatically 'bash pipeline_wrapper' as cmd
+        if pipeline_dict.has_key("PIPELINE_WORKDIR"):
+            pipeline_wrapper = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"pipeline_wrapper")
+            pipeline_script = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")
+            input_sandbox_files.append(pipeline_script)
+            input_sandbox_files.append(pipeline_wrapper)
+            j.setExecutable(str("bash %s"%pipeline_wrapper))
+                
+        else:
+            input_sandbox_files.append(executable)
+            j.setExecutable(executable)
 
     j.setName("MC job")
     if not opts.name is None:
@@ -137,10 +147,13 @@ if __name__ == "__main__":
     if opts.debug:
         print('*DEBUG* just showing the JDL of the job to be submitted')
         print(j._toJDL())
-    else:
-        d = Dirac()
-        if not d['OK']:
-            gLogger.error(d['Message'])
-            gLogger.error("Error loading Dirac monitor")
-            dexit(1)
-        print("Your job %s (\"%s\") has been submitted."%(str(d.submit(j)['Value']),executable))
+    
+    d = Dirac()
+    res = d.submit(j)
+    if not res['OK']:
+        gLogger.error("Error during Job Submission")
+        gLogger.error(res['Message'])
+        dexit(1)
+    JobID = res['Value']
+    print("Your job %s (\"%s\") has been submitted."%(str(JobID),executable))
+    
