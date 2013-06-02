@@ -90,10 +90,9 @@ if __name__ == "__main__":
     #print input_sandbox_files #DEBUG
 
     if len(args)>0:
-        executable = args[0].replace("bash ","").replace("./","")
-        input_sandbox_files.append("jobmeta.inf") # that one is generated with every single job (or at least should be)
         # BUG: pipeline.process instance creates pipeline_wrapper --> sets automatically 'bash pipeline_wrapper' as cmd
         if pipeline_dict.has_key("PIPELINE_WORKDIR"):
+            input_sandbox_files.append("jobmeta.inf") # that one is generated with every single job (or at least should be)
             pipeline_wrapper = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"pipeline_wrapper")
             pipeline_script = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")
             input_sandbox_files.append(pipeline_script)
@@ -101,6 +100,8 @@ if __name__ == "__main__":
             j.setExecutable(str("bash %s"%pipeline_wrapper))
                 
         else:
+            executable = args[0].replace("bash ","").replace("./","")
+            os.chmod(executable,755) # make file executable
             input_sandbox_files.append(executable)
             j.setExecutable(executable)
 
@@ -145,15 +146,15 @@ if __name__ == "__main__":
         j.setInputData(input_stage_files)
 
     if opts.debug:
-        print('*DEBUG* just showing the JDL of the job to be submitted')
-        print(j._toJDL())
+        gLogger.notice('*DEBUG* just showing the JDL of the job to be submitted')
+        gLogger.notice(j._toJDL())
     
-    d = Dirac()
+    d = Dirac(True,"myRepo.rep")
     res = d.submit(j)
     if not res['OK']:
         gLogger.error("Error during Job Submission")
         gLogger.error(res['Message'])
         dexit(1)
     JobID = res['Value']
-    print("Your job %s (\"%s\") has been submitted."%(str(JobID),executable))
+    gLogger.notice("Your job %s (\"%s\") has been submitted."%(str(JobID),executable))
     
