@@ -90,20 +90,6 @@ if __name__ == "__main__":
     # use stored certificates
     from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
     from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
-    proxy = None
-    op = Operations()
-    #TODO: replace glast.org with VO-agnostic statement
-    shifter = op.getValue("Pipeline/Shifter","/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865")
-    shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
-    result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
-    if not result['OK']:
-        gLogger.error(result['Message'])
-        gLogger.error("No valid proxy found.")
-        dexit(1)
-    proxy = result[ 'Value' ]
-    os.environ['X509_USER_PROXY'] = proxy
-    gLogger.info("using proxy %s"%proxy)
-    #sys.exit()
     do_xml = False
     
     user = os.getenv("USER")
@@ -119,7 +105,7 @@ if __name__ == "__main__":
     d = Dirac()
     w = RPCClient("WorkloadManagement/JobMonitoring")
     my_dict = {}
-    my_dict['Status']=['Stalled','Waiting','Running','Checking'] # only monitor transient states
+    my_dict['Status']=['Matched','Staging','Completed','Done','Failed','Rescheduled','Stalled','Waiting','Running','Checking'] # monitor all states
     my_dict['Owner']=[user]
     res = w.getJobs(my_dict)
     
