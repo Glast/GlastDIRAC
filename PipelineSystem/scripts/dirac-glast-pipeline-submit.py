@@ -101,10 +101,10 @@ if __name__ == "__main__":
             j.setExecutable(str("bash %s"%pipeline_wrapper))
                 
         else:
-            executable = args[0].replace("bash ","").replace("./","")
-            os.chmod(executable,0755) # make file executable
-            input_sandbox_files.append(executable)
-            j.setExecutable(executable)
+            pipeline_wrapper = args[0].replace("bash ","").replace("./","")
+            os.chmod(pipeline_wrapper,0755) # make file executable
+            input_sandbox_files.append(pipeline_wrapper)
+            j.setExecutable(pipeline_wrapper)
 
     j.setName("MC job")
     if not opts.name is None:
@@ -157,5 +157,5 @@ if __name__ == "__main__":
         gLogger.error(res['Message'])
         dexit(1)
     JobID = res['Value']
-    gLogger.notice("Your job %s (\"%s\") has been submitted."%(str(JobID),executable))
+    gLogger.notice("Your job %s (\"%s\") has been submitted."%(str(JobID),pipeline_wrapper))
     
