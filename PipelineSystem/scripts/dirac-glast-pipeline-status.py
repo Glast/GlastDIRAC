@@ -93,7 +93,7 @@ if __name__ == "__main__":
     do_xml = False
     
     user = os.getenv("USER")
-
+    doLogging = False
     if specialOptions.has_key("xml"):
         do_xml = specialOptions["xml"]
     if specialOptions.has_key("user"):
