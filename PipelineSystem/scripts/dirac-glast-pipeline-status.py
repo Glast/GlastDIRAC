@@ -109,7 +109,7 @@ if __name__ == "__main__":
     w = RPCClient("WorkloadManagement/JobMonitoring")
     if not specialOptions.has_key("JobID"):
         my_dict = {}
-        my_dict['Status']=['Matched','Staging','Completed','Done','Failed','Rescheduled','Stalled','Waiting','Running','Checking'] # monitor all states
+        #my_dict['Status']=['Matched','Staging','Completed','Done','Failed','Rescheduled','Stalled','Waiting','Running','Checking'] # monitor all states
         my_dict['Owner']=[user]
         local_time = datetime.datetime.utcnow()
         timedelta = local_time-datetime.timedelta(seconds=86400)

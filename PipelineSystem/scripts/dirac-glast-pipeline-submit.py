@@ -92,27 +92,32 @@ if __name__ == "__main__":
             for f in files:
                 output_sandbox_files.append(f)
     #print input_sandbox_files #DEBUG
-
+    executable = None
     if len(args)>0:
         # BUG: pipeline.process instance creates pipeline_wrapper --> sets automatically 'bash pipeline_wrapper' as cmd
         if pipeline:
             input_sandbox_files.append("jobmeta.inf") # that one is generated with every single job (or at least should be)
-            pipeline_wrapper = os.path.join(pipeline_dict["GPL_CONFIGDIR"],"pipeline_wrapper") 
+            for key in ["GPL_CONFIGDIR","PIPELINE_WORKDIR"]:
+               if os.path.isfile(os.path.join(pipeline_dict[key],"pipeline_wrapper")): 
+                   pipeline_wrapper = os.path.join(pipeline_dict[key],"pipeline_wrapper")
+                   break
             if not os.path.isfile(pipeline_wrapper):
                 gLogger.error("file pipeline_wrapper not found in %s"%pipeline_wrapper)
                 dexit(1)
+            if os.path.isfile(os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")):
+                script = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")
+                os.path.chmod(script,0755)
+                input_sandbox_files.append(script)
             input_sandbox_files.append(pipeline_wrapper)
-            j.setExecutable(str("bash %s"%pipeline_wrapper))
-
-                
+            executable = "bash %s"%pipeline_wrapper    
         else:
-            pipeline_wrapper = args[0].replace("bash ","").replace("./","")
+            executable = args[0].replace("bash ","").replace("./","")
             if not os.path.isfile(pipeline_wrapper):
                 gLogger.error("file pipeline_wrapper not found in %s"%pipeline_wrapper)
                 dexit(1)
             os.chmod(pipeline_wrapper,0755) # make file executable
             input_sandbox_files.append(pipeline_wrapper)
-            j.setExecutable(pipeline_wrapper)
+        j.setExecutable(executable)
     else:
         gLogger.error("No executable defined.")
         dexit(1)
@@ -166,5 +171,5 @@ if __name__ == "__main__":
         gLogger.error("Error during Job Submission ",res['Message'])
         dexit(1)
     JobID = res['Value']
-    gLogger.notice("Your job %s (\"%s\") has been submitted."%(str(JobID),pipeline_wrapper))
+    gLogger.notice("Your job %s (\"%s\") has been submitted."%(str(JobID),executable))
     
