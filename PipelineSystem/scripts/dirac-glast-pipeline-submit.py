@@ -93,15 +93,16 @@ if __name__ == "__main__":
         # BUG: pipeline.process instance creates pipeline_wrapper --> sets automatically 'bash pipeline_wrapper' as cmd
         if pipeline_dict.has_key("PIPELINE_WORKDIR"):
             input_sandbox_files.append("jobmeta.inf") # that one is generated with every single job (or at least should be)
-            pipeline_wrapper = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"pipeline_wrapper")
-            pipeline_script = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")
-            input_sandbox_files.append(pipeline_script)
+            if pipeline_dict.has_key("GPL_CONFIGDIR"):
+                pipeline_wrapper = os.path.join(pipeline_dict["GPL_CONFIGDIR"],"pipeline_wrapper") 
+            #pipeline_script = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")
+            #input_sandbox_files.append(pipeline_script)
             input_sandbox_files.append(pipeline_wrapper)
             j.setExecutable(str("bash %s"%pipeline_wrapper))
                 
         else:
             executable = args[0].replace("bash ","").replace("./","")
-            os.chmod(executable,755) # make file executable
+            os.chmod(executable,0755) # make file executable
             input_sandbox_files.append(executable)
             j.setExecutable(executable)
 
