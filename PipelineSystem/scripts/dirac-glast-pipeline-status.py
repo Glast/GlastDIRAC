@@ -78,6 +78,7 @@ if __name__ == "__main__":
 
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
+    logging = True
     specialOptions = {}
     Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: user, xml, dayspassed) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
@@ -118,12 +119,12 @@ if __name__ == "__main__":
 
     #for j in job_list:
     res = d.status(job_list)   
-
+    
     if not res['OK']:
         gLogger.error(res['Message'])
         gLogger.error("Could not get status of job_list")
         dexit(1)
-
+    
     status = res['Value']
     statuses = []
     if not do_xml:
@@ -136,36 +137,30 @@ if __name__ == "__main__":
             gLogger.error("Could not get Job Parameters")
             dexit(1)
         status_j.update(res['Value'])
-        res = w.getJobLoggingInfo(int(j))
-        #print res
-        if not res['OK']:
-            gLogger.error(res['Message'])
-            gLogger.error("Could not get JobLoggingInfo")
-            dexit(1)
-        logs = res['Value']
-        logging_obj = []
-        for l in logs:
-            logging_obj.append(logging(l))
-        #print logging_obj[0].__dict__
-        #print logging_obj[-1].__dict__
-        logging_info = {'Submitted': logging_obj[0].time, 'Started': None, 'Ended': None, 'JobID': j}
-        for l in logging_obj:
-            if l.major_status == 'Application':
-                logging_info['Started']=l.time
-        if status_j['Status'] == 'Done':
-            logging_info['Ended']=logging_obj[-1].time
-        status_j.update(logging_info)
+        if logging:
+            res = w.getJobLoggingInfo(int(j))
+            #print res
+            if not res['OK']:
+                gLogger.error(res['Message'])
+                gLogger.error("Could not get JobLoggingInfo")
+                dexit(1)
+            logs = res['Value']
+            logging_obj = []
+            for l in logs:
+                logging_obj.append(logging(l))
+            logging_info = {'Submitted': logging_obj[0].time, 'Started': None, 'Ended': None, 'JobID': j}
+            for l in logging_obj:
+                if l.major_status == 'Application':
+                    logging_info['Started']=l.time
+            if status_j['Status'] == 'Done':
+                logging_info['Ended']=logging_obj[-1].time
+            status_j.update(logging_info)
         new_stat = internalstatus(j,status_j)
         #print new_stat._toxml().toprettyxml()
         if do_xml:
             firstChild.appendChild(new_stat._toxml())
         else:
             print(new_stat())
-        #statuses.append(status_j)
-        #print new_stat.mydict.values()#_toxml()
-    #print statuses
-
-
     # TODO:
         # pretty print & parse in java
     if do_xml:
