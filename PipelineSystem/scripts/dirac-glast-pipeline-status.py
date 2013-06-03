@@ -81,7 +81,7 @@ if __name__ == "__main__":
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
     specialOptions = {}
-    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: user, xml, dayspassed, logging) ", setSpecialOption )
+    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: user, xml, dayspassed, logging, JobID) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')
     Script.parseCommandLine()
@@ -105,24 +105,26 @@ if __name__ == "__main__":
     if do_xml:
         xmlfile = xdom.parse(StringIO.StringIO('<?xml version="1.0" ?><joblist/>'))
         firstChild = xmlfile.firstChild
-    
     d = Dirac()
     w = RPCClient("WorkloadManagement/JobMonitoring")
-    my_dict = {}
-    my_dict['Status']=['Matched','Staging','Completed','Done','Failed','Rescheduled','Stalled','Waiting','Running','Checking'] # monitor all states
-    my_dict['Owner']=[user]
-    local_time = datetime.datetime.utcnow()
-    timedelta = local_time-datetime.timedelta(seconds=86400)
-    if specialOptions.has_key("dayspassed"):
-        timedelta = local_time-datetime.timedelta(seconds=float(specialOptions["dayspassed"])*3600)
-    res = w.getJobs(my_dict,timedelta.strftime( '%Y-%m-%d %H:%M:%S' ))
+    if not specialOptions.has_key("JobID"):
+        my_dict = {}
+        my_dict['Status']=['Matched','Staging','Completed','Done','Failed','Rescheduled','Stalled','Waiting','Running','Checking'] # monitor all states
+        my_dict['Owner']=[user]
+        local_time = datetime.datetime.utcnow()
+        timedelta = local_time-datetime.timedelta(seconds=86400)
+        if specialOptions.has_key("dayspassed"):
+            timedelta = local_time-datetime.timedelta(seconds=float(specialOptions["dayspassed"])*3600)
+        res = w.getJobs(my_dict,timedelta.strftime( '%Y-%m-%d %H:%M:%S' ))
     
-    if not res['OK']:
-        gLogger.error("Could not get list of running jobs.",res['Message'])
-        dexit(1)
-
-    job_list = res['Value']
-
+        if not res['OK']:
+            gLogger.error("Could not get list of running jobs.",res['Message'])
+            dexit(1)
+        
+        job_list = res['Value']
+    else:
+        job_list = specialOptions["JobID"].split(",")
+        doLogging = True
     #for j in job_list:
     res = d.status(job_list)   
     
