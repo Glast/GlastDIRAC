@@ -54,8 +54,7 @@ if __name__ == "__main__":
     shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
     result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
     if not result['OK']:
-        gLogger.error(result['Message'])
-        gLogger.error("No valid proxy found.")
+        gLogger.error("No valid proxy found; ",result['Message'])
         dexit(1)
     proxy = result[ 'Value' ]
     os.environ['X509_USER_PROXY'] = proxy
@@ -93,19 +92,23 @@ if __name__ == "__main__":
         # BUG: pipeline.process instance creates pipeline_wrapper --> sets automatically 'bash pipeline_wrapper' as cmd
         if pipeline_dict.has_key("PIPELINE_WORKDIR"):
             input_sandbox_files.append("jobmeta.inf") # that one is generated with every single job (or at least should be)
-            if pipeline_dict.has_key("GPL_CONFIGDIR"):
-                pipeline_wrapper = os.path.join(pipeline_dict["GPL_CONFIGDIR"],"pipeline_wrapper") 
-            #pipeline_script = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")
-            #input_sandbox_files.append(pipeline_script)
+            pipeline_wrapper = os.path.join(pipeline_dict["GPL_CONFIGDIR"],"pipeline_wrapper") 
+            if not os.path.isfile(pipeline_wrapper):
+                gLogger.error("file pipeline_wrapper not found in %s"%pipeline_wrapper)
+                dexit(1)
             input_sandbox_files.append(pipeline_wrapper)
             j.setExecutable(str("bash %s"%pipeline_wrapper))
+
                 
         else:
             pipeline_wrapper = args[0].replace("bash ","").replace("./","")
+            if not os.path.isfile(pipeline_wrapper):
+                gLogger.error("file pipeline_wrapper not found in %s"%pipeline_wrapper)
+                dexit(1)
             os.chmod(pipeline_wrapper,0755) # make file executable
             input_sandbox_files.append(pipeline_wrapper)
             j.setExecutable(pipeline_wrapper)
-
+    
     j.setName("MC job")
     if not opts.name is None:
         j.setName(opts.name)
@@ -125,8 +128,7 @@ if __name__ == "__main__":
         cl = SoftwareTagClient()
         result = cl.getSitesForTag(tag)
         if not result['OK']:
-            gLogger.error(result['Message'])
-            gLogger.error("Could not get sites for Tag %s"%tag)
+            gLogger.error("*ERROR* Could not get sites for Tag %s"%tag,result['Message'])
             dexit(1)
         sites = result[ 'Value' ]
         j.setDestination(sites)
@@ -153,8 +155,7 @@ if __name__ == "__main__":
     d = Dirac(True,"myRepo.rep")
     res = d.submit(j)
     if not res['OK']:
-        gLogger.error("Error during Job Submission")
-        gLogger.error(res['Message'])
+        gLogger.error("Error during Job Submission ",res['Message'])
         dexit(1)
     JobID = res['Value']
     gLogger.notice("Your job %s (\"%s\") has been submitted."%(str(JobID),pipeline_wrapper))
