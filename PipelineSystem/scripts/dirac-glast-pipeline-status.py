@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # S.Zimmer 10/2012 The Oskar Klein Center for Cosmoparticle Physics
 import xml.dom.minidom as xdom
-import sys, getopt, os, StringIO
+import sys, getopt, os, StringIO, datetime
 
 class logging:
     def __init__(self,ntuple):
@@ -40,7 +40,9 @@ class internalstatus:
         self.mydict = my_dict
         self.__dict__.update(kwargs)
         #print my_dict
-
+    def setSite(self,site):
+        self.hostname = site
+        
     def __call__(self):
         old_dict = self.__dict__
         for key in self.__dict__.keys():
@@ -109,7 +111,11 @@ if __name__ == "__main__":
     my_dict = {}
     my_dict['Status']=['Matched','Staging','Completed','Done','Failed','Rescheduled','Stalled','Waiting','Running','Checking'] # monitor all states
     my_dict['Owner']=[user]
-    res = w.getJobs(my_dict)
+    local_time = datetime.datetime.utcnow()
+    timedelta = local_time-datetime.timedelta(seconds=86400)
+    if specialOptions.has_key("dayspassed"):
+        timedelta = local_time-datetime.timedelta(seconds=float(specialOptions["dayspassed"])*3600)
+    res = w.getJobs(my_dict,timedelta.strftime( '%Y-%m-%d %H:%M:%S' ))
     
     if not res['OK']:
         gLogger.error("Could not get list of running jobs.",res['Message'])
@@ -125,7 +131,14 @@ if __name__ == "__main__":
         dexit(1)
     
     status = res['Value']
-    statuses = []
+    # get sites info
+    sites = None
+    res = w.getJobsSites(job_list)
+    if not res['OK']:
+        gLogger.error("Could not get sites;",res['Message'])
+    else:
+        sites = res['Value']
+    
     if not do_xml:
         print('# ID\thostname\tStatus\tSubmitted\tStarted\tEnded\tCPUtime\tMemory')
     for j in job_list:
@@ -153,6 +166,8 @@ if __name__ == "__main__":
                 logging_info['Ended']=logging_obj[-1].time
             status_j.update(logging_info)
         new_stat = internalstatus(j,status_j)
+        if int(j) in sites:
+            new_stat.setSite(sites[int(j)]['Site'])
         #print new_stat._toxml().toprettyxml()
         if do_xml:
             firstChild.appendChild(new_stat._toxml())
