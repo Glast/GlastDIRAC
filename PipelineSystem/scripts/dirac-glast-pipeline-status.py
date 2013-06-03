@@ -98,7 +98,7 @@ if __name__ == "__main__":
         do_xml = specialOptions["xml"]
     if specialOptions.has_key("user"):
         user = specialOptions["user"]
-    if specialOptions.has_key("logging")
+    if specialOptions.has_key("logging"):
         doLogging = specialOptions["logging"]
     if do_xml:
         xmlfile = xdom.parse(StringIO.StringIO('<?xml version="1.0" ?><joblist/>'))
