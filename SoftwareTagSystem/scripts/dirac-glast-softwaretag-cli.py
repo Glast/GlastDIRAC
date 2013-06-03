@@ -4,7 +4,7 @@ from GlastDIRAC.SoftwareTagSystem.Client import SoftwareTagClient
 
 class SoftwareTagCli(cmd.Cmd):
     def __init__(self):
-        self.client = SoftwareTagClient()
+        self.client = SoftwareTagClient.SoftwareTagClient()
         super(SoftwareTagCli,self).__init__()
     
     def do_add(self,args):
