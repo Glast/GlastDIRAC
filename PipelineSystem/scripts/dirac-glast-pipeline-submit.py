@@ -106,7 +106,7 @@ if __name__ == "__main__":
                 dexit(1)
             if os.path.isfile(os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")):
                 script = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")
-                os.path.chmod(script,0755)
+                os.chmod(script,0755) # to make sure it's executable.
                 input_sandbox_files.append(script)
             input_sandbox_files.append(pipeline_wrapper)
             executable = "bash %s"%pipeline_wrapper    
