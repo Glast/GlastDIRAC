@@ -82,7 +82,7 @@ class SoftwareTagCli(cmd.Cmd):
             if len(argss)>1:
                 status = argss[1]
             # expect site as input
-            sites = args[0].split(",")
+            sites = argss[0].split(",")
             tags = []
             for site in sites:
                 res = self.client.getTagsAtSite(site,status=status)
