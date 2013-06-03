@@ -111,8 +111,7 @@ if __name__ == "__main__":
     res = w.getJobs(my_dict)
     
     if not res['OK']:
-        gLogger.info(res["Message"])
-        gLogger.error("Could not get list of running jobs.")
+        gLogger.error("Could not get list of running jobs.",res['Message'])
         dexit(1)
 
     job_list = res['Value']
@@ -121,8 +120,7 @@ if __name__ == "__main__":
     res = d.status(job_list)   
     
     if not res['OK']:
-        gLogger.error(res['Message'])
-        gLogger.error("Could not get status of job_list")
+        gLogger.error("Could not get status of job_list,",res['Message'])
         dexit(1)
     
     status = res['Value']
@@ -131,18 +129,16 @@ if __name__ == "__main__":
         print('# ID\thostname\tStatus\tSubmitted\tStarted\tEnded\tCPUtime\tMemory')
     for j in job_list:
         status_j=status[int(j)]
-        res = w.getJobParameters(int(j))
-        if not res['OK']:
-            gLogger.error(res['Message'])
-            gLogger.error("Could not get Job Parameters")
-            dexit(1)
-        status_j.update(res['Value'])
         if dologging:
+            res = w.getJobParameters(int(j))
+            if not res['OK']:
+                gLogger.error("Could not get Job Parameters;",res["Message"])
+                dexit(1)
+            status_j.update(res['Value'])
             res = w.getJobLoggingInfo(int(j))
             #print res
             if not res['OK']:
-                gLogger.error(res['Message'])
-                gLogger.error("Could not get JobLoggingInfo")
+                gLogger.error("Could not get JobLoggingInfo;",res['Message'])
                 dexit(1)
             logs = res['Value']
             logging_obj = []
