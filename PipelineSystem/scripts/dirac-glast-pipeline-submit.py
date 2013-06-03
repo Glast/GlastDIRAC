@@ -117,7 +117,7 @@ if __name__ == "__main__":
                 dexit(1)
             os.chmod(pipeline_wrapper,0755) # make file executable
             input_sandbox_files.append(pipeline_wrapper)
-        j.setExecutable(executable)
+        j.setExecutable(str(executable))
     else:
         gLogger.error("No executable defined.")
         dexit(1)
