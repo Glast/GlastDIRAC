@@ -78,9 +78,8 @@ if __name__ == "__main__":
 
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
-    dologging = True
     specialOptions = {}
-    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: user, xml, dayspassed) ", setSpecialOption )
+    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: user, xml, dayspassed, logging) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')
     Script.parseCommandLine()
@@ -99,6 +98,8 @@ if __name__ == "__main__":
         do_xml = specialOptions["xml"]
     if specialOptions.has_key("user"):
         user = specialOptions["user"]
+    if specialOptions.has_key("logging")
+        doLogging = specialOptions["logging"]
     if do_xml:
         xmlfile = xdom.parse(StringIO.StringIO('<?xml version="1.0" ?><joblist/>'))
         firstChild = xmlfile.firstChild
@@ -129,7 +130,7 @@ if __name__ == "__main__":
         print('# ID\thostname\tStatus\tSubmitted\tStarted\tEnded\tCPUtime\tMemory')
     for j in job_list:
         status_j=status[int(j)]
-        if dologging:
+        if doLogging:
             res = w.getJobParameters(int(j))
             if not res['OK']:
                 gLogger.error("Could not get Job Parameters;",res["Message"])
