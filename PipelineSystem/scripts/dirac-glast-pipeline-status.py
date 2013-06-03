@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
-    logging = True
+    dologging = True
     specialOptions = {}
     Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: user, xml, dayspassed) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
@@ -137,7 +137,7 @@ if __name__ == "__main__":
             gLogger.error("Could not get Job Parameters")
             dexit(1)
         status_j.update(res['Value'])
-        if logging:
+        if dologging:
             res = w.getJobLoggingInfo(int(j))
             #print res
             if not res['OK']:
