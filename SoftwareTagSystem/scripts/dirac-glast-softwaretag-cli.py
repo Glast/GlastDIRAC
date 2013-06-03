@@ -14,7 +14,7 @@ class SoftwareTagCli(cmd.Cmd):
         errorcount = 0
         argss = args.split()
         if (len(argss)==0):
-            print self.do_meta.__doc__
+            print self.do_add.__doc__
             return
         option = argss[0]
         del argss[0]
@@ -38,7 +38,7 @@ class SoftwareTagCli(cmd.Cmd):
         errorcount = 0
         argss = args.split()
         if (len(argss)==0):
-            print self.do_meta.__doc__
+            print self.do_remove.__doc__
             return
         option = argss[0]
         del argss[0]
