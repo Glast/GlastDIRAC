@@ -54,3 +54,7 @@ class SoftwareTagCli(cmd.Cmd):
         if errorcount!=0:
             print "Found errors, cannot continue"
             return
+
+if __name__=="__main__":
+    cli = SoftwareTagCli()
+    cli.cmdloop()  
