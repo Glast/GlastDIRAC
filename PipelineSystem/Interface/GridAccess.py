@@ -1,19 +1,19 @@
-#!/usr/bin/env python
+""" Grid Storage Access Library 
 
+@author: V. Rolland (LUPM/IN2P3)
+@author: S. Zimmer (OKC/SU)
+
+"""
 from DIRAC.Core.Base import Script
 Script.parseCommandLine( ignoreErrors = False )
 import DIRAC
+from DIRAC import gLogger, S_OK, S_ERROR
 import os, time
-from DIRAC.Interfaces.API.Dirac                       import Dirac
 from DIRAC.Core.Security.ProxyInfo                          import getProxyInfo
 from DIRAC.DataManagementSystem.Client.ReplicaManager       import ReplicaManager
 from DIRAC.Core.Utilities.List                              import sortList
 
 # Set up message logging
-import logging
-log = logging.getLogger("gplLong")
-
-
 
 class stageGrid:
     """
@@ -22,19 +22,16 @@ class stageGrid:
     """
     
     def __init__(self,dataDir):
-    	self.stagingArea = dataDir
-    	self.listFileStaged = [] 
-    	self.prefixDest = "/glast.org/user/v/vrolland"
-    	self.stagingDest = self.prefixDest+"/ServiceChallenge/MC-tasks/"+os.environ['PIPELINE_TASK']+"/"+os.environ['PIPELINE_STREAM']
-    	
-    	self.nbofSEtried =0;
-    	self.listSEs = os.environ['SEs_AVAILABLE'].split(',')
-    	self.SE = False;
-    	self.__pickRandomSE()
-    	
-	  
-
-	
+        self.stagingArea = dataDir
+        self.listFileStaged = []    
+        self.prefixDest = "/glast.org/user/v/vrolland"
+        self.stagingDest = self.prefixDest+"/ServiceChallenge/MC-tasks/"+os.environ['PIPELINE_TASK']+"/"+os.environ['PIPELINE_STREAM']
+        self.nbofSEtried =0;
+        self.listSEs = os.environ['SEs_AVAILABLE'].split(',')
+        self.SE = None
+        self.log = gLogger.getSubLogger("GPL Staging")
+        self.__pickRandomSE()
+            
     def getStageDir(self):
         """
         @return: string - stage directory
@@ -48,7 +45,11 @@ class stageGrid:
         pick SE from list of storage elements
         """
         from random import choice
-        self.SE = choice(self.listSEs)
+        try:
+            self.SE = choice(self.listSEs)
+        except IndexError:
+            self.SE = None
+        
             
     def stageOut(self,outfile):
         """
@@ -72,33 +73,37 @@ class stageGrid:
         @return:
         """
         rc = 0
-        dirac = Dirac()
+        rm = ReplicaManager()
         for item in self.listFileStaged:   
-            #log.info("SE '"+self.SE+"' == : '"+str(self.SE == "False")+"'")
-            if self.SE == "False":
-                log.info("No SE available for '"+item[0]+"'")
+            #self.log.info("SE '"+self.SE+"' == : '"+str(self.SE == "False")+"'")
+            if not self.SE:
+                self.log.info("No SE available for '"+item[0]+"'")
                 rc+=1
                 continue
             else:
-                log.info("Trying to store '"+item[0]+"' in SE : '"+self.SE+"' ...")
-                result = dirac.addFile( item[1], item[0], self.SE)
+                self.log.info("Trying to store '"+item[0]+"' in SE : '"+self.SE+"' ...")
+                result = rm.putAndRegister( item[1], item[0], self.SE)
                 if not result['OK']:
-                    log.warning('ERROR %s' % ( result['Message'] ))
+                    self.log.warning('ERROR %s' % ( result['Message'] ))
+                    self.listSEs.remove(self.SE) # make sure not to pick the same SE again.             
 
-        log.info("Wait 5sec before trying again...")
+        self.log.info("Wait 5sec before trying again...")
         time.sleep(5)
-        result = dirac.addFile( item[1], item[0], self.SE)
+        result = rm.putAndRegister( item[1], item[0], self.SE)
         if not result['OK']:
-            log.warning('ERROR %s' % ( result['Message'] ))
-            while   not result['OK']   and   self.SE != "False" :
+            self.log.warning('ERROR %s' % ( result['Message'] ))
+            while   not result['OK'] :
                 self.__pickRandomSE()
-                log.info("Trying with another SE : '"+self.SE+"' . In 5sec...")
+                if not self.SE:
+                    break
+                self.log.info("Trying with another SE : '"+self.SE+"' . In 5sec...")
                 time.sleep(5)
-                result = dirac.addFile( item[1], item[0], self.SE)
+                result = rm.putAndRegister( item[1], item[0], self.SE)
                 if result['OK']:
-                    log.info("file stored : '"+item[1]+"' in '"+self.SE+"'")
+                    self.log.info("file stored : '"+item[1]+"' in '"+self.SE+"'")
                 else:
-                    log.info("ERROR : failed to store the file '"+item[1]+"' ...")
+                    self.log.info("ERROR : failed to store the file '"+item[1]+"' ...")
+                    self.listSEs.remove(self.SE) # make sure not to pick the same SE again. 
                     rc += 1
         return rc
 
@@ -108,7 +113,7 @@ class stageGrid:
         @return:
         """
         for item in self.listFileStaged:
-            log.info("* "+item[0]+" - "+item[1])
+            self.log.info("* "+item[0]+" - "+item[1])
 
     def listStageDir(self):
         """
@@ -116,14 +121,14 @@ class stageGrid:
         @return:
         """
         for item in self.listFileStaged:
-            log.info("* "+item[0])
+            self.log.info("* "+item[0])
 
     def getChecksums(self,printflag=None):
         """@brief Return a dictionary of: [stagedOut file name,[length,checksum] ].  Call this after creating file(s), but before finish(), if at all.  If the printflag is set to 1, a brief report will be sent to stdout."""
         cksums = {}
         # Compute checksums for all stagedOut files
         
-        log.info("Calculating 32-bit CRC checksums for stagedOut files")
+        self.log.info("Calculating 32-bit CRC checksums for stagedOut files")
         #print "Calculating 32-bit CRC checksums for stagedOut files"
         
         for stagee in self.listFileStaged:
@@ -134,17 +139,17 @@ class stageGrid:
                 foo = fd.read()             # Calculate checksum
                 rc = fd.close()
                 if rc != None:
-                    log.warning("Checksum error: return code =  "+str(rc)+" for file "+File)
+                    self.log.warning("Checksum error: return code =  "+str(rc)+" for file "+File)
                     #print "Checksum error: return code =  "+str(rc)+" for file "+file
                 else:
                     cksumout = foo.split()
                     cksums[cksumout[2]] = [cksumout[0],cksumout[1]]
             else:
-                log.warning("Checksum error: file does not exist, "+File)
+                self.log.warning("Checksum error: file does not exist, "+File)
         return cksums
 
 def getOutputData(baseDir):
-    listOuputData = []
+    listOutputData = []
     res = getProxyInfo( False, False )
     if not res['OK']:
         gLogger.error( "Failed to get client proxy information.", res['Message'] )
@@ -154,7 +159,7 @@ def getOutputData(baseDir):
 
     print  'Will search for files in %s' % baseDir
     activeDirs = [baseDir]
-
+    import fnmatch
     # ######################################################################################################## #
     # before is from dirac-dms-user-lfns
     rm = ReplicaManager()
@@ -172,35 +177,48 @@ def getOutputData(baseDir):
             subdirs = dirContents['SubDirs']    
             for subdir, metadata in subdirs.items():
                 activeDirs.append( subdir )
-for filename, fileInfo in dirContents['Files'].items():
-metadata = fileInfo['MetaData']
-if fnmatch.fnmatch( filename, "*"):
-allFiles.append( filename )
-files = dirContents['Files'].keys()
-# ######################################################################################################## #
-# get file
-listlfn_toremove = []
-dirac = Dirac()
-for lfn in sortList( allFiles ):
-print " - getting '"+lfn+"'... ",
-result = dirac.getFile( lfn )
-if not result['OK']:
-print 'ERROR %s' % ( result['Message'] )
-exitCode = 2
-else :
-listOuputData.append(result['Value']['Successful'][lfn])
-listlfn_toremove.append(lfn)
-print "OK"
-# ######################################################################################################## #
-# remove files
-print 'Will remove retrieved files' 
-for lfntoremove in listlfn_toremove:
-print " - removing : '"+lfntoremove+"'",
-result = dirac.removeFile( lfntoremove )      
-if not result['OK']:
-print 'ERROR %s: %s' % ( lfntoremove, result['Message'] )
-exitCode = 2
-else :
-print "OK"
-# ######################################################################################################## #
-return listOuputData;
+            for filename, fileInfo in dirContents['Files'].items():
+                metadata = fileInfo['MetaData']
+                if fnmatch.fnmatch( filename, "*"):
+                    allFiles.append( filename )
+            files = dirContents['Files'].keys()
+    # ######################################################################################################## #
+    # get file
+    listlfn_toremove = []
+    ntries = 3
+    for lfn in sortList( allFiles ):
+        success = False
+        while ntries:
+            print " - getting '"+lfn+"'... ",
+            result = rm.getFile( lfn )
+            if not result['OK']:
+                print 'ERROR %s' % ( result['Message'] )
+                print 'sleep for 10s and try again.'
+                time.sleep(10)
+            else:
+                success = True
+                listOutputData.append(result['Value']['Successful'][lfn])
+                listlfn_toremove.append(lfn)
+                print "OK"
+                break
+            ntries -= 1
+        if not success:
+            print 'ERROR could not get file after %i trials. Giving up :('%ntries
+            exitCode = 2
+    # ######################################################################################################## #
+    # remove files
+    print 'Will remove retrieved files' 
+    for lfntoremove in listlfn_toremove:
+        print " - removing : '"+lfntoremove+"'",
+    result = rm.removeFile(listlfn_toremove)      
+    if not result['OK']:
+        print 'ERROR: %s' % (result['Message'] )
+        exitCode = 2
+    else :
+        failed_files = result['Value']['Failed']
+        for key in failed_files:
+            print "Failed file %s: %s"%(key,failed_files[key])
+    # ######################################################################################################## #
+    if exitCode:
+        return S_ERROR("Failed to finish operations.")
+    return S_OK(listOutputData);
