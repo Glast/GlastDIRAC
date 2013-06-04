@@ -112,11 +112,11 @@ if __name__ == "__main__":
             executable = "bash %s"%pipeline_wrapper    
         else:
             executable = args[0].replace("bash ","").replace("./","")
-            if not os.path.isfile(pipeline_wrapper):
-                gLogger.error("file pipeline_wrapper not found in %s"%pipeline_wrapper)
+            if not os.path.isfile(executable):
+                gLogger.error("file %s not found."%executable)
                 dexit(1)
-            os.chmod(pipeline_wrapper,0755) # make file executable
-            input_sandbox_files.append(pipeline_wrapper)
+            os.chmod(executable,0755) # make file executable
+            input_sandbox_files.append(executable)
         j.setExecutable(str(executable))
     else:
         gLogger.error("No executable defined.")
