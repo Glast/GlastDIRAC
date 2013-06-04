@@ -48,7 +48,7 @@ class GlastAdditionnalInfoDB ( DB ):
     return connection
   
   def _checkProperty(self, ItemProperty, name, connection = False ):
-    """ Check a given site.
+    """ Check a given Property. Probably does not do what it's supposed to...
     """
     connection = self.__getConnection( connection )
     
@@ -58,6 +58,8 @@ class GlastAdditionnalInfoDB ( DB ):
     if not res['OK']:
         return S_ERROR("Could not get property %s with name %s" % (ItemProperty, name))
     if len(res['Value']):
+        if not res['Value'][0][0]:
+          return S_ERROR("Value for %s not found" % ItemProperty)
         return res
     else:
         return S_ERROR("Could not find any property %s with name %s" % (ItemProperty, name))
@@ -111,7 +113,7 @@ class GlastAdditionnalInfoDB ( DB ):
                          conn = self.__getConnection( connection ))
     if not res['OK']:
         return res
-    if not res['Value'][0][0]: #(because if no site is found, this returns [(,)]
+    if not res['Value'][0][0]: #(because if no site is found, this returns ((,))
         return S_ERROR("No site for this tag/status was found")
       
     ces = [row[0] for row in res['Value']]
