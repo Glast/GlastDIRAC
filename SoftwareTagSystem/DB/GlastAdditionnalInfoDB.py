@@ -252,21 +252,30 @@ class GlastAdditionnalInfoDB ( DB ):
       """ to interact with the status field """
       if not status in self.tag_statuses:
           return S_ERROR("Status %s undefined." % status)
-        
+      if status == 'Probing' :
+          return S_ERROR("Transition to Probing does not make sense for this method.")
+       
       res = self.__getCESforSite(site)
       if not res['OK']:
           return res
+        
       for ce in res['Value']:
+          if tag:
+              updatefields = ['CEName','Software_Tag','Status', 'LastUpdateTime']
+              updatestatus = [ce, tag, status, 'UTC_TIMESTAMP()']
+          else:
+              updatefields = ['CEName','Status', 'LastUpdateTime']
+              updatestatus = [ce, status, 'UTC_TIMESTAMP()']
           res = self.updateFields("SoftwareTags_has_Sites", 
-                                  ['CEName','Software_Tag','Status', 'LastUpdateTime'],
-                                  [ce, tag, status, 'UTC_TIMESTAMP()'], 
+                                  updatefields,
+                                  updatestatus, 
                                   conn = self.__getConnection( connection ))
           if not res['OK']:
             return S_ERROR("Error updating Status")
       return S_OK()
 
   def updateCEStatus(self, tag, ce, status, connection = False):
-    """ Update the tags at CE relations
+    """ Update the tags at CE relations. Usually through the Agent of the jobs
     """
     if not status in self.tag_statuses:
         return S_ERROR("Status %s undefined." % status)

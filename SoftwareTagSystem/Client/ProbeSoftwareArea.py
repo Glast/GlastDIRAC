@@ -3,6 +3,12 @@
 import os
 from DIRAC import S_OK, S_ERROR
 
+def getMappingTagToDirectory(tag):
+  return S_OK()
+
+def getMappingTagFromDirectory(directory):
+  return S_OK()
+
 def ProbeSoftwareArea():
   """ Look into the shared area and report back to the SoftwareTag service
   """
@@ -29,7 +35,12 @@ def ProbeSoftwareArea():
   for item in list_sw:
     gLogger.notice("   %s"%item)
     #Need mapping between Tag name and local software directory name
-    res = swtc.updateCEStatus(item, ce, 'Valid')
+    res = getMappingTagFromDirectory(item)
+    if not res['OK']:
+      gLogger.error("Failed finding relation between directory and Tag")
+      continue
+    
+    res = swtc.updateCEStatus(res['Value'], ce, 'Valid')
     if not res['OK']:
       message = "Failed to report back: %s" %res['Message']
   
