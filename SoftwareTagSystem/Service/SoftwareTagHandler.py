@@ -5,7 +5,7 @@ Service code for GLAST stuff
 __RCSID__ = " $Id: $ "
 
 from DIRAC.Core.DISET.RequestHandler                    import RequestHandler
-from GlastDIRAC.SoftwareTagSystem.DB.GlastAdditionnalInfoDB import GlastAdditionnalInfoDB #Fix path
+from GlastDIRAC.SoftwareTagSystem.DB.GlastAdditionnalInfoDB import GlastAdditionalInfoDB #Fix path
 from DIRAC import S_OK
 from types import StringTypes
 
@@ -13,7 +13,7 @@ glastdb = False
 
 def initializeSoftwareTagHandler( ServiceInfo ):
   global glastdb
-  glastdb = GlastAdditionnalInfoDB()
+  glastdb = GlastAdditionalInfoDB()
   return S_OK()
 
 class SoftwareTagHandler(RequestHandler):
