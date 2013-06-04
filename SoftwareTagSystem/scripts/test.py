@@ -59,6 +59,13 @@ if __name__=="__main__":
     gLogger.error(res['Message'])
   else:
     gLogger.notice("Updated %s to %s at %s" %(mytag, "Valid", cetest))
+
+  #try again now that at least one CE as a Valid tag
+  res = sw.getSitesForTag(mytag)
+  if not res['OK']:
+    gLogger.error(res['Message'])
+  else:
+    gLogger.notice("Sites for tag: ", res['Value'])
   
   #Remove the association tag-site (mark as removed)
   res = sw.removeTagAtSite(mytag,mysite)
