@@ -92,6 +92,7 @@ if __name__ == "__main__":
     # use stored certificates
     from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
     from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
+    from DIRAC.Core.Utilities.List import breakListIntoChunks
     do_xml = False
     
     user = os.getenv("USER")
@@ -125,21 +126,19 @@ if __name__ == "__main__":
     else:
         job_list = specialOptions["JobID"].split(",")
         doLogging = True
-    #for j in job_list:
-    res = d.status(job_list)   
-    
-    if not res['OK']:
-        gLogger.error("Could not get status of job_list,",res['Message'])
-        dexit(1)
-    
-    status = res['Value']
+    status = {}
+    sites = {} 
+    for chunk in breakListIntoChunks(job_list,1000):
+        res = d.status(chunk)   
+        if not res['OK']:
+            gLogger.error("Could not get status of job list chunk,",res['Message'])
+            continue
+        status.update(res['Value'])
     # get sites info
-    sites = None
-    res = w.getJobsSites(job_list)
-    if not res['OK']:
-        gLogger.error("Could not get sites;",res['Message'])
-    else:
-        sites = res['Value']
+        res = w.getJobsSites(chunk)
+        if not res['OK']:
+            gLogger.error("Could not get sites;",res['Message'])
+        sites.update(res['Value'])
     
     if not do_xml:
         print('# ID\thostname\tStatus\tSubmitted\tStarted\tEnded\tCPUtime\tMemory')
