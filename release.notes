@@ -1,9 +1,10 @@
 [v1r1p0]
+
 *All
 NEW: Production-ready system.
 *SoftwareTagSystem
-NEW: dirac-glast-tag-list UI for read-only access to DB
-CHANGE: bugfixes to dirac-glast-tag-admin
+NEW: dirac-glast-softwaretag-cli as command-line interface for tag access (used onluy by glast_sgm)
+CHANGE: bugfixes
 *PipelineSystem
 CHANGE: dirac-glast-pipeline-status queries logging only if set by add. parameter
 CHANGE: massive re-write of submit, streamline.
