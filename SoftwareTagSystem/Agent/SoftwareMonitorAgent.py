@@ -6,9 +6,10 @@ from DIRAC import S_OK
 from GlastDIRAC.SoftwareTagSystem.Client.SoftwareTagClient import SoftwareTagClient
 
 class SoftwareMonitorAgent(AgentModule):
-  """ This agent picks up "New" tags and submits jobs (Will eventually) and those that
+  """ This agent picks up "New" tags and submits jobs and those that
   are OK will report back to the service directly. For now it enforces the 
   transition from New to Probing to Valid.
+  Also resets the tags that have been Probing for too long to New
   """
   
   def initialize(self):
@@ -18,6 +19,10 @@ class SoftwareMonitorAgent(AgentModule):
     
     self.swtc = SoftwareTagClient()
     self.submitjobs = self.am_getOption( 'SubmitJobs', False )
+    self.delay = self.am_getOption("Delay", 86400)
+    
+    self.am_setOption( 'shifterProxy', 'SiteManager' ) 
+    #Needs to be able to submit job for that VO
     
     return S_OK()
   
@@ -43,12 +48,25 @@ class SoftwareMonitorAgent(AgentModule):
         
         if not res['OK']:
           self.log.error(res['Message'])
-      
+     
+    ##Also, reset to New tags that were in Probing for too long.
+    res = self.swtc.getTagsWithStatus("Probing",olderthan=self.delay)
+    if not res['OK']:
+      self.log.error("Failed to get old Probing tags")
+    else:
+      for tag, ces in res['Value'].items():
+        for ce in ces:
+          res = self.swtc.updateCEStatus(tag, ce, 'New')
+          if not res['OK']:
+            self.log.error(res['Message'])
+            continue
     return S_OK()
   
   def submitProbeJobs(self, ce):
     """ Submit some jobs to the CEs
     """
+    
+    #need credentials, should be there since the initialize
     
     from DIRAC.Interfaces.API.Dirac import Dirac
     d = Dirac()
