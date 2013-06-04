@@ -17,9 +17,9 @@ def ProbeSoftwareArea():
   swtc = SoftwareTagClient()
 
   if not 'VO_GLAST_ORG_SW_DIR' in os.environ:
-    #res = swtc.reportBadCE(ce)
-    #if not res['OK']:
-    #  return S_ERROR("Failed to report Bad site, missing software area.")
+    res = swtc.updateCEStatus("", ce, "Bad")
+    if not res['OK']:
+      return S_ERROR("Failed to report Bad site, missing software area.")
     return S_ERROR("Missing VO_GLAST_ORG_SW_DIR environment variable")
 
   list_sw = os.listdir(os.environ['VO_GLAST_ORG_SW_DIR'])
@@ -28,9 +28,10 @@ def ProbeSoftwareArea():
   message = None
   for item in list_sw:
     gLogger.notice("   %s"%item)
-    #res = swtc.validatePresence(item, ce)
-    #if not res['OK']:
-    #  message = "Failed to report back: %s" %res['Message']
+    #Need mapping between Tag name and local software directory name
+    res = swtc.updateCEStatus(item, ce, 'Valid')
+    if not res['OK']:
+      message = "Failed to report back: %s" %res['Message']
   
   if message:
     return S_ERROR(message)
