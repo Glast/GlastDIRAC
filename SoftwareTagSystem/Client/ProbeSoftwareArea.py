@@ -4,9 +4,15 @@ import os
 from DIRAC import S_OK, S_ERROR
 
 def getMappingTagToDirectory(tag):
-  return S_OK("")
+  """ Returns the directory given a tag name
+  """
+  #tags are VO.glast.org-OS/FLAOUR/TAG, and in the SW dir it's the same
+  tag = tag.replace("VO.glast.org-","")
+  return S_OK(tag)
 
 def getMappingTagFromDirectory(directory):
+  """ Returns the tag name given a directory name
+  """
   return S_OK("")
 
 def ProbeSoftwareArea():
@@ -28,7 +34,8 @@ def ProbeSoftwareArea():
       return S_ERROR("Failed to report Bad site, missing software area.")
     return S_ERROR("Missing VO_GLAST_ORG_SW_DIR environment variable")
 
-  list_sw = os.listdir(os.environ['VO_GLAST_ORG_SW_DIR'])
+  base_sw_dir = os.environ['VO_GLAST_ORG_SW_DIR']
+  list_sw = os.listdir(base_sw_dir)
   
   gLogger.notice("Found the following software directories:")
   message = None
