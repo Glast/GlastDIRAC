@@ -2,18 +2,22 @@
 
 import os
 from DIRAC import S_OK, S_ERROR
+
 def ProbeSoftwareArea():
   """ Look into the shared area and report back to the SoftwareTag service
   """
-  from DIRAC import gLogger, siteName
+  from DIRAC import gLogger, gConfig
 
-  site = siteName()
+  #site = siteName()
+  ce = gConfig.getValue('/LocalSite/GridCE', '')
+  if not ce:
+    return S_ERROR("CE undefined, cannot proceed")
   
   from GlastDIRAC.SoftwareTagSystem.Client.SoftwareTagClient import SoftwareTagClient
   swtc = SoftwareTagClient()
 
   if not 'VO_GLAST_ORG_SW_DIR' in os.environ:
-    #res = swtc.reportBadSite(site)
+    #res = swtc.reportBadCE(ce)
     #if not res['OK']:
     #  return S_ERROR("Failed to report Bad site, missing software area.")
     return S_ERROR("Missing VO_GLAST_ORG_SW_DIR environment variable")
@@ -24,7 +28,7 @@ def ProbeSoftwareArea():
   message = None
   for item in list_sw:
     gLogger.notice("   %s"%item)
-    #res = swtc.validatePresence(item, site)
+    #res = swtc.validatePresence(item, ce)
     #if not res['OK']:
     #  message = "Failed to report back: %s" %res['Message']
   
