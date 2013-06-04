@@ -9,7 +9,8 @@ __RCSID__ = " $Id: $ "
 from DIRAC                                                             import gLogger, S_OK, S_ERROR
 from DIRAC.Core.Base.DB                                                import DB
 #from DIRAC.ConfigurationSystem.Client.Helpers.Operations            import Operations
-from DIRAC.ConfigurationSystem.Client.Helpers.Resources import getQueues
+from DIRAC.ConfigurationSystem.Client.Helpers.Resources                import getQueues
+from DIRAC.ConfigurationSystem.Client.Helpers.Registry import getVO
 class GlastAdditionnalInfoDB ( DB ):
   def __init__( self, maxQueueSize = 10 ):
     """ 
@@ -29,11 +30,10 @@ class GlastAdditionnalInfoDB ( DB ):
                                                      }             
                         }
                       )
-    
+    self.vo = getVO('glast.org')
     ##tags statuses: 
     self.tag_statuses = ['New','Probing','Valid','Bad','Removed']
-    #State machine: New -> Probing -> Validated/Bad -> Removed -> Probing -> etc.
-    
+    #State machine: New -> Probing -> Valid/Bad -> Removed -> Probing -> etc.    
     
   #####################################################################
   # Private methods
@@ -65,7 +65,7 @@ class GlastAdditionnalInfoDB ( DB ):
   def __getCESforSite(self, site):
     """ As the name suggests, get all the CEs for a given site
     """
-    res = getQueues(siteList = [site])
+    res = getQueues(siteList = [site], community = self.vo)
     if not res['OK']:
         return S_ERROR("Could not get CEs for site")
     if not res['Value']:
@@ -75,6 +75,25 @@ class GlastAdditionnalInfoDB ( DB ):
     if not ces:
         return S_ERROR("No CEs for site %s" % site)
     return S_OK(ces)
+  
+  def __getSiteForCEs(self, ces):
+    """ We want to get the site for a given CE because that's what the job expects
+    """
+    
+    res = getQueues(community = self.vo)
+    if not res['OK']:
+        return S_ERROR("Could not get site for CE")
+    sitedict = res['Value']
+    
+    final_sdict = {}
+    for site, s_ces in sitedict:
+      for ce in ces:
+        if ce in s_ces:
+          if not site in final_sdict:
+            final_sdict[site] = []
+          final_sdict[site].append(ce)
+    
+    return S_OK(final_sdict)
   
   ##################################################################
   ## Public methods that will need to be exported to the service 
@@ -87,14 +106,19 @@ class GlastAdditionnalInfoDB ( DB ):
     res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
     if not res['OK']:
         return S_ERROR("Tag was not found")
-    res = self.getFields("SoftwareTags_has_Sites", "CEName", 
-                         {"Software_Tag": tag}, 
-                         {"Status":status}, 
+    res = self.getFields("SoftwareTags_has_Sites", ["CEName"], 
+                         {"Software_Tag": tag, "Status":status}, 
                          conn = self.__getConnection( connection ))
-    ces = []
-    for row in res['Value']:
-        ces.append(row[0])
-    return S_OK(ces)
+    if not res['OK']:
+        return res
+    if not res['Value'][0][0]: #(because if no site is found, this returns [(,)]
+        return S_ERROR("No site for this tag/status was found")
+      
+    ces = [row[0] for row in res['Value']]
+    res = self.__getSiteForCEs(ces)
+    if not res['OK']:
+        return res
+    return S_OK(res['Value'].keys())
 
 
   def getTagsAtSite(self, site, status='Valid',connection = False):
@@ -141,7 +165,7 @@ class GlastAdditionnalInfoDB ( DB ):
     for row in res['Value']:
         if not row[0] in tagsdict:
             tagsdict[row[0]] = []
-            tagsdict[row[0]].append(row[1]) # this has e.g. {'someTag':[CE1,CE2]}
+        tagsdict[row[0]].append(row[1]) # this has e.g. {'someTag':[CE1,CE2]}
       
     return S_OK(tagsdict)
   
@@ -156,13 +180,28 @@ class GlastAdditionnalInfoDB ( DB ):
     #  return S_ERROR("Site was not found")
     res = self.__getCESforSite(site)
     if not res['OK']:
-        return res
-    for ce in res['Value']:
-        res = self.insertFields("SoftwareTags_has_Sites", 
-                                ['CEName', 'Software_Tag', 'LastUpdateTime'], 
-                                [ce, tag, "UTC_TIMESTAMP()"], 
-                                conn = self.__getConnection( connection ))
-    return res
+          return res
+    ces = res['Value']
+    res = self.getFields('SoftwareTags_has_Sites', ['Status', 'CEName'], {'Software_Tag':tag,'CEName':ces},  
+                           conn = self.__getConnection( connection ))
+    if not res['OK']:
+        return S_ERROR("Failed looking up existence of tag at site")
+
+    ces_in_db = [row[1] for row in res['Value']]
+    
+    inserted  = {}
+    for ce in ces:
+        if ce not in ces_in_db:
+            res = self.insertFields("SoftwareTags_has_Sites", 
+                                    ['CEName', 'Software_Tag', 'LastUpdateTime'], 
+                                    [ce, tag, "UTC_TIMESTAMP()"], 
+                                    conn = self.__getConnection( connection ))
+            if not res['OK']:
+                self.log.error("Failed inserting new row:", res['Message'])
+            if not tag in inserted:
+                inserted[tag] = []    
+            inserted[tag].append(ce)  
+    return S_OK(inserted)
   
   def removeTagAtSite(self, tag, site, connection = False):
     """ Mark the tag at site as Removed. This allows to know that the tag is maybe still there
