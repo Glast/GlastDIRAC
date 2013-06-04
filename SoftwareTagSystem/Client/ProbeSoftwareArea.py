@@ -42,7 +42,8 @@ def ProbeSoftwareArea():
     
     res = swtc.updateCEStatus(res['Value'], ce, 'Valid')
     if not res['OK']:
-      message = "Failed to report back: %s" %res['Message']
+      gLogger.error("Failed to report back: %s" %res['Message'])
+      message = res['Message']
   
   if message:
     return S_ERROR(message)
