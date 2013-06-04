@@ -4,10 +4,10 @@ import os
 from DIRAC import S_OK, S_ERROR
 
 def getMappingTagToDirectory(tag):
-  return S_OK()
+  return S_OK("")
 
 def getMappingTagFromDirectory(directory):
-  return S_OK()
+  return S_OK("")
 
 def ProbeSoftwareArea():
   """ Look into the shared area and report back to the SoftwareTag service
