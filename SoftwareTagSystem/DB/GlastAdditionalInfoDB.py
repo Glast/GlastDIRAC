@@ -11,14 +11,14 @@ from DIRAC.Core.Base.DB                                                import DB
 #from DIRAC.ConfigurationSystem.Client.Helpers.Operations            import Operations
 from DIRAC.ConfigurationSystem.Client.Helpers.Resources                import getQueues
 from DIRAC.ConfigurationSystem.Client.Helpers.Registry import getVO
-class GlastAdditionnalInfoDB ( DB ):
+class GlastAdditionalInfoDB ( DB ):
   def __init__( self, maxQueueSize = 10 ):
     """ 
     """
     #self.ops = Operations()
-    self.dbname = 'GlastAdditionnalInfoDB'
-    self.logger = gLogger.getSubLogger('GlastAdditionnalInfoDB')
-    DB.__init__( self, self.dbname, 'SoftwareTag/GlastAdditionnalInfoDB', maxQueueSize  )
+    self.dbname = 'GlastAdditionalInfoDB'
+    self.logger = gLogger.getSubLogger('GlastAdditionalInfoDB')
+    DB.__init__( self, self.dbname, 'SoftwareTag/GlastAdditionalInfoDB', maxQueueSize  )
     self.fields = ["CEName","Status","Software_Tag"]
     self._createTables( { "SoftwareTags_has_Sites" :{"Fields":{"idRelation":"INT NOT NULL AUTO_INCREMENT",
                                                                "CEName":"VARCHAR(45) NOT NULL",
