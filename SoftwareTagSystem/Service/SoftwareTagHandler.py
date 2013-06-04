@@ -19,17 +19,17 @@ def initializeSoftwareTagHandler( ServiceInfo ):
 class SoftwareTagHandler(RequestHandler):
 
   types_getSitesForTag = [StringTypes]
-  def export_getSitesForTag(self, tag,status):
+  def export_getSitesForTag(self, tag, status):
     """ Get the sites that have the Tag
     Returns currently the list of CEs
     """
-    return glastdb.getSitesForTag(tag,status=status)
+    return glastdb.getSitesForTag(tag, status=status)
   
   types_getTagsAtSite = [StringTypes]
   def export_getTagsAtSite(self, site, status):
     """ Get the list of tags at a given Site. Goes through all CEs of the site
     """
-    return glastdb.getTagsAtSite(site,status=status)
+    return glastdb.getTagsAtSite(site, status=status)
   
   types_addTagAtSite = [StringTypes, StringTypes]
   def export_addTagAtSite(self, tag, site):
@@ -38,7 +38,7 @@ class SoftwareTagHandler(RequestHandler):
     return glastdb.addTagAtSite( tag, site )
   
   types_getTagsWithStatus = [StringTypes]
-  def export_getTagsWithStatus(self, status, olderthan=None):
+  def export_getTagsWithStatus(self, status, olderthan):
     """ Get all tags:celist that have the given status. Can select with olderthan
     in seconds
     """

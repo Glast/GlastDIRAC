@@ -87,11 +87,11 @@ class GlastAdditionnalInfoDB ( DB ):
     
     final_sdict = {}
     for site, s_ces in sitedict:
-      for ce in ces:
-        if ce in s_ces:
-          if not site in final_sdict:
-            final_sdict[site] = []
-          final_sdict[site].append(ce)
+        for ce in ces:
+            if ce in s_ces:
+                if not site in final_sdict:
+                    final_sdict[site] = []
+                final_sdict[site].append(ce)
     
     return S_OK(final_sdict)
   
