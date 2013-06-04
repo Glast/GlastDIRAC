@@ -30,7 +30,7 @@ class SoftwareTagCli(cmd.Cmd):
                    continue
         else:
             print "ERROR parsing command"
-            print self.do_get.__doc__
+            print self.do_add.__doc__
             return
         if errorcount!=0:
             print "Found errors, cannot continue"
@@ -58,7 +58,7 @@ class SoftwareTagCli(cmd.Cmd):
                    continue
         else:
             print "ERROR parsing command"
-            print self.do_get.__doc__
+            print self.do_remove.__doc__
             return
         if errorcount!=0:
             print "Found errors, cannot continue"
@@ -78,7 +78,7 @@ class SoftwareTagCli(cmd.Cmd):
         del argss[0]
         if option == "tag":
             tags = []
-            status = 'OK'
+            status = 'Valid'
             if len(argss)>1:
                 status = argss[1]
             # expect site as input
@@ -95,10 +95,10 @@ class SoftwareTagCli(cmd.Cmd):
         
         elif option == "site":
             tag = args[0]
-            status = 'OK'
+            status = 'Valid'
             if len(argss)>1:
                 status = argss[1]
-            res = self.client.getSitesForTag(tag,status='OK')
+            res = self.client.getSitesForTag(tag,status=status)
             if not res['OK']:
                 print "Failed to get tags for site %s; %s"%(site,res['Message'])
             else:
@@ -114,9 +114,33 @@ class SoftwareTagCli(cmd.Cmd):
         if errorcount!=0:
             print "Found errors, cannot continue"
             return
+          
+    def do_reset(self, args):
+        """ Reset site-tags relations statuses to New
+        
+           >>> reset site LCG.LAL.fr
+        """
+        argss = args.split()
+        if (len(argss)==0):
+            print self.do_reset.__doc__
+            return
+        option = argss[0]
+        del argss[0]
+        if option == 'site':
+            if not argss[0]:
+                print "Error, you need a Site name"
+                print self.do_reset.__doc__
+                return
+            res = self.client.updateStatus(tag='', site=argss[0], status = 'New')
+        else:
+            print "reset %s not implemented" % option
+            return
+        return
+      
     def do_quit(self,args):
         """ quit """
         sys.exit(0)
+        
     def do_exit(self,args):
         """ quit """
         sys.exit(0)
