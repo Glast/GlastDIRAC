@@ -11,7 +11,7 @@ updateStatus(tag,site,status)
 
 """
 
-from DIRAC.Core.Base.Client                               import Client
+from DIRAC.Core.Base.Client import Client
 
 class SoftwareTagClient (Client):
   """ Client of the SoftwareTagHandler.

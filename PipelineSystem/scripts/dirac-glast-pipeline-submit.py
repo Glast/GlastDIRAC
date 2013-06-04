@@ -45,33 +45,37 @@ if __name__ == "__main__":
     from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
     from GlastDIRAC.SoftwareTagSystem.Client import SoftwareTagClient
     from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
-
-    proxy = None
     opts = options(specialOptions) # converts the "DIRAC registerSwitch()" to something similar to OptionParser
-    op = Operations()
-    #TODO: replace glast.org with VO-agnostic statement
-    shifter = op.getValue("Pipeline/Shifter","/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865")
-    shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
-    result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
-    if not result['OK']:
-        gLogger.error(result['Message'])
-        gLogger.error("No valid proxy found.")
-        dexit(1)
-    proxy = result[ 'Value' ]
-    os.environ['X509_USER_PROXY'] = proxy
-    gLogger.info("using proxy %s"%proxy)
-    j = Job(stdout="logFile.txt",stderr="logFile.txt") # specifies the logfile
-    
-    input_sandbox_files = []
-    output_sandbox_files = ["logFile.txt", "jobmeta.inf"]
+    pipeline = False
     pipeline_dict = None
     if not opts.env is None:
         import json
         f = open(specialOptions["env"],"r")
         pipeline_dict = json.load(f)
         pipeline_dict["P2_ECHO"]="echo" # this is needed to ensure correct functionality together with dirac-sys-sendmail
+        pipeline = True
+        
+    if pipeline:
+        proxy = None
+        
+        op = Operations()
+        #TODO: replace glast.org with VO-agnostic statement
+        shifter = op.getValue("Pipeline/Shifter","/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865")
+        shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
+        result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
+        if not result['OK']:
+            gLogger.error("No valid proxy found; ",result['Message'])
+            dexit(1)
+        proxy = result[ 'Value' ]
+        os.environ['X509_USER_PROXY'] = proxy
+        gLogger.info("using proxy %s"%proxy)
+    
+    j = Job(stdout="logFile.txt",stderr="logFile.txt") # specifies the logfile
+    
+    input_sandbox_files = []
+    output_sandbox_files = ["logFile.txt", "jobmeta.inf"]
+    if pipeline:
         j.setExecutionEnv(pipeline_dict) # that sets the env vars
-    if not pipeline_dict is None:
         if pipeline_dict.has_key("GPL_CONFIGDIR"):
             GPL_CONFIGDIR = pipeline_dict['GPL_CONFIGDIR']
             files = []
@@ -88,22 +92,36 @@ if __name__ == "__main__":
             for f in files:
                 output_sandbox_files.append(f)
     #print input_sandbox_files #DEBUG
-
+    executable = None
     if len(args)>0:
-        executable = args[0].replace("bash ","").replace("./","")
-        input_sandbox_files.append("jobmeta.inf") # that one is generated with every single job (or at least should be)
         # BUG: pipeline.process instance creates pipeline_wrapper --> sets automatically 'bash pipeline_wrapper' as cmd
-        if pipeline_dict.has_key("PIPELINE_WORKDIR"):
-            pipeline_wrapper = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"pipeline_wrapper")
-            pipeline_script = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")
-            input_sandbox_files.append(pipeline_script)
+        if pipeline:
+            input_sandbox_files.append("jobmeta.inf") # that one is generated with every single job (or at least should be)
+            for key in ["GPL_CONFIGDIR","PIPELINE_WORKDIR"]:
+               if os.path.isfile(os.path.join(pipeline_dict[key],"pipeline_wrapper")): 
+                   pipeline_wrapper = os.path.join(pipeline_dict[key],"pipeline_wrapper")
+                   break
+            if not os.path.isfile(pipeline_wrapper):
+                gLogger.error("file pipeline_wrapper not found in %s"%pipeline_wrapper)
+                dexit(1)
+            if os.path.isfile(os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")):
+                script = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")
+                os.chmod(script,0755) # to make sure it's executable.
+                input_sandbox_files.append(script)
             input_sandbox_files.append(pipeline_wrapper)
-            j.setExecutable(str("bash %s"%pipeline_wrapper))
-                
+            executable = "bash %s"%pipeline_wrapper    
         else:
+            executable = args[0].replace("bash ","").replace("./","")
+            if not os.path.isfile(executable):
+                gLogger.error("file %s not found."%executable)
+                dexit(1)
+            os.chmod(executable,0755) # make file executable
             input_sandbox_files.append(executable)
-            j.setExecutable(executable)
-
+        j.setExecutable(str(executable))
+    else:
+        gLogger.error("No executable defined.")
+        dexit(1)
+        
     j.setName("MC job")
     if not opts.name is None:
         j.setName(opts.name)
@@ -120,11 +138,10 @@ if __name__ == "__main__":
 
     if not opts.release is None:
         release = opts.release
-        cl = SoftwareTagClient()
-        result = cl.getSitesForTag(tag)
+        cl = SoftwareTagClient.SoftwareTagClient()
+        result = cl.getSitesForTag(tag,status='OK')
         if not result['OK']:
-            gLogger.error(result['Message'])
-            gLogger.error("Could not get sites for Tag %s"%tag)
+            gLogger.error("*ERROR* Could not get sites for Tag %s"%tag,result['Message'])
             dexit(1)
         sites = result[ 'Value' ]
         j.setDestination(sites)
@@ -145,15 +162,14 @@ if __name__ == "__main__":
         j.setInputData(input_stage_files)
 
     if opts.debug:
-        print('*DEBUG* just showing the JDL of the job to be submitted')
-        print(j._toJDL())
+        gLogger.notice('*DEBUG* just showing the JDL of the job to be submitted')
+        gLogger.notice(j._toJDL())
     
-    d = Dirac()
+    d = Dirac(True,"myRepo.rep")
     res = d.submit(j)
     if not res['OK']:
-        gLogger.error("Error during Job Submission")
-        gLogger.error(res['Message'])
+        gLogger.error("Error during Job Submission ",res['Message'])
         dexit(1)
     JobID = res['Value']
-    print("Your job %s (\"%s\") has been submitted."%(str(JobID),executable))
+    gLogger.notice("Your job %s (\"%s\") has been submitted."%(str(JobID),executable))
     

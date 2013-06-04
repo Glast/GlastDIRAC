@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # S.Zimmer 10/2012 The Oskar Klein Center for Cosmoparticle Physics
 import xml.dom.minidom as xdom
-import sys, getopt, os, StringIO
+import sys, getopt, os, StringIO, datetime
 
 class logging:
     def __init__(self,ntuple):
@@ -40,7 +40,9 @@ class internalstatus:
         self.mydict = my_dict
         self.__dict__.update(kwargs)
         #print my_dict
-
+    def setSite(self,site):
+        self.hostname = site
+        
     def __call__(self):
         old_dict = self.__dict__
         for key in self.__dict__.keys():
@@ -79,7 +81,7 @@ if __name__ == "__main__":
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
     specialOptions = {}
-    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: user, xml, dayspassed) ", setSpecialOption )
+    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: user, xml, dayspassed, logging, JobID) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')
     Script.parseCommandLine()
@@ -90,101 +92,89 @@ if __name__ == "__main__":
     # use stored certificates
     from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
     from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
-    proxy = None
-    op = Operations()
-    #TODO: replace glast.org with VO-agnostic statement
-    shifter = op.getValue("Pipeline/Shifter","/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865")
-    shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
-    result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
-    if not result['OK']:
-        gLogger.error(result['Message'])
-        gLogger.error("No valid proxy found.")
-        dexit(1)
-    proxy = result[ 'Value' ]
-    os.environ['X509_USER_PROXY'] = proxy
-    gLogger.info("using proxy %s"%proxy)
-    #sys.exit()
     do_xml = False
     
     user = os.getenv("USER")
-
+    doLogging = False
     if specialOptions.has_key("xml"):
         do_xml = specialOptions["xml"]
     if specialOptions.has_key("user"):
         user = specialOptions["user"]
+    if specialOptions.has_key("logging"):
+        doLogging = specialOptions["logging"]
     if do_xml:
         xmlfile = xdom.parse(StringIO.StringIO('<?xml version="1.0" ?><joblist/>'))
         firstChild = xmlfile.firstChild
-    
     d = Dirac()
     w = RPCClient("WorkloadManagement/JobMonitoring")
-    my_dict = {}
-    #my_dict['Status']=['Done','Completed','Stalled','Failed','Killed','Waiting','Running','Checking']
-    my_dict['Owner']=[user]
-    if specialOptions.has_key("dayspassed"):
-        delay = int(specialOptions["dayspassed"])
-    else:
-        delay = 3
-    delTime = str( Time.dateTime() - delay * Time.day )
-    res = w.getJobs(my_dict,delTime)
+    if not specialOptions.has_key("JobID"):
+        my_dict = {}
+        #my_dict['Status']=['Matched','Staging','Completed','Done','Failed','Rescheduled','Stalled','Waiting','Running','Checking'] # monitor all states
+        my_dict['Owner']=[user]
+        local_time = datetime.datetime.utcnow()
+        timedelta = local_time-datetime.timedelta(seconds=86400)
+        if specialOptions.has_key("dayspassed"):
+            timedelta = local_time-datetime.timedelta(seconds=float(specialOptions["dayspassed"])*3600)
+        res = w.getJobs(my_dict,timedelta.strftime( '%Y-%m-%d %H:%M:%S' ))
     
-    if not res['OK']:
-        gLogger.info(res["Message"])
-        gLogger.error("Could not get list of running jobs.")
-        dexit(1)
-
-    job_list = res['Value']
-
+        if not res['OK']:
+            gLogger.error("Could not get list of running jobs.",res['Message'])
+            dexit(1)
+        
+        job_list = res['Value']
+    else:
+        job_list = specialOptions["JobID"].split(",")
+        doLogging = True
     #for j in job_list:
     res = d.status(job_list)   
-
+    
     if not res['OK']:
-        gLogger.error(res['Message'])
-        gLogger.error("Could not get status of job_list")
+        gLogger.error("Could not get status of job_list,",res['Message'])
         dexit(1)
-
+    
     status = res['Value']
-    statuses = []
+    # get sites info
+    sites = None
+    res = w.getJobsSites(job_list)
+    if not res['OK']:
+        gLogger.error("Could not get sites;",res['Message'])
+    else:
+        sites = res['Value']
+    
     if not do_xml:
         print('# ID\thostname\tStatus\tSubmitted\tStarted\tEnded\tCPUtime\tMemory')
     for j in job_list:
         status_j=status[int(j)]
-        res = w.getJobParameters(int(j))
-        if not res['OK']:
-            gLogger.error(res['Message'])
-            gLogger.error("Could not get Job Parameters")
-            dexit(1)
-        status_j.update(res['Value'])
-        res = w.getJobLoggingInfo(int(j))
-        #print res
-        if not res['OK']:
-            gLogger.error(res['Message'])
-            gLogger.error("Could not get JobLoggingInfo")
-            dexit(1)
-        logs = res['Value']
-        logging_obj = []
-        for l in logs:
-            logging_obj.append(logging(l))
-        #print logging_obj[0].__dict__
-        #print logging_obj[-1].__dict__
-        logging_info = {'Submitted': logging_obj[0].time, 'Started': None, 'Ended': None, 'JobID': j}
-        for l in logging_obj:
-            if l.major_status == 'Application':
-                logging_info['Started']=l.time
-        if status_j['Status'] == 'Done':
-            logging_info['Ended']=logging_obj[-1].time
-        status_j.update(logging_info)
+        if doLogging:
+            res = w.getJobParameters(int(j))
+            if not res['OK']:
+                gLogger.error("Could not get Job Parameters;",res["Message"])
+                dexit(1)
+            status_j.update(res['Value'])
+            res = w.getJobLoggingInfo(int(j))
+            #print res
+            if not res['OK']:
+                gLogger.error("Could not get JobLoggingInfo;",res['Message'])
+                dexit(1)
+            logs = res['Value']
+            logging_obj = []
+            for l in logs:
+                logging_obj.append(logging(l))
+            logging_info = {'Submitted': logging_obj[0].time, 'Started': None, 'Ended': None, 'JobID': j}
+            for l in logging_obj:
+                if l.major_status == 'Application':
+                    logging_info['Started']=l.time
+            if status_j['Status'] == 'Done':
+                logging_info['Ended']=logging_obj[-1].time
+            status_j.update(logging_info)
         new_stat = internalstatus(j,status_j)
+        if int(j) in sites:
+            new_stat.setSite(sites[int(j)]['Site'])
         #print new_stat._toxml().toprettyxml()
         if do_xml:
             firstChild.appendChild(new_stat._toxml())
         else:
             print(new_stat())
-        #statuses.append(status_j)
-        #print new_stat.mydict.values()#_toxml()
-    #print statuses
-
-
     # TODO:
         # pretty print & parse in java
     if do_xml:
