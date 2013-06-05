@@ -136,7 +136,7 @@ class SoftwareTagCli(cmd.Cmd):
                 print "Error, you need a Site name"
                 print self.do_reset.__doc__
                 return
-            res = self.client.updateStatus(tag='', site=argss[0], status = 'New')
+            res = self.client.updateStatus('', argss[0], 'New')
             if not res['OK']:
               print res['Message']
               return
