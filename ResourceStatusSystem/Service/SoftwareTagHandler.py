@@ -38,7 +38,7 @@ class SoftwareTagHandler(RequestHandler):
     return glastdb.addTagAtSite( tag, site )
   
   types_getTagsWithStatus = [StringTypes]
-  def export_getTagsWithStatus(self, status, olderthan):
+  def export_getTagsWithStatus(self, status, olderthan= None):
     """ Get all tags:celist that have the given status. Can select with olderthan
     in seconds
     """

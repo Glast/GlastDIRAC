@@ -158,7 +158,7 @@ class GlastAdditionalInfoDB ( DB ):
     if olderthan:
       import datetime
       older= (datetime.datetime.utcnow() - datetime.timedelta( seconds = olderthan ) ).strftime( '%Y-%m-%d %H:%M:%S' )
-    res = self.getFields('Software_Tag', ['Software_Tag','CEName'], 
+    res = self.getFields('SoftwareTags_has_Sites', ['Software_Tag','CEName'], 
                          conDict, older=older, 
                          conn = self.__getConnection( connection ))
     if not res['OK']:
