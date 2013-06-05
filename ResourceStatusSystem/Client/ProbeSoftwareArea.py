@@ -25,7 +25,7 @@ def ProbeSoftwareArea():
   if not ce:
     return S_ERROR("CE undefined, cannot proceed")
   
-  from GlastDIRAC.SoftwareTagSystem.Client.SoftwareTagClient import SoftwareTagClient
+  from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient import SoftwareTagClient
   swtc = SoftwareTagClient()
 
   if not 'VO_GLAST_ORG_SW_DIR' in os.environ:

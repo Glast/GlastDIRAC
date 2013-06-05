@@ -3,7 +3,7 @@ software monitoring jobs
 """
 from DIRAC.Core.Base.AgentModule                         import AgentModule
 from DIRAC import S_OK
-from GlastDIRAC.SoftwareTagSystem.Client.SoftwareTagClient import SoftwareTagClient
+from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient import SoftwareTagClient
 
 class SoftwareMonitorAgent(AgentModule):
   """ This agent picks up "New" tags and submits jobs and those that

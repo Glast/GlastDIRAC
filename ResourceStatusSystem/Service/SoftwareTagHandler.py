@@ -5,7 +5,7 @@ Service code for GLAST stuff
 __RCSID__ = " $Id: $ "
 
 from DIRAC.Core.DISET.RequestHandler                    import RequestHandler
-from GlastDIRAC.SoftwareTagSystem.DB.GlastAdditionnalInfoDB import GlastAdditionalInfoDB #Fix path
+from GlastDIRAC.ResourceStatusSystem.DB.GlastAdditionnalInfoDB import GlastAdditionalInfoDB #Fix path
 from DIRAC import S_OK
 from types import StringTypes
 
@@ -74,4 +74,3 @@ class SoftwareTagHandler(RequestHandler):
     """ Dump the DB for a given field.
     """
     return glastdb.getEntriesFromField(field)
-   

@@ -1,6 +1,6 @@
 #!/bin/env python
 import cmd, sys
-from GlastDIRAC.SoftwareTagSystem.Client import SoftwareTagClient
+from GlastDIRAC.ResourceStatusSystem.Client import SoftwareTagClient
 
 class SoftwareTagCli(cmd.Cmd):
     def __init__(self):

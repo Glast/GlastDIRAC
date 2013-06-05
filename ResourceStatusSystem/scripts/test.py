@@ -6,7 +6,7 @@ if __name__=="__main__":
   
   from DIRAC import gLogger, exit as dexit
   
-  from GlastDIRAC.SoftwareTagSystem.Client.SoftwareTagClient import SoftwareTagClient
+  from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient import SoftwareTagClient
   from DIRAC.ConfigurationSystem.Client.Helpers.Resources                import getQueues
 
   sw = SoftwareTagClient()
