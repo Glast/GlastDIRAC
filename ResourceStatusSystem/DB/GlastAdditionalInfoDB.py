@@ -67,13 +67,20 @@ class GlastAdditionalInfoDB ( DB ):
   def __getCESforSite(self, site):
     """ As the name suggests, get all the CEs for a given site
     """
-    res = getQueues(siteList = [site], community = self.vo)
+    slist = None
+    if site !='ALL':
+      slist = [site]
+    res = getQueues(siteList = slist, community = self.vo)
     if not res['OK']:
         return S_ERROR("Could not get CEs for site")
     if not res['Value']:
         return S_ERROR("No CEs for site %s" % site)
-    
-    ces = res['Value'][site].keys()
+    ces  =[]
+    for key, items in res['Value'].items():
+        if site !='ALL':
+            if key != site:
+                continue
+        ces.extend(items.keys())
     if not ces:
         return S_ERROR("No CEs for site %s" % site)
     return S_OK(ces)
