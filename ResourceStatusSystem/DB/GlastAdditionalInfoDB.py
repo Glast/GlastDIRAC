@@ -214,6 +214,8 @@ class GlastAdditionalInfoDB ( DB ):
     res = self.__getCESforSite(site)
     if not res['OK']:
         return res
+    successful = []
+    failed ={} 
     for ce in res['Value']:
         res = self._checkProperty("CEName", ce, self.__getConnection( connection ))
         if not res['OK']:
@@ -224,7 +226,11 @@ class GlastAdditionalInfoDB ( DB ):
                                 ['Removed', 'UTC_TIMESTAMP()'],
                                 {"CEName":ce, "Software_Tag":tag},
                                 conn = self.__getConnection( connection ))
-    return S_ERROR()
+        if res['OK']:
+            successful.append(ce)
+        else:
+            failed.append(ce)
+    return S_OK({"Successful":successful, "Failed":failed})
   
   def cleanTagAtSite(self, tag, site, connection = False):
     """ Remove the relation between tag and Site. Should be called only once
