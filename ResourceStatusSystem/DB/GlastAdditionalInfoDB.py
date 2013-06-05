@@ -200,6 +200,7 @@ class GlastAdditionalInfoDB ( DB ):
                                     conn = self.__getConnection( connection ))
             if not res['OK']:
                 self.log.error("Failed inserting new row:", res['Message'])
+                continue
             if not tag in inserted:
                 inserted[tag] = []    
             inserted[tag].append(ce)  
