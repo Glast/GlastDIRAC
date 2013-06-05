@@ -91,7 +91,9 @@ class SoftwareTagCli(cmd.Cmd):
                     errorcount+=1
                 else:
                     tags+=res['Value']
-            return tags
+            print "Found the following tags:"
+            for tag in tags:
+                print tag
         
         elif option == "site":
             tag = args[0]
@@ -100,9 +102,12 @@ class SoftwareTagCli(cmd.Cmd):
                 status = argss[1]
             res = self.client.getSitesForTag(tag,status=status)
             if not res['OK']:
-                print "Failed to get tags for site %s; %s"%(site,res['Message'])
+                print "Failed to get sites for tag %s; %s"%(tag,res['Message'])
             else:
-                return res['Value']
+                sites = res['Value']
+                print "Found the following sites:"
+                for site in sites:
+                    print site
         
         elif option == "all":
             raise NotImplementedError
@@ -131,7 +136,13 @@ class SoftwareTagCli(cmd.Cmd):
                 print "Error, you need a Site name"
                 print self.do_reset.__doc__
                 return
-            res = self.client.updateStatus(tag='', site=argss[0], status = 'New')
+            res = self.client.updateStatus('', argss[0], 'New')
+            if not res['OK']:
+              print res['Message']
+              return
+            else:
+              print "Reset OK"
+              return
         else:
             print "reset %s not implemented" % option
             return
@@ -146,5 +157,7 @@ class SoftwareTagCli(cmd.Cmd):
         sys.exit(0)
     
 if __name__=="__main__":
+    from DIRAC.Core.Base import Script
+    Script.parseCommandLine()
     cli = SoftwareTagCli()
     cli.cmdloop()  
