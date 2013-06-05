@@ -113,7 +113,7 @@ class GlastAdditionalInfoDB ( DB ):
                          conn = self.__getConnection( connection ))
     if not res['OK']:
         return res
-    if not res['Value'][0][0]: #(because if no site is found, this returns ((,))
+    if not res['Value']: #(because if no site is found, this returns ((,))
         return S_ERROR("No site for this tag/status was found")
       
     ces = [row[0] for row in res['Value']]
