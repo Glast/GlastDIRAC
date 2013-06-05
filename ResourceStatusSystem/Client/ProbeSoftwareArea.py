@@ -65,8 +65,10 @@ def ProbeSoftwareArea():
     if not res['OK']:
       gLogger.error("Failed finding relation between directory and Tag")
       continue
-    
-    res = swtc.updateCEStatus(res['Value'], ce, 'Valid')
+    tag = res['Value']
+    gLogger.notice("Found tag in SW area:", tag)
+
+    res = swtc.updateCEStatus(tag, ce, 'Valid')
     if not res['OK']:
       gLogger.error("Failed to report back: %s" %res['Message'])
       message = res['Message']
