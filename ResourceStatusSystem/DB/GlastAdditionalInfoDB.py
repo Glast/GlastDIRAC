@@ -223,30 +223,8 @@ class GlastAdditionalInfoDB ( DB ):
   def removeTagAtSite(self, tag, site, connection = False):
     """ Mark the tag at site as Removed. This allows to know that the tag is maybe still there
     """
-    res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
-    if not res['OK']:
-        gLogger.error("Tag not found:", res['Message'])
-        return S_ERROR("Tag was not found")
-    res = self.__getCESforSite(site)
-    if not res['OK']:
-        return res
-    successful = []
-    failed ={} 
-    for ce in res['Value']:
-        res = self._checkProperty("CEName", ce, self.__getConnection( connection ))
-        if not res['OK']:
-            gLogger.error("CE not in DB!", res['Message'])
-            continue
-        res = self.updateFields("SoftwareTags_has_Sites", 
-                                ['Status', 'LastUpdateTime'], 
-                                ['Removed', 'UTC_TIMESTAMP()'],
-                                {"CEName":ce, "Software_Tag":tag},
-                                conn = self.__getConnection( connection ))
-        if res['OK']:
-            successful.append(ce)
-        else:
-            failed.append(ce)
-    return S_OK({"Successful":successful, "Failed":failed})
+    
+    return self.updateStatus(tag, site, 'Removed', connection)
   
   def cleanTagAtSite(self, tag, site, connection = False):
     """ Remove the relation between tag and Site. Should be called only once
@@ -278,22 +256,28 @@ class GlastAdditionalInfoDB ( DB ):
     return S_OK({"Successful":successful, "Failed":failed})
   
   def updateStatus(self, tag, site, status, connection = False):
-      """ to interact with the status field """
+      """ To interact with the status field """
       if not status in self.tag_statuses:
           return S_ERROR("Status %s undefined." % status)
+        
       if status == 'Installing' :
           return S_ERROR("Transition to Installing does not make sense for this method.")
+      condDict = {}
+      if tag:
+        res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
+        if not res['OK']:
+            gLogger.error("Tag not found:", res['Message'])
+            return S_ERROR("Tag was not found")
+        condDict['Software_Tag'] = tag
        
       res = self.__getCESforSite(site)
       if not res['OK']:
           return res
       updatefields = ['Status', 'LastUpdateTime']
-      updatestatus = [status, 'UTC_TIMESTAMP()']        
+      updatestatus = [status, 'UTC_TIMESTAMP()']
+      successful = []
+      failed = []
       for ce in res['Value']:
-          condDict = {}
-          if tag:
-              condDict['Software_Tag'] = tag
-
           condDict['CEName'] = ce
           res = self.updateFields("SoftwareTags_has_Sites", 
                                   updatefields,
@@ -301,8 +285,11 @@ class GlastAdditionalInfoDB ( DB ):
                                   condDict, 
                                   conn = self.__getConnection( connection ))
           if not res['OK']:
-            return S_ERROR("Error updating Status")
-      return S_OK()
+            failed.append(ce)
+          else:
+            successful.append(ce)
+             
+      return S_OK({'Successful':successful, 'Failed':failed})
 
   def updateCEStatus(self, tag, ce, status, connection = False):
     """ Update the tags at CE relations. Usually through the Agent of the jobs
