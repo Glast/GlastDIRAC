@@ -1,6 +1,7 @@
 #!/bin/env python
 import cmd, sys
 from GlastDIRAC.ResourceStatusSystem.Client import SoftwareTagClient
+from DIRAC.Core.Utilities import PromptUser
 
 class SoftwareTagCli(cmd.Cmd):
     def __init__(self):
@@ -120,34 +121,65 @@ class SoftwareTagCli(cmd.Cmd):
             print "Found errors, cannot continue"
             return
           
-    def do_reset(self, args):
-        """ Reset site-tags relations statuses to New
-        
-           >>> reset site LCG.LAL.fr
+    def do_forcestatus(selfs,args):
+        """ update status of tag, site or both
+            *** USE WITH ABSOLUTE CARE!!! ***
+            forcestatus tag <tag> <status> [<site>] : the entire tag is set for all sites, site is optional.
+            forcestatus site <site> <status> : all tags at the site are updated 
+            
+            status can only be Valid, Bad, and Removed
+             
         """
         argss = args.split()
         if (len(argss)==0):
-            print self.do_reset.__doc__
+            print self.do_forcestatus.__doc__
             return
         option = argss[0]
         del argss[0]
-        if option == 'site':
-            if not argss[0]:
-                print "Error, you need a Site name"
-                print self.do_reset.__doc__
-                return
-            res = self.client.updateStatus('', argss[0], 'New')
-            if not res['OK']:
-              print res['Message']
-              return
-            else:
-              print "Reset OK"
-              return
+        res = tag = site = status = None
+        if option == "site":
+            if len(argss)<1:
+                print self.do_forcestatus.__doc__
+            tag = ""
+            site = argss[0]
+            status = argss[1]
+        elif option == "tag":
+            if len(argss)<1:
+                print self.do_forcestatus.__doc__
+            site = "ALL"
+            tag = argss[0]
+            status = argss[1]
+            if len(argss)==3:
+                site = argss[-1]
         else:
-            print "reset %s not implemented" % option
+            print "ERROR parsing command"
+            print self.do_forcestatus.__doc__
             return
+        if status not in ['Bad','New','Valid']:
+            print "ERROR invalid status"
+            print self.do_forcestatus.__doc__
+            return
+        if status == 'New' and tag == "":
+            if site == "ALL":
+                print "ERROR bad boy, you should never reset the entire DB!!"
+                return
+            else:
+                print 'Resetting all tags at site %s'%site
+        print "Force update to status=%s:\nsites=%s\ntags=%s "%(status,site,tag)
+        res = PromptUser.promptUser("Are you sure?!", choices=['y','n'], default='n')
+        if not res['OK']:
+            return
+        elif res['Value'] != 'y':
+            return
+        res = self.client.updateStatus(tag,site,status)
+        if not res['OK']:
+            print 'Message: %s'%res['Message']
+        elif res['Value']['Failed']:
+            print 'Failed to update %s'%res['Value']['Failed']
+        else:
+            print 'Successfully updated %i CEs'%len(res['Value']['Successful'])
         return
-      
+        
     def do_quit(self,args):
         """ quit """
         sys.exit(0)
