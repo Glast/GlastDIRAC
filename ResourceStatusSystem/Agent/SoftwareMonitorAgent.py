@@ -82,12 +82,17 @@ class SoftwareMonitorAgent(AgentModule):
     d = Dirac()
     from DIRAC.Interfaces.API.Job import Job
     
+    from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
+    
+    ops = Operations()
+    scriptname = ops.getValue("ResourceStatus/SofwareManagementScript","ProbeSoftwareArea.py")
+    
     j = Job()
     j.setDestinationCE(ce)
     j.setCPUTime(1000)
     j.setName("Probe %s" % ce)
     j.setJobGroup("SoftwareProbe")
-    j.setExecutable("$DIRAC/GlastDIRAC/SoftwareTagSystem/Client/ProbeSoftwareArea.py", logFile='SoftwareProbe.log')
+    j.setExecutable("$DIRAC/GlastDIRAC/ResourceStatusSystem/Client/%s" % scriptname, logFile='SoftwareProbe.log')
     j.setOutputSandbox('*.log')
     res = d.submit(j)
     if not res['OK']:
