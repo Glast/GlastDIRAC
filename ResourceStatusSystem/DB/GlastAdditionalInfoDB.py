@@ -300,6 +300,7 @@ class GlastAdditionalInfoDB ( DB ):
                             updatefields,
                             updatestatus, 
                             conn = self.__getConnection( connection ))
+    return res
 
   def getEntriesFromField(self, field = None, connection = False):
       """ Get all entries for a given field: allows DB dump
