@@ -1,3 +1,12 @@
+[v1r1p3]
+
+*SoftwareTagSystem
+CHANGE: SoftwareTagSystem removed
+*ResourceStatusSystem
+NEW: replaces old SoftwareTagSystem
+*All
+CHANGE: Minor changes and rewrites. 
+
 [v1r1p2]
 
 *All
