@@ -23,7 +23,7 @@ class GlastAdditionalInfoDB ( DB ):
     self._createTables( { "SoftwareTags_has_Sites" :{"Fields":{"idRelation":"INT NOT NULL AUTO_INCREMENT",
                                                                "CEName":"VARCHAR(45) NOT NULL",
                                                                "Status":"ENUM('New','Installing','Valid','Bad','Removed') DEFAULT 'New'",
-                                                               "Software_Tag":"VARCHAR(60) NOT NULL",
+                                                               "Software_Tag":"VARCHAR(255) NOT NULL",
                                                                "LastUpdateTime":"DATETIME"},
                                                      "PrimaryKey" : ['idRelation'],
                                                      'Indexes' : { "Index":["idRelation","Software_Tag","CEName", 'Status']}
@@ -259,7 +259,8 @@ class GlastAdditionalInfoDB ( DB ):
       """ To interact with the status field """
       if not status in self.tag_statuses:
           return S_ERROR("Status %s undefined." % status)
-        
+      if not site:
+          return S_ERROR("Site MUST be specified, even if 'ALL'")  
       if status == 'Installing' :
           return S_ERROR("Transition to Installing does not make sense for this method.")
       condDict = {}
