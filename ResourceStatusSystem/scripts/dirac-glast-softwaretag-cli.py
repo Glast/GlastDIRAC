@@ -97,7 +97,7 @@ class SoftwareTagCli(cmd.Cmd):
                 print tag
         
         elif option == "site":
-            tag = args[0]
+            tag = argss[0]
             status = 'Valid'
             if len(argss)>1:
                 status = argss[1]
@@ -121,13 +121,13 @@ class SoftwareTagCli(cmd.Cmd):
             print "Found errors, cannot continue"
             return
           
-    def do_forcestatus(selfs,args):
+    def do_forcestatus(self,args):
         """ update status of tag, site or both
             *** USE WITH ABSOLUTE CARE!!! ***
             forcestatus tag <tag> <status> [<site>] : the entire tag is set for all sites, site is optional.
             forcestatus site <site> <status> : all tags at the site are updated 
             
-            status can only be Valid, Bad, and Removed
+            status can only be Valid, Bad, and New
              
         """
         argss = args.split()
