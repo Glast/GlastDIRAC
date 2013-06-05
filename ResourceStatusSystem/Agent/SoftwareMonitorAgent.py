@@ -26,7 +26,11 @@ class SoftwareMonitorAgent(AgentModule):
       
     self.delay = self.am_getOption("Delay", 86400)
     self.log.info("Will reset to 'New' the tasks that have been 'Probing' for %s seconds" % self.delay)
+
+    self.script = self.am_getOption("SoftwareManagementScript", "ProbeSoftwareArea.py")
+    
     self.am_setOption( 'shifterProxy', 'SoftwareManager' ) 
+    
     #Needs to be able to submit job for that VO
     
     return S_OK()
@@ -85,7 +89,7 @@ class SoftwareMonitorAgent(AgentModule):
     from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
     
     ops = Operations()
-    scriptname = ops.getValue("ResourceStatus/SofwareManagementScript","ProbeSoftwareArea.py")
+    scriptname = ops.getValue("ResourceStatus/SofwareManagementScript", self.script)
     
     j = Job()
     j.setDestinationCE(ce)
