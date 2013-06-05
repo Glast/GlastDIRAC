@@ -115,7 +115,7 @@ class GlastAdditionalInfoDB ( DB ):
     if not res['OK']:
         return res
     if not res['Value']: #(because if no site is found, this returns ((,))
-        return S_ERROR("No site for this tag/status was found")
+        return S_ERROR("No site for this tag %s with status %s was found" %(tag, status))
       
     ces = [row[0] for row in res['Value']]
     res = self.__getSiteForCEs(ces)
@@ -140,8 +140,12 @@ class GlastAdditionalInfoDB ( DB ):
             continue
 
         res = self.getFields("SoftwareTags_has_Sites", ["Software_Tag"], 
-                             {"CEName": ce}, {"Status":status}, 
+                             {"CEName": ce, "Status":status}, 
                              conn = self.__getConnection( connection ))
+        if not res['OK']:
+          gLogger.error("Issue getting info", res['Message'])
+          continue
+        
         for row in res['Value']:
             tag = row[0]
             if not tag in tags:
@@ -310,14 +314,19 @@ class GlastAdditionalInfoDB ( DB ):
         if not res['OK']:
             gLogger.error("Tag not found:",res['Message'])
             return S_ERROR("Tag was not found")
-        updatefields = ['CEName','Software_Tag','Status', 'LastUpdateTime']
-        updatestatus = [ce, tag, status, 'UTC_TIMESTAMP()']
+        updatefields = ['Status', 'LastUpdateTime']
+        updatestatus = [status, 'UTC_TIMESTAMP()']
     else:
-        updatefields = ['CEName','Status', 'LastUpdateTime']
-        updatestatus = [ce, status, 'UTC_TIMESTAMP()']
+        updatefields = ['Status', 'LastUpdateTime']
+        updatestatus = [status, 'UTC_TIMESTAMP()']
+    
+    condDict = {"CEName":ce}    
+    if tag:
+      condDict["Software_Tag"]=tag
     res = self.updateFields("SoftwareTags_has_Sites", 
                             updatefields,
-                            updatestatus, 
+                            updatestatus,
+                            condDict,
                             conn = self.__getConnection( connection ))
     return res
 
