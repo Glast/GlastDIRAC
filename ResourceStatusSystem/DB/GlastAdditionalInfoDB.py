@@ -230,6 +230,8 @@ class GlastAdditionalInfoDB ( DB ):
     """ Remove the relation between tag and Site. Should be called only once
     cleanup is really done.
     """
+    if not tag:
+      return S_ERROR("Tag MUST be specified")
     res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
     if not res['OK']:
         gLogger.error("Tag not found", res['Message'])
