@@ -88,7 +88,7 @@ class GlastAdditionalInfoDB ( DB ):
     sitedict = res['Value']
     
     final_sdict = {}
-    for site, s_ces in sitedict:
+    for site, s_ces in sitedict.items():
         for ce in ces:
             if ce in s_ces:
                 if not site in final_sdict:
