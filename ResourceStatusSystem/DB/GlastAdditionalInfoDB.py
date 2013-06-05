@@ -243,6 +243,8 @@ class GlastAdditionalInfoDB ( DB ):
     res = self.__getCESforSite(site)
     if not res['OK']:
         return res
+    successful = []
+    failed = []
     for ce in res['Value']:
         res = self._checkProperty("CEName", ce, self.__getConnection( connection ))
         if not res['OK']:
@@ -253,7 +255,11 @@ class GlastAdditionalInfoDB ( DB ):
         res = self.deleteEntries("SoftwareTags_has_Sites",
                                  {"Software_Tag":tag, "CEName": ce}, 
                                  conn = self.__getConnection( connection ))
-    return res
+        if not res['OK']:
+            failed.append(ce)
+        else:
+            successful.append(ce)
+    return S_OK({"Successful":successful, "Failed":failed})
   
   def updateStatus(self, tag, site, status, connection = False):
       """ to interact with the status field """
