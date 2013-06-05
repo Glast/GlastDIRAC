@@ -259,7 +259,8 @@ class GlastAdditionalInfoDB ( DB ):
       """ To interact with the status field """
       if not status in self.tag_statuses:
           return S_ERROR("Status %s undefined." % status)
-        
+      if not site:
+          return S_ERROR("Site MUST be specified, even if 'ALL'")  
       if status == 'Installing' :
           return S_ERROR("Transition to Installing does not make sense for this method.")
       condDict = {}
