@@ -107,6 +107,7 @@ class GlastAdditionalInfoDB ( DB ):
     
     res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
     if not res['OK']:
+        gLogger.error("Tag undefined", res['Message'])
         return S_ERROR("Tag was not found")
     res = self.getFields("SoftwareTags_has_Sites", ["CEName"], 
                          {"Software_Tag": tag, "Status":status}, 
@@ -135,7 +136,7 @@ class GlastAdditionalInfoDB ( DB ):
     for ce in res['Value']:
         res = self._checkProperty("CEName", ce, self.__getConnection( connection ))
         if not res['OK']:
-            gLogger.error("CE not in the DB:", ce)
+            gLogger.error("CE not in the DB:", res['Message'])
             continue
 
         res = self.getFields("SoftwareTags_has_Sites", ["Software_Tag"], 
@@ -156,12 +157,13 @@ class GlastAdditionalInfoDB ( DB ):
     conDict = {'Status':status}
     older = None
     if olderthan:
-      import datetime
-      older= (datetime.datetime.utcnow() - datetime.timedelta( seconds = olderthan ) ).strftime( '%Y-%m-%d %H:%M:%S' )
+        import datetime
+        older= (datetime.datetime.utcnow() - datetime.timedelta( seconds = olderthan ) ).strftime( '%Y-%m-%d %H:%M:%S' )
     res = self.getFields('SoftwareTags_has_Sites', ['Software_Tag','CEName'], 
                          conDict, older=older, 
                          conn = self.__getConnection( connection ))
     if not res['OK']:
+        gLogger.error("No tag with status %s:" % status, res['Message'])
         return res
     tagsdict = {}
     for row in res['Value']:
@@ -187,6 +189,7 @@ class GlastAdditionalInfoDB ( DB ):
     res = self.getFields('SoftwareTags_has_Sites', ['Status', 'CEName'], {'Software_Tag':tag,'CEName':ces},  
                            conn = self.__getConnection( connection ))
     if not res['OK']:
+        gLogger.error("Failed checking tag at site", res['Message'])
         return S_ERROR("Failed looking up existence of tag at site")
 
     ces_in_db = [row[1] for row in res['Value']]
@@ -211,6 +214,7 @@ class GlastAdditionalInfoDB ( DB ):
     """
     res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
     if not res['OK']:
+        gLogger.error("Tag not found:", res['Message'])
         return S_ERROR("Tag was not found")
     res = self.__getCESforSite(site)
     if not res['OK']:
@@ -220,8 +224,8 @@ class GlastAdditionalInfoDB ( DB ):
     for ce in res['Value']:
         res = self._checkProperty("CEName", ce, self.__getConnection( connection ))
         if not res['OK']:
-          gLogger.error("CE not in DB!")
-          continue
+            gLogger.error("CE not in DB!", res['Message'])
+            continue
         res = self.updateFields("SoftwareTags_has_Sites", 
                                 ['Status', 'LastUpdateTime'], 
                                 ['Removed', 'UTC_TIMESTAMP()'],
@@ -239,6 +243,7 @@ class GlastAdditionalInfoDB ( DB ):
     """
     res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
     if not res['OK']:
+        gLogger.error("Tag not found", res['Message'])
         return S_ERROR("Tag was not found")
     res = self.__getCESforSite(site)
     if not res['OK']:
@@ -248,7 +253,7 @@ class GlastAdditionalInfoDB ( DB ):
     for ce in res['Value']:
         res = self._checkProperty("CEName", ce, self.__getConnection( connection ))
         if not res['OK']:
-            gLogger.error("CE not in DB!")
+            gLogger.error("CE not in DB!", res['Message'])
             continue
     
         
@@ -295,7 +300,7 @@ class GlastAdditionalInfoDB ( DB ):
       
     res = self._checkProperty("CEName", ce, self.__getConnection( connection ))
     if not res['OK']:
-      gLogger.error("CE not in DB!")
+      gLogger.error("CE not in DB!", res['Message'])
       return S_ERROR("CE not in DB!")
     
     updatefields = []
@@ -303,6 +308,7 @@ class GlastAdditionalInfoDB ( DB ):
     if tag:
         res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
         if not res['OK']:
+            gLogger.error("Tag not found:",res['Message'])
             return S_ERROR("Tag was not found")
         updatefields = ['CEName','Software_Tag','Status', 'LastUpdateTime']
         updatestatus = [ce, tag, status, 'UTC_TIMESTAMP()']
