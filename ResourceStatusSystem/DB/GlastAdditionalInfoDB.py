@@ -248,7 +248,7 @@ class GlastAdditionalInfoDB ( DB ):
             gLogger.error("CE not in DB!")
             continue
     
-    
+        
         res = self.deleteEntries("SoftwareTags_has_Sites",
                                  {"Software_Tag":tag, "CEName": ce}, 
                                  conn = self.__getConnection( connection ))
