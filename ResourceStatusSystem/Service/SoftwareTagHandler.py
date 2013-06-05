@@ -5,8 +5,7 @@ Service code for GLAST stuff
 __RCSID__ = " $Id: $ "
 
 from DIRAC.Core.DISET.RequestHandler                    import RequestHandler
-from GlastDIRAC.SoftwareTagSystem.DB.GlastAdditionalInfoDB import GlastAdditionalInfoDB #Fix path
-
+from GlastDIRAC.ResourceStatusSystem.DB.GlastAdditionalInfoDB import GlastAdditionalInfoDB #Fix path
 from DIRAC import S_OK
 from types import StringTypes
 
@@ -20,14 +19,14 @@ def initializeSoftwareTagHandler( ServiceInfo ):
 class SoftwareTagHandler(RequestHandler):
 
   types_getSitesForTag = [StringTypes]
-  def export_getSitesForTag(self, tag, status):
+  def export_getSitesForTag(self, tag, status='Valid'):
     """ Get the sites that have the Tag
     Returns currently the list of CEs
     """
     return glastdb.getSitesForTag(tag, status=status)
   
   types_getTagsAtSite = [StringTypes]
-  def export_getTagsAtSite(self, site, status):
+  def export_getTagsAtSite(self, site, status='Valid'):
     """ Get the list of tags at a given Site. Goes through all CEs of the site
     """
     return glastdb.getTagsAtSite(site, status=status)
@@ -39,7 +38,7 @@ class SoftwareTagHandler(RequestHandler):
     return glastdb.addTagAtSite( tag, site )
   
   types_getTagsWithStatus = [StringTypes]
-  def export_getTagsWithStatus(self, status, olderthan):
+  def export_getTagsWithStatus(self, status, olderthan= None):
     """ Get all tags:celist that have the given status. Can select with olderthan
     in seconds
     """
@@ -75,4 +74,3 @@ class SoftwareTagHandler(RequestHandler):
     """ Dump the DB for a given field.
     """
     return glastdb.getEntriesFromField(field)
-   

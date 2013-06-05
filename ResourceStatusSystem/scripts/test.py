@@ -6,7 +6,7 @@ if __name__=="__main__":
   
   from DIRAC import gLogger, exit as dexit
   
-  from GlastDIRAC.SoftwareTagSystem.Client.SoftwareTagClient import SoftwareTagClient
+  from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient import SoftwareTagClient
   from DIRAC.ConfigurationSystem.Client.Helpers.Resources                import getQueues
 
   sw = SoftwareTagClient()
@@ -70,7 +70,7 @@ if __name__=="__main__":
   #Remove the association tag-site (mark as removed)
   res = sw.removeTagAtSite(mytag,mysite)
   if not res['OK']:
-    gLogger.error(res['Value'])
+    gLogger.error(res['Message'])
   else:
     gLogger.notice("Removed tag from site (still in the DB)")
     
