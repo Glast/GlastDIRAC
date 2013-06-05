@@ -280,17 +280,18 @@ class GlastAdditionalInfoDB ( DB ):
       res = self.__getCESforSite(site)
       if not res['OK']:
           return res
-        
+      updatefields = ['Status', 'LastUpdateTime']
+      updatestatus = [status, 'UTC_TIMESTAMP()']        
       for ce in res['Value']:
+          condDict = {}
           if tag:
-              updatefields = ['CEName','Software_Tag','Status', 'LastUpdateTime']
-              updatestatus = [ce, tag, status, 'UTC_TIMESTAMP()']
-          else:
-              updatefields = ['CEName','Status', 'LastUpdateTime']
-              updatestatus = [ce, status, 'UTC_TIMESTAMP()']
+              condDict['Software_Tag'] = tag
+
+          condDict['CEName'] = ce
           res = self.updateFields("SoftwareTags_has_Sites", 
                                   updatefields,
-                                  updatestatus, 
+                                  updatestatus,
+                                  condDict, 
                                   conn = self.__getConnection( connection ))
           if not res['OK']:
             return S_ERROR("Error updating Status")
@@ -307,22 +308,20 @@ class GlastAdditionalInfoDB ( DB ):
       gLogger.error("CE not in DB!", res['Message'])
       return S_ERROR("CE not in DB!")
     
-    updatefields = []
-    updatestatus = []
+    condDict = {}
     if tag:
         res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
         if not res['OK']:
             gLogger.error("Tag not found:",res['Message'])
             return S_ERROR("Tag was not found")
-        updatefields = ['Status', 'LastUpdateTime']
-        updatestatus = [status, 'UTC_TIMESTAMP()']
-    else:
-        updatefields = ['Status', 'LastUpdateTime']
-        updatestatus = [status, 'UTC_TIMESTAMP()']
-    
+        condDict["Software_Tag"]=tag
+           
     condDict = {"CEName":ce}    
-    if tag:
-      condDict["Software_Tag"]=tag
+
+    updatefields = ['Status', 'LastUpdateTime']
+    updatestatus = [status, 'UTC_TIMESTAMP()']
+    
+
     res = self.updateFields("SoftwareTags_has_Sites", 
                             updatefields,
                             updatestatus,

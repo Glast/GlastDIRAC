@@ -137,6 +137,9 @@ class SoftwareTagCli(cmd.Cmd):
                 print self.do_reset.__doc__
                 return
             res = self.client.updateStatus(tag='', site=argss[0], status = 'New')
+            if not res['OK']:
+              print res['Message']
+              return
         else:
             print "reset %s not implemented" % option
             return
