@@ -140,6 +140,9 @@ class SoftwareTagCli(cmd.Cmd):
             if not res['OK']:
               print res['Message']
               return
+            else:
+              print "Reset OK"
+              return
         else:
             print "reset %s not implemented" % option
             return
