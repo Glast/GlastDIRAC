@@ -70,7 +70,7 @@ if __name__=="__main__":
   #Remove the association tag-site (mark as removed)
   res = sw.removeTagAtSite(mytag,mysite)
   if not res['OK']:
-    gLogger.error(res['Value'])
+    gLogger.error(res['Message'])
   else:
     gLogger.notice("Removed tag from site (still in the DB)")
     

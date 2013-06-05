@@ -19,14 +19,14 @@ def initializeSoftwareTagHandler( ServiceInfo ):
 class SoftwareTagHandler(RequestHandler):
 
   types_getSitesForTag = [StringTypes]
-  def export_getSitesForTag(self, tag, status):
+  def export_getSitesForTag(self, tag, status='Valid'):
     """ Get the sites that have the Tag
     Returns currently the list of CEs
     """
     return glastdb.getSitesForTag(tag, status=status)
   
   types_getTagsAtSite = [StringTypes]
-  def export_getTagsAtSite(self, site, status):
+  def export_getTagsAtSite(self, site, status='Valid'):
     """ Get the list of tags at a given Site. Goes through all CEs of the site
     """
     return glastdb.getTagsAtSite(site, status=status)

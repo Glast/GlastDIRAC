@@ -52,7 +52,7 @@ class GlastAdditionalInfoDB ( DB ):
     """
     connection = self.__getConnection( connection )
     
-    res = self.getFields("SoftwareTags_has_Sites", ItemProperty, 
+    res = self.getFields("SoftwareTags_has_Sites", [ItemProperty], 
                          {ItemProperty : name},
                          conn = connection)#"SELECT Name FROM Sites WHERE Name='%s';" % (site)
     if not res['OK']:
@@ -138,7 +138,7 @@ class GlastAdditionalInfoDB ( DB ):
             gLogger.error("CE not in the DB:", ce)
             continue
 
-        res = self.getFields("SoftwareTags_has_Sites", "Software_Tag", 
+        res = self.getFields("SoftwareTags_has_Sites", ["Software_Tag"], 
                              {"CEName": ce}, {"Status":status}, 
                              conn = self.__getConnection( connection ))
         for row in res['Value']:
