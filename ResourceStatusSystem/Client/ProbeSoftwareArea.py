@@ -50,7 +50,7 @@ def ProbeSoftwareArea():
 
   base_sw_dir = os.environ['VO_GLAST_ORG_SW_DIR']
   
-  gLogger.notice("Found the following software directories:")
+  gLogger.notice("Found the following software directory:", base_sw_dir)
   message = None
   
   directory_list = []  
