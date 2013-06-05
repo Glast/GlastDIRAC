@@ -44,7 +44,7 @@ class SoftwareMonitorAgent(AgentModule):
         if self.submitjobs:
           res = self.submitProbeJobs(ce)
         else:
-          res = self.swtc.updateStatus(tag, ces, 'Valid')
+          res = self.swtc.updateCEStatus(tag, ce, 'Valid')
         
         if not res['OK']:
           self.log.error(res['Message'])
