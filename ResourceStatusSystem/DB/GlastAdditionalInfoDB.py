@@ -22,7 +22,7 @@ class GlastAdditionalInfoDB ( DB ):
     self.fields = ["CEName","Status","Software_Tag"]
     self._createTables( { "SoftwareTags_has_Sites" :{"Fields":{"idRelation":"INT NOT NULL AUTO_INCREMENT",
                                                                "CEName":"VARCHAR(45) NOT NULL",
-                                                               "Status":"ENUM('New','Probing','Valid','Bad','Removed') DEFAULT 'New'",
+                                                               "Status":"ENUM('New','Installing','Valid','Bad','Removed') DEFAULT 'New'",
                                                                "Software_Tag":"VARCHAR(60) NOT NULL",
                                                                "LastUpdateTime":"DATETIME"},
                                                      "PrimaryKey" : ['idRelation'],
@@ -32,7 +32,7 @@ class GlastAdditionalInfoDB ( DB ):
                       )
     self.vo = getVO('glast.org')
     ##tags statuses: 
-    self.tag_statuses = ['New','Probing','Valid','Bad','Removed']
+    self.tag_statuses = ['New','Installing','Valid','Bad','Removed']
     #State machine: New -> Probing -> Valid/Bad -> Removed -> Probing -> etc.    
     
   #####################################################################
@@ -281,8 +281,8 @@ class GlastAdditionalInfoDB ( DB ):
       """ to interact with the status field """
       if not status in self.tag_statuses:
           return S_ERROR("Status %s undefined." % status)
-      if status == 'Probing' :
-          return S_ERROR("Transition to Probing does not make sense for this method.")
+      if status == 'Installing' :
+          return S_ERROR("Transition to Installing does not make sense for this method.")
        
       res = self.__getCESforSite(site)
       if not res['OK']:

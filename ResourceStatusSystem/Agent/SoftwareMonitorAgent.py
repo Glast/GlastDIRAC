@@ -32,7 +32,7 @@ class SoftwareMonitorAgent(AgentModule):
     return S_OK()
   
   def execute(self):
-    """ Get all New tags, mark them as Probing. 
+    """ Get all New tags, mark them as Installing. Old Installing tags are reset to New 
     """
     res = self.swtc.getTagsWithStatus("New")
     if not res['OK']:
@@ -42,7 +42,7 @@ class SoftwareMonitorAgent(AgentModule):
       
     for tag, ces in res['Value'].items():
       for ce in ces:
-        res = self.swtc.updateCEStatus(tag, ce, 'Probing')
+        res = self.swtc.updateCEStatus(tag, ce, 'Installing')
         if not res['OK']:
           self.log.error(res['Message'])
           continue
@@ -57,12 +57,12 @@ class SoftwareMonitorAgent(AgentModule):
           self.log.error(res['Message'])
      
     ##Also, reset to New tags that were in Probing for too long.
-    res = self.swtc.getTagsWithStatus("Probing",olderthan=self.delay)
+    res = self.swtc.getTagsWithStatus("Installing",olderthan=self.delay)
     if not res['OK']:
-      self.log.error("Failed to get old Probing tags")
+      self.log.error("Failed to get old 'Installing' tags")
     else:
       if not res['Value']:
-        self.log.info("No 'Probing' tags to reset")
+        self.log.info("No 'Installing' tags to reset")
         
       for tag, ces in res['Value'].items():
         for ce in ces:
