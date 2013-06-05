@@ -18,7 +18,7 @@ class GlastAdditionalInfoDB ( DB ):
     #self.ops = Operations()
     self.dbname = 'GlastAdditionalInfoDB'
     self.logger = gLogger.getSubLogger('GlastAdditionalInfoDB')
-    DB.__init__( self, self.dbname, 'SoftwareTag/GlastAdditionalInfoDB', maxQueueSize  )
+    DB.__init__( self, self.dbname, 'ResourceStatus/GlastAdditionalInfoDB', maxQueueSize  )
     self.fields = ["CEName","Status","Software_Tag"]
     self._createTables( { "SoftwareTags_has_Sites" :{"Fields":{"idRelation":"INT NOT NULL AUTO_INCREMENT",
                                                                "CEName":"VARCHAR(45) NOT NULL",
