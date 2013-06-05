@@ -1,3 +1,10 @@
+[v1r1p4]
+
+*All
+CHANGE: bugfixes
+*ResourceStatusSystem
+added cleanup in CLI, OPERATOR mode only
+
 [v1r1p3]
 
 *SoftwareTagSystem
