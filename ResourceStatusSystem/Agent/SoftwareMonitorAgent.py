@@ -32,7 +32,9 @@ class SoftwareMonitorAgent(AgentModule):
     res = self.swtc.getTagsWithStatus("New")
     if not res['OK']:
       return res
-    
+    if not res['Value']:
+      self.log.info("No 'New' tags to consider")
+      
     for tag, ces in res['Value'].items():
       for ce in ces:
         res = self.swtc.updateCEStatus(tag, ce, 'Probing')
@@ -54,6 +56,9 @@ class SoftwareMonitorAgent(AgentModule):
     if not res['OK']:
       self.log.error("Failed to get old Probing tags")
     else:
+      if not res['Value']:
+        self.log.info("No 'Probing' tags to reset")
+        
       for tag, ces in res['Value'].items():
         for ce in ces:
           res = self.swtc.updateCEStatus(tag, ce, 'New')
