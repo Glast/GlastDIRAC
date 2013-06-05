@@ -190,6 +190,7 @@ class SoftwareTagCli(cmd.Cmd):
     def do_resettag(self,argss):
         """ forget tag (drop in DB)
             *** USE WITH ABSOLUTE CARE!!! ***
+            *** only used by OPERATORS ***
             resettag tag
         """
         args = argss.split()
