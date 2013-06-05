@@ -29,6 +29,7 @@ class SoftwareTagCli(cmd.Cmd):
                    print "Could not register tag %s at site %s, message %s"%(tag,site,res['Message'])
                    errorcount+=1
                    continue
+               print "Added %s to %i CEs"%(tag,len(res['Value'][tag]))
         else:
             print "ERROR parsing command"
             print self.do_add.__doc__
@@ -126,9 +127,7 @@ class SoftwareTagCli(cmd.Cmd):
             *** USE WITH ABSOLUTE CARE!!! ***
             forcestatus tag <tag> <status> [<site>] : the entire tag is set for all sites, site is optional.
             forcestatus site <site> <status> : all tags at the site are updated 
-            
             status can only be Valid, Bad, and New
-             
         """
         argss = args.split()
         if (len(argss)==0):
@@ -188,6 +187,30 @@ class SoftwareTagCli(cmd.Cmd):
         """ quit """
         sys.exit(0)
     
+    def do_resettag(self,argss):
+        """ forget tag (drop in DB)
+            *** USE WITH ABSOLUTE CARE!!! ***
+            *** only used by OPERATORS ***
+            resettag tag
+        """
+        args = argss.split()
+        if len(args)<1:
+            print self.do_resettag().__doc__
+            return
+        tag = args[0]
+        completed = False
+        ces_removed = 0
+        while not completed:
+            res = self.client.cleanTagAtSite(tag,"ALL")
+            if not res['OK']:
+                print "Failed to reset %s: %s"%(tag,res['Message'])
+            elif res['OK'] and len(res['Value']['Failed'])!=0:
+                print 'Failed to reset tag %s in %i CEs'%(tag,len(res['Value']['Failed']))
+            else:
+                completed = True
+                ces_removed+=len(res['Value']['Successful'])
+        print "Cleaned %s from %i CEs"%(tag,ces_removed)
+        
 if __name__=="__main__":
     from DIRAC.Core.Base import Script
     Script.parseCommandLine()
