@@ -21,7 +21,7 @@ class SoftwareMonitorAgent(AgentModule):
     self.submitjobs = self.am_getOption( 'SubmitJobs', False )
     self.delay = self.am_getOption("Delay", 86400)
     
-    self.am_setOption( 'shifterProxy', 'SiteManager' ) 
+    self.am_setOption( 'shifterProxy', 'SoftwareManager' ) 
     #Needs to be able to submit job for that VO
     
     return S_OK()
