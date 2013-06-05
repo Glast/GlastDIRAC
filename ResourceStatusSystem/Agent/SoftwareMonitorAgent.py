@@ -15,12 +15,17 @@ class SoftwareMonitorAgent(AgentModule):
   def initialize(self):
     """ Initialize the agent.
     """
-    self.am_setOption( "PollingTime", 86400 )
+    self.am_setOption( "PollingTime", 86400 ) #Once a day is enough
     
     self.swtc = SoftwareTagClient()
     self.submitjobs = self.am_getOption( 'SubmitJobs', False )
+    if self.submitjobs:
+      self.log.info("Will submit probe jobs to validate the software tags")
+    else:
+      self.log.info("Will mark as Valid all 'New' tags directly.")
+      
     self.delay = self.am_getOption("Delay", 86400)
-    
+    self.log.info("Will reset to 'New' the tasks that have been 'Probing' for %s seconds" % self.delay)
     self.am_setOption( 'shifterProxy', 'SoftwareManager' ) 
     #Needs to be able to submit job for that VO
     

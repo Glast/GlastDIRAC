@@ -8,11 +8,20 @@ def getMappingTagToDirectory(tag):
   """
   #tags are VO.glast.org-OS/FLAOUR/TAG, and in the SW dir it's the same
   tag = tag.replace("VO.glast.org-","")
-  return S_OK(tag)
+  items = tag.split("/")
+  if len(items)>3:
+    return S_ERROR("Bad tag structure")
+  soft_os = items[0]
+  variant = items[1]
+  package = items[2]
+  version = items[3]
+  directory = os.path.join(["glast/ground/releases",soft_os,variant,package,version])
+  return S_OK(directory)
 
 def getMappingTagFromDirectory(directory):
   """ Returns the tag name given a directory name
   """
+  
   return S_OK("")
 
 def ProbeSoftwareArea():
