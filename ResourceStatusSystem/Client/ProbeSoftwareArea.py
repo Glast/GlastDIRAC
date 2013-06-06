@@ -54,7 +54,7 @@ def ProbeSoftwareArea():
   message = None
   
   directory_list = []  
-  for root, dirnames, files in os.walk(base_sw_dir+"glast/ground/releases"):
+  for root, dirnames, files in os.walk(base_sw_dir+"/glast/ground/releases"):
     if "bin" in dirnames:
       directory_list.append(root)
     
