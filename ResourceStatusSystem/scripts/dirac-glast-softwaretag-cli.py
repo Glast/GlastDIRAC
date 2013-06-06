@@ -115,7 +115,7 @@ class SoftwareTagCli(cmd.Cmd):
             print "Found errors, cannot continue"
             return
     
-    def do_reset(self):
+    def do_reset(self,args):
         """ 
             to reset a tag system-wide use:
             >> forcestatus tag <tag> New ALL
@@ -123,7 +123,8 @@ class SoftwareTagCli(cmd.Cmd):
             >> forcestatus site <site> New
         """
         print self.do_reset.__doc__ 
-
+        reset
+        
     def do_forcestatus(self,args):
         """ update status of tag, site or both
             *** USE WITH ABSOLUTE CARE!!! ***
