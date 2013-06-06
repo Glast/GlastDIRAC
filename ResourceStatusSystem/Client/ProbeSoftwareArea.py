@@ -50,7 +50,7 @@ def ProbeSoftwareArea():
 
   base_sw_dir = os.environ['VO_GLAST_ORG_SW_DIR']
   
-  gLogger.notice("Found the following software directory:", base_sw_dir)
+  gLogger.notice("Found the following software directories:")
   message = None
   
   directory_list = []  
@@ -65,10 +65,8 @@ def ProbeSoftwareArea():
     if not res['OK']:
       gLogger.error("Failed finding relation between directory and Tag")
       continue
-    tag = res['Value']
-    gLogger.notice("Found tag in SW area:", tag)
-
-    res = swtc.updateCEStatus(tag, ce, 'Valid')
+    
+    res = swtc.updateCEStatus(res['Value'], ce, 'Valid')
     if not res['OK']:
       gLogger.error("Failed to report back: %s" %res['Message'])
       message = res['Message']
