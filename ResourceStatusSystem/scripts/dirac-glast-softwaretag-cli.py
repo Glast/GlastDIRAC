@@ -178,7 +178,54 @@ class SoftwareTagCli(cmd.Cmd):
         else:
             print 'Successfully updated %i CEs'%len(res['Value']['Successful'])
         return
-        
+    
+    def do_list(self,argss):
+        """ list tags/sites known to the system 
+            list tags [<status>] :  lists all tags known to the system
+            list sites [<status>]:  lists all sites known to the system 
+                                    where tags with status [<status>] are registered 
+        """
+        args = argss.split()
+        if len(args)<1:
+            print self.do_list().__doc__
+            return
+        option = args[0]
+        _status = 'Valid'
+        del args[0]
+        if len(args)>0:
+            status = args[0]
+        res = self.client.getTagsAtSite("ALL",status=_status)
+        if not res['OK']:
+            print 'ERROR retrieving tags: %s'%res['Message']
+        else:
+            tags = res['Value']
+            if option == "tags":
+                print "Found the following tags:"
+                for tag in tags:
+                    print tag
+                
+            elif option == "sites":
+                sites = []
+                for tag in tags:
+                    res = self.client.getSitesForTag(tag,status=status)
+                    # returns list of CEs
+                    if not res['OK']:
+                        print 'ERROR retrieving sites for tag %s'%tag
+                    else:
+                        sites+=res['Value']
+                # done, need to re-parse CEs to sites
+                if not res['OK']:
+                    print 'ERROR mapping sites to CEs'
+                    return
+                else:
+                    print 'Found the following sites'
+                    for site in sites:
+                        print site
+            else:
+                print "ERROR parsing command"
+                print self.do_get.__doc__
+                return
+             
     def do_quit(self,args):
         """ quit """
         sys.exit(0)
