@@ -71,6 +71,8 @@ def ProbeSoftwareArea():
     if not res['OK']:
       gLogger.error("Failed to report back: %s" %res['Message'])
       message = res['Message']
+    else:
+      gLogger.notice("Marked %s as Valid at %s" % (res['Value'], ce))
   
   if message:
     return S_ERROR(message)
