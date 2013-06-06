@@ -1,5 +1,10 @@
 """ This agent does not do much at first. It's task is eventually to submit and monitor
 software monitoring jobs
+
+created: 04/06/2013
+
+#author: S. Poss (CERN)
+
 """
 from DIRAC.Core.Base.AgentModule                         import AgentModule
 from DIRAC import S_OK
