@@ -114,7 +114,16 @@ class SoftwareTagCli(cmd.Cmd):
         if errorcount!=0:
             print "Found errors, cannot continue"
             return
-          
+    
+    def do_reset(self):
+        """ 
+            to reset a tag system-wide use:
+            >> forcestatus tag <tag> New ALL
+            to reset all tags at a site use:
+            >> forcestatus site <site> New
+        """
+        print self.do_reset.__doc__ 
+
     def do_forcestatus(self,args):
         """ update status of tag, site or both
             *** USE WITH ABSOLUTE CARE!!! ***
@@ -227,29 +236,37 @@ class SoftwareTagCli(cmd.Cmd):
         """ quit """
         sys.exit(0)
     
-    def do_resettag(self,argss):
+    def do_removetagfromdb(self,argss):
         """ forget tag (drop in DB)
             *** USE WITH ABSOLUTE CARE!!! ***
             *** only used by OPERATORS ***
-            resettag tag
+            cleantag tag
         """
         args = argss.split()
         if len(args)<1:
-            print self.do_resettag.__doc__
+            print self.do_removetagfromdb.__doc__
             return
         tag = args[0]
         completed = False
         ces_removed = 0
+        print "Removing tag %s from DB"%tag
+        for i in range(3):
+            # ask 3 times!
+            res = PromptUser.promptUser("Are you REALLY sure?!", choices=['y','n'], default='n')
+            if not res['OK']:
+                return
+            elif res['Value'] != 'y':
+                return
         while not completed:
             res = self.client.cleanTagAtSite(tag,"ALL")
             if not res['OK']:
-                print "Failed to reset %s: %s"%(tag,res['Message'])
+                print "Failed to remove tag %s: %s"%(tag,res['Message'])
             elif res['OK'] and len(res['Value']['Failed'])!=0:
-                print 'Failed to reset tag %s in %i CEs'%(tag,len(res['Value']['Failed']))
+                print 'Failed to remove tag %s in %i CEs'%(tag,len(res['Value']['Failed']))
             else:
                 completed = True
                 ces_removed+=len(res['Value']['Successful'])
-        print "Cleaned %s from %i CEs"%(tag,ces_removed)
+        print "Removed %s from %i CEs"%(tag,ces_removed)
         
 if __name__=="__main__":
     from DIRAC.Core.Base import Script
