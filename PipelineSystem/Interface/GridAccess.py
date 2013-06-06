@@ -1,4 +1,4 @@
-""" Grid Storage Access Library 
+""" Grid Storage Access Library to be used instead of GPL.staging.
 
 @author: V. Rolland (LUPM/IN2P3)
 @author: S. Zimmer (OKC/SU)

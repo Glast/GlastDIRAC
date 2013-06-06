@@ -1,4 +1,11 @@
 #!/bin/env python
+""" Software Tag Interface System 
+
+Created 06/04/2012
+@author: S. Zimmer (OKC/SU)
+
+"""
+
 import cmd, sys
 from GlastDIRAC.ResourceStatusSystem.Client import SoftwareTagClient
 from DIRAC.Core.Utilities import PromptUser

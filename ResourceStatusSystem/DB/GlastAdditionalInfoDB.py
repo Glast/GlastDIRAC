@@ -3,6 +3,9 @@
 ###########################################################################
 
 """ DB for GlastAdditionalInfoDB
+Created 03/2013
+@author: S. Poss (CERN)
+
 """
 __RCSID__ = " $Id: $ "
 

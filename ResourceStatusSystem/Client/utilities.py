@@ -1,7 +1,7 @@
 '''
 Created on Jun 6, 2013
 
-@author: zimmer
+@author: S. Zimmer (OKC/SU)
 '''
 from DIRAC import S_OK, S_ERROR
 from DIRAC.ConfigurationSystem.Client.Helpers.Resources                import getQueues

@@ -1,5 +1,8 @@
 """
 Service code for GLAST stuff
+Created 03/2013
+
+@author: S. Poss (CERN)
 """
 
 __RCSID__ = " $Id: $ "
