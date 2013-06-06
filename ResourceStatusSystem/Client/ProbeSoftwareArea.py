@@ -65,16 +65,20 @@ def ProbeSoftwareArea():
     
 
   for directory in directory_list:
+    gLogger.notice("Decoding %s and tries to make a tag out of it" % directory)
     #Need mapping between Tag name and local software directory name
     res = getMappingTagFromDirectory(directory)
     if not res['OK']:
       gLogger.error("Failed finding relation between directory and Tag")
       continue
-    
-    res = swtc.updateCEStatus(res['Value'], ce, 'Valid')
+    tag = res['Value']
+    gLogger.notice("Found tag ", tag)
+    res = swtc.updateCEStatus(tag, ce, 'Valid')
     if not res['OK']:
       gLogger.error("Failed to report back: %s" %res['Message'])
       message = res['Message']
+    else:
+      gLogger.notice("Tag now Valid!")
   
   if message:
     return S_ERROR(message)
