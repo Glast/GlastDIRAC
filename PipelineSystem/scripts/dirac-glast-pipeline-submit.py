@@ -43,7 +43,7 @@ if __name__ == "__main__":
     from DIRAC.Interfaces.API.Job import Job
     from DIRAC.Interfaces.API.Dirac import Dirac
     from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
-    from GlastDIRAC.SoftwareTagSystem.Client import SoftwareTagClient
+    from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient import SoftwareTagClient
     from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
     opts = options(specialOptions) # converts the "DIRAC registerSwitch()" to something similar to OptionParser
     pipeline = False
