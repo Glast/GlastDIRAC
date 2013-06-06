@@ -55,11 +55,11 @@ def ProbeSoftwareArea():
 
   base_sw_dir = os.environ['VO_GLAST_ORG_SW_DIR']
   
-  gLogger.notice("Found the following software directories:")
+  gLogger.notice("Found the following software directory:", base_sw_dir)
   message = None
   
   directory_list = []  
-  for root, dirnames, files in os.walk(base_sw_dir+"glast/ground/releases"):
+  for root, dirnames, files in os.walk(os.path.join(base_sw_dir,"glast/ground/releases")):
     if "bin" in dirnames:
       directory_list.append(root)
     
