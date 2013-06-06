@@ -60,10 +60,10 @@ class SoftwareMonitorAgent(AgentModule):
         if not res['OK']:
           self.log.error(res['Message'])
         else:
-          self.log.notice("Done with %s at %s" %(tag, ce))
+          self.log.info("Done with %s at %s" %(tag, ce))
      
     ##Also, reset to New tags that were in Probing for too long.
-    res = self.swtc.getTagsWithStatus("Installing",olderthan=self.delay)
+    res = self.swtc.getTagsWithStatus("Installing", self.delay)
     if not res['OK']:
       self.log.error("Failed to get old 'Installing' tags")
     else:
@@ -99,7 +99,7 @@ class SoftwareMonitorAgent(AgentModule):
     j.setCPUTime(1000)
     j.setName("Probe %s" % ce)
     j.setJobGroup("SoftwareProbe")
-    j.setExecutable("%s/GlastDIRAC/ResourceStatusSystem/Client/%s" % (os.environ['DIRAC'], scriptname),
+    j.setExecutable("%s/GlastDIRAC/ResourceStatusSystem/Client/%s" % (os.environ['DIRAC'],scriptname),
                     logFile='SoftwareProbe.log')
     j.setOutputSandbox('*.log')
     res = d.submit(j)
