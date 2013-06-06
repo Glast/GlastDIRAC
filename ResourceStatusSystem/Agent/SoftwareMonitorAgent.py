@@ -59,6 +59,8 @@ class SoftwareMonitorAgent(AgentModule):
         
         if not res['OK']:
           self.log.error(res['Message'])
+        else:
+          self.log.notice("Done with %s at %s" %(tag, ce))
      
     ##Also, reset to New tags that were in Probing for too long.
     res = self.swtc.getTagsWithStatus("Installing",olderthan=self.delay)
@@ -87,6 +89,7 @@ class SoftwareMonitorAgent(AgentModule):
     from DIRAC.Interfaces.API.Job import Job
     
     from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
+    import os
     
     ops = Operations()
     scriptname = ops.getValue("ResourceStatus/SofwareManagementScript", self.script)
@@ -96,7 +99,8 @@ class SoftwareMonitorAgent(AgentModule):
     j.setCPUTime(1000)
     j.setName("Probe %s" % ce)
     j.setJobGroup("SoftwareProbe")
-    j.setExecutable("$DIRAC/GlastDIRAC/ResourceStatusSystem/Client/%s" % scriptname, logFile='SoftwareProbe.log')
+    j.setExecutable("%s/GlastDIRAC/ResourceStatusSystem/Client/%s" % (os.environ['DIRAC'], scriptname),
+                    logFile='SoftwareProbe.log')
     j.setOutputSandbox('*.log')
     res = d.submit(j)
     if not res['OK']:
