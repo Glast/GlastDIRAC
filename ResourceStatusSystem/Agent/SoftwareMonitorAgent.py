@@ -3,7 +3,7 @@ software monitoring jobs
 
 created: 04/06/2013
 
-#author: S. Poss (CERN)
+@author: S. Poss (CERN)
 
 """
 from DIRAC.Core.Base.AgentModule                         import AgentModule
