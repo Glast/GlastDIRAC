@@ -59,6 +59,8 @@ class SoftwareMonitorAgent(AgentModule):
         
         if not res['OK']:
           self.log.error(res['Message'])
+        else:
+          self.log.info("Took care of %s at %s" %(tag, ce))
      
     ##Also, reset to New tags that were in Probing for too long.
     res = self.swtc.getTagsWithStatus("Installing",olderthan=self.delay)
