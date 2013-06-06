@@ -1,5 +1,10 @@
 #!/bin/env python
+""" Probe Software Area 
 
+Created 06/06/2013
+@author: S. Poss (CERN)
+
+"""
 import os
 from DIRAC import S_OK, S_ERROR
 

@@ -1,5 +1,11 @@
 #!/usr/bin/env python
-# S.Zimmer 10/2012 The Oskar Klein Center for Cosmoparticle Physics
+""" Pipeline Submission Script 
+
+Created 10/2012
+@author: S. Zimmer (OKC/SU)
+
+"""
+
 import xml.dom.minidom as xdom
 import sys, getopt, os, StringIO, datetime
 

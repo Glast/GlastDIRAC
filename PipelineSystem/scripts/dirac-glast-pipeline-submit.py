@@ -1,6 +1,11 @@
 #!/usr/bin/env python
-# S.Zimmer 10/2012 The Oskar Klein Center for Cosmoparticle Physics
-#TODO: replace glast.org with VO-agnostic call
+
+""" Pipeline Submission Script 
+
+Created 10/2012
+@author: S. Zimmer (OKC/SU)
+
+"""
 
 class options:
     def __init__(self,DICT,**kwargs):

@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+""" Pipeline Submission Script 
+
+Created 04/16/2012
+@author: S. Zimmer (OKC/SU)
+
+"""
 from DIRAC.Core.Base import Script
 from DIRAC.ConfigurationSystem.Client.Helpers.Resources import getQueues
 from DIRAC.Core.Utilities.Grid import ldapsearchBDII

@@ -1,5 +1,8 @@
-"""
-Client for the glast software tables
+""" Client for the glast software tables
+
+Created 03/2013
+@author: S. Poss (CERN)
+
 Exposes for free the methods 
 
 getSitesForTag(tag,status='OK')
