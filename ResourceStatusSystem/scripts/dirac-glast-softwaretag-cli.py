@@ -226,7 +226,7 @@ class SoftwareTagCli(cmd.Cmd):
                         print site
             else:
                 print "ERROR parsing command"
-                print self.do_list.__doc__
+                print self.do_get.__doc__
                 return
              
     def do_quit(self,args):
