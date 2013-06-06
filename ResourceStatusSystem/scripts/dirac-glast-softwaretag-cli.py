@@ -80,14 +80,14 @@ class SoftwareTagCli(cmd.Cmd):
         del argss[0]
         status = 'Valid'
         if len(argss)>1:
-            status = argss[1]
+            status = argss[-1]
         if option == "tag":
             tags = []
             # expect site as input
             sites = argss[0].split(",")
             tags = []
             for site in sites:
-                res = self.client.getTagsAtSite(site,status=status)
+                res = self.client.getTagsAtSite(site,status)
                 if not res['OK']:
                     print "Failed to get tags for site %s; %s"%(site,res['Message'])
                     errorcount+=1
@@ -99,7 +99,7 @@ class SoftwareTagCli(cmd.Cmd):
         
         elif option == "site":
             tag = argss[0]
-            res = self.client.getSitesForTag(tag,status=status)
+            res = self.client.getSitesForTag(tag,status)
             if not res['OK']:
                 print "Failed to get sites for tag %s; %s"%(tag,res['Message'])
             else:
@@ -183,11 +183,11 @@ class SoftwareTagCli(cmd.Cmd):
             print self.do_list().__doc__
             return
         option = args[0]
-        _status = 'Valid'
+        status = 'Valid'
         del args[0]
         if len(args)>0:
             status = args[0]
-        res = self.client.getTagsAtSite("ALL",status=_status)
+        res = self.client.getTagsAtSite("ALL",status)
         if not res['OK']:
             print 'ERROR retrieving tags: %s'%res['Message']
         else:
@@ -200,7 +200,7 @@ class SoftwareTagCli(cmd.Cmd):
             elif option == "sites":
                 sites = []
                 for tag in tags:
-                    res = self.client.getSitesForTag(tag,status=status)
+                    res = self.client.getSitesForTag(tag,status)
                     # returns list of CEs
                     if not res['OK']:
                         print 'ERROR retrieving sites for tag %s'%tag
