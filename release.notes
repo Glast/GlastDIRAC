@@ -1,3 +1,40 @@
+[v1r1p6]
+
+*ResourceStatusSystem
+FIX: bugfixes to v1r1p5
+*All
+CHANGE: add authorship
+
+[v1r1p5]
+
+*ResourceStatusSystem
+CHANGE: Improved and expanded CLI
+CHANGE: bugfixes to ProbeSoftwareArea
+NEW: utilities module  
+*PipelineSystem
+CHANGE: bugfixes to submit script
+
+[v1r1p4]
+
+*All
+CHANGE: bugfixes
+*ResourceStatusSystem
+added cleanup in CLI, OPERATOR mode only
+
+[v1r1p3]
+
+*SoftwareTagSystem
+CHANGE: SoftwareTagSystem removed
+*ResourceStatusSystem
+NEW: replaces old SoftwareTagSystem
+*All
+CHANGE: Minor changes and rewrites. 
+
+[v1r1p2]
+
+*All
+Massive changes.
+
 [v1r1p0]
 
 *All

@@ -1,6 +1,11 @@
 #!/usr/bin/env python
-# S.Zimmer 10/2012 The Oskar Klein Center for Cosmoparticle Physics
-#TODO: replace glast.org with VO-agnostic call
+
+""" Pipeline Submission Script 
+
+Created 10/2012
+@author: S. Zimmer (OKC/SU)
+
+"""
 
 class options:
     def __init__(self,DICT,**kwargs):
@@ -43,7 +48,7 @@ if __name__ == "__main__":
     from DIRAC.Interfaces.API.Job import Job
     from DIRAC.Interfaces.API.Dirac import Dirac
     from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
-    from GlastDIRAC.SoftwareTagSystem.Client import SoftwareTagClient
+    from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient import SoftwareTagClient
     from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
     opts = options(specialOptions) # converts the "DIRAC registerSwitch()" to something similar to OptionParser
     pipeline = False
@@ -137,9 +142,9 @@ if __name__ == "__main__":
         j.setBannedSites(opts.bannedSites.split(","))
 
     if not opts.release is None:
-        release = opts.release
-        cl = SoftwareTagClient.SoftwareTagClient()
-        result = cl.getSitesForTag(tag,status='OK')
+        tag = opts.release
+        cl = SoftwareTagClient()
+        result = cl.getSitesForTag(tag,'Valid') # keyword doesn't work there.
         if not result['OK']:
             gLogger.error("*ERROR* Could not get sites for Tag %s"%tag,result['Message'])
             dexit(1)
