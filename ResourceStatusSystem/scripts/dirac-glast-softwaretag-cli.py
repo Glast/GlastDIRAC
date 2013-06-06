@@ -242,7 +242,7 @@ class SoftwareTagCli(cmd.Cmd):
         """
         args = argss.split()
         if len(args)<1:
-            print self.do_resettag().__doc__
+            print self.do_resettag.__doc__
             return
         tag = args[0]
         completed = False
