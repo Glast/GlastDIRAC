@@ -65,11 +65,11 @@ class SoftwareTagCli(cmd.Cmd):
         if errorcount!=0:
             print "Found errors, cannot continue"
             return
+        
     def do_get(self,args):
         """ get something
-        get tag <site1,site2,site3> - lists tags at site 1 -3
-        get site <tag> - lists sites supporting tag
-        get all - lists everything.
+        get tag <site1,site2,site3> [<status>]- lists tags at site 1 -3
+        get site <tag> [<status>]- lists sites supporting tag
         """
         errorcount = 0
         argss = args.split()
@@ -78,11 +78,11 @@ class SoftwareTagCli(cmd.Cmd):
             return
         option = argss[0]
         del argss[0]
+        status = 'Valid'
+        if len(argss)>1:
+            status = argss[1]
         if option == "tag":
             tags = []
-            status = 'Valid'
-            if len(argss)>1:
-                status = argss[1]
             # expect site as input
             sites = argss[0].split(",")
             tags = []
@@ -99,9 +99,6 @@ class SoftwareTagCli(cmd.Cmd):
         
         elif option == "site":
             tag = argss[0]
-            status = 'Valid'
-            if len(argss)>1:
-                status = argss[1]
             res = self.client.getSitesForTag(tag,status=status)
             if not res['OK']:
                 print "Failed to get sites for tag %s; %s"%(tag,res['Message'])
@@ -110,10 +107,6 @@ class SoftwareTagCli(cmd.Cmd):
                 print "Found the following sites:"
                 for site in sites:
                     print site
-        
-        elif option == "all":
-            raise NotImplementedError
-            
         else:
             print "ERROR parsing command"
             print self.do_get.__doc__
