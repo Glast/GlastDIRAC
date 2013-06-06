@@ -174,7 +174,7 @@ class GlastAdditionalInfoDB ( DB ):
         import datetime
         older= (datetime.datetime.utcnow() - datetime.timedelta( seconds = olderthan ) ).strftime( '%Y-%m-%d %H:%M:%S' )
     res = self.getFields('SoftwareTags_has_Sites', ['Software_Tag','CEName'], 
-                         conDict, older=older, 
+                         conDict, older=older, timeStamp = "LastUpdateTime",
                          conn = self.__getConnection( connection ))
     if not res['OK']:
         gLogger.error("No tag with status %s:" % status, res['Message'])
