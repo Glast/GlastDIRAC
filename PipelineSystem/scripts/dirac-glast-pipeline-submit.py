@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     if not opts.release is None:
         release = opts.release
-        cl = SoftwareTagClient.SoftwareTagClient()
+        cl = SoftwareTagClient()
         result = cl.getSitesForTag(tag,'Valid') # keyword doesn't work there.
         if not result['OK']:
             gLogger.error("*ERROR* Could not get sites for Tag %s"%tag,result['Message'])
