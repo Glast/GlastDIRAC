@@ -50,22 +50,23 @@ def ProbeSoftwareArea():
 
   base_sw_dir = os.environ['VO_GLAST_ORG_SW_DIR']
   
-  gLogger.notice("Found the following software directories:")
+  gLogger.notice("Found the following software directory:", base_sw_dir)
   message = None
   
   directory_list = []  
-  for root, dirnames, files in os.walk(base_sw_dir+"glast/ground/releases"):
+  for root, dirnames, files in os.walk(os.path.join(base_sw_dir,"glast/ground/releases")):
     if "bin" in dirnames:
       directory_list.append(root)
     
 
   for directory in directory_list:
+    gLogger.notice("Trying to understand:", directory)
     #Need mapping between Tag name and local software directory name
     res = getMappingTagFromDirectory(directory)
     if not res['OK']:
       gLogger.error("Failed finding relation between directory and Tag")
       continue
-    
+    gLogger.notice("Found tag:", res['Value'])
     res = swtc.updateCEStatus(res['Value'], ce, 'Valid')
     if not res['OK']:
       gLogger.error("Failed to report back: %s" %res['Message'])
