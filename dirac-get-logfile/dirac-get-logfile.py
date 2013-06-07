@@ -15,7 +15,7 @@ if __name__ == "__main__":
     user = 'zimmer'
     delay_job_handled = 3
     status_to_handle = ['Done','Failed','Killed','Deleted']
-    status_to_ignore = ['Running','Waiting','Checking','Stalled','Received'] # TODO deleted in handled ?
+    status_to_ignore = ['Running','Waiting','Checking','Stalled','Received']
     dir_temp = '/tmp'
     filename_jobhandled = '/glast_data/Pipeline2/grid-service/jobidhandled'
 
@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     proxy = None
     op = Operations()
-    #TODO: replace glast.org with VO-agnostic statement
+
     shifter = op.getValue("Pipeline/Shifter","/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865")
     shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
     result = gProxyManager.downloadProxyToFile(shifter,shifter_group,requiredTimeLeft=10000)
@@ -97,13 +97,15 @@ if __name__ == "__main__":
 		  
 		    # check if 'jobmeta.inf' is present (if not it's not a PIPELINE job )
 		    if not os.path.isfile(dir_temp+"/InputSandbox"+j+"/jobmeta.inf"):
-			print "ERROR : not a pipeline task"
-			sys.stderr.write(time.strftime('%d/%m/%y %H:%M',time.localtime())+" => "+j+" => "+"ERROR : not a pipeline task\n")
+			print "WARNING : not a pipeline task"
+			# notify the job as "already handled"
+			jobid_handled.append(j);
 		    else:
 		      
-			# TODO faire plus élégalement ( => lire file en python (pas utilisé cat)
 			# Get the working dir of the task from 'jobmeta.inf'
-			workdir = commands.getoutput("cat "+dir_temp+"/InputSandbox"+j+"/jobmeta.inf");
+			file_jobmeta = open( dir_temp+"/InputSandbox"+j+"/jobmeta.inf" , "r")
+			workdir = file_jobmeta.readline()
+			file_jobmeta.close()
 			
 			# retrieve the OUTPUT sandbox
 			res = d.getOutputSandbox(j,dir_temp)
