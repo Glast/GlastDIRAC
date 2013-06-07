@@ -1,5 +1,10 @@
 #!/bin/env python
+""" Probe Software Area 
 
+Created 06/06/2013
+@author: S. Poss (CERN)
+
+"""
 import os
 from DIRAC import S_OK, S_ERROR
 
@@ -8,12 +13,26 @@ def getMappingTagToDirectory(tag):
   """
   #tags are VO.glast.org-OS/FLAOUR/TAG, and in the SW dir it's the same
   tag = tag.replace("VO.glast.org-","")
-  return S_OK(tag)
+  items = tag.split("/")
+  if len(items)>3:
+    return S_ERROR("Bad tag structure")
+  soft_os = items[0]
+  variant = items[1]
+  package = items[2]
+  version = items[3]
+  directory = os.path.join(["glast/ground/releases",soft_os,variant,package,version])
+  return S_OK(directory)
 
 def getMappingTagFromDirectory(directory):
   """ Returns the tag name given a directory name
   """
-  return S_OK("")
+  items = directory.split("/")
+  version = items[-1]
+  package = items[-2]
+  variant = items[-3]
+  soft_os = items[-4]
+  tag = "VO-glast.org-"+soft_os+"/"+variant+"/"+package+"/"+version
+  return S_OK(tag)
 
 def ProbeSoftwareArea():
   """ Look into the shared area and report back to the SoftwareTag service
@@ -25,7 +44,7 @@ def ProbeSoftwareArea():
   if not ce:
     return S_ERROR("CE undefined, cannot proceed")
   
-  from GlastDIRAC.SoftwareTagSystem.Client.SoftwareTagClient import SoftwareTagClient
+  from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient import SoftwareTagClient
   swtc = SoftwareTagClient()
 
   if not 'VO_GLAST_ORG_SW_DIR' in os.environ:
@@ -35,22 +54,31 @@ def ProbeSoftwareArea():
     return S_ERROR("Missing VO_GLAST_ORG_SW_DIR environment variable")
 
   base_sw_dir = os.environ['VO_GLAST_ORG_SW_DIR']
-  list_sw = os.listdir(base_sw_dir)
   
-  gLogger.notice("Found the following software directories:")
+  gLogger.notice("Found the following software directory:", base_sw_dir)
   message = None
-  for item in list_sw:
-    gLogger.notice("   %s"%item)
+  
+  directory_list = []  
+  for root, dirnames, files in os.walk(os.path.join(base_sw_dir,"glast/ground/releases")):
+    if "bin" in dirnames:
+      directory_list.append(root)
+    
+
+  for directory in directory_list:
+    gLogger.notice("Decoding %s and tries to make a tag out of it" % directory)
     #Need mapping between Tag name and local software directory name
-    res = getMappingTagFromDirectory(item)
+    res = getMappingTagFromDirectory(directory)
     if not res['OK']:
       gLogger.error("Failed finding relation between directory and Tag")
       continue
-    
-    res = swtc.updateCEStatus(res['Value'], ce, 'Valid')
+    tag = res['Value']
+    gLogger.notice("Found tag ", tag)
+    res = swtc.updateCEStatus(tag, ce, 'Valid')
     if not res['OK']:
       gLogger.error("Failed to report back: %s" %res['Message'])
       message = res['Message']
+    else:
+      gLogger.notice("Tag now Valid!")
   
   if message:
     return S_ERROR(message)

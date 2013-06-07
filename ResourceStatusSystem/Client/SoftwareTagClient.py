@@ -1,5 +1,8 @@
-"""
-Client for the glast software tables
+""" Client for the glast software tables
+
+Created 03/2013
+@author: S. Poss (CERN)
+
 Exposes for free the methods 
 
 getSitesForTag(tag,status='OK')
@@ -18,4 +21,4 @@ class SoftwareTagClient (Client):
   """
   def __init__(self, **kwargs ):
     Client.__init__(self, **kwargs )
-    self.setServer("SoftwareTag/SoftwareTag")
+    self.setServer("ResourceStatus/SoftwareTag")

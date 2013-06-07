@@ -3,6 +3,9 @@
 ###########################################################################
 
 """ DB for GlastAdditionalInfoDB
+Created 03/2013
+@author: S. Poss (CERN)
+
 """
 __RCSID__ = " $Id: $ "
 
@@ -11,19 +14,19 @@ from DIRAC.Core.Base.DB                                                import DB
 #from DIRAC.ConfigurationSystem.Client.Helpers.Operations            import Operations
 from DIRAC.ConfigurationSystem.Client.Helpers.Resources                import getQueues
 from DIRAC.ConfigurationSystem.Client.Helpers.Registry import getVO
-class GlastAdditionnalInfoDB ( DB ):
+class GlastAdditionalInfoDB ( DB ):
   def __init__( self, maxQueueSize = 10 ):
     """ 
     """
     #self.ops = Operations()
-    self.dbname = 'GlastAdditionnalInfoDB'
-    self.logger = gLogger.getSubLogger('GlastAdditionnalInfoDB')
-    DB.__init__( self, self.dbname, 'SoftwareTag/GlastAdditionnalInfoDB', maxQueueSize  )
+    self.dbname = 'GlastAdditionalInfoDB'
+    self.logger = gLogger.getSubLogger('GlastAdditionalInfoDB')
+    DB.__init__( self, self.dbname, 'ResourceStatus/GlastAdditionalInfoDB', maxQueueSize  )
     self.fields = ["CEName","Status","Software_Tag"]
     self._createTables( { "SoftwareTags_has_Sites" :{"Fields":{"idRelation":"INT NOT NULL AUTO_INCREMENT",
                                                                "CEName":"VARCHAR(45) NOT NULL",
-                                                               "Status":"ENUM('New','Probing','Valid','Bad','Removed') DEFAULT 'New'",
-                                                               "Software_Tag":"VARCHAR(60) NOT NULL",
+                                                               "Status":"ENUM('New','Installing','Valid','Bad','Removed') DEFAULT 'New'",
+                                                               "Software_Tag":"VARCHAR(255) NOT NULL",
                                                                "LastUpdateTime":"DATETIME"},
                                                      "PrimaryKey" : ['idRelation'],
                                                      'Indexes' : { "Index":["idRelation","Software_Tag","CEName", 'Status']}
@@ -32,7 +35,7 @@ class GlastAdditionnalInfoDB ( DB ):
                       )
     self.vo = getVO('glast.org')
     ##tags statuses: 
-    self.tag_statuses = ['New','Probing','Valid','Bad','Removed']
+    self.tag_statuses = ['New','Installing','Valid','Bad','Removed']
     #State machine: New -> Probing -> Valid/Bad -> Removed -> Probing -> etc.    
     
   #####################################################################
@@ -52,7 +55,7 @@ class GlastAdditionnalInfoDB ( DB ):
     """
     connection = self.__getConnection( connection )
     
-    res = self.getFields("SoftwareTags_has_Sites", ItemProperty, 
+    res = self.getFields("SoftwareTags_has_Sites", [ItemProperty], 
                          {ItemProperty : name},
                          conn = connection)#"SELECT Name FROM Sites WHERE Name='%s';" % (site)
     if not res['OK']:
@@ -67,13 +70,20 @@ class GlastAdditionnalInfoDB ( DB ):
   def __getCESforSite(self, site):
     """ As the name suggests, get all the CEs for a given site
     """
-    res = getQueues(siteList = [site], community = self.vo)
+    slist = None
+    if site !='ALL':
+      slist = [site]
+    res = getQueues(siteList = slist, community = self.vo)
     if not res['OK']:
         return S_ERROR("Could not get CEs for site")
     if not res['Value']:
         return S_ERROR("No CEs for site %s" % site)
-    
-    ces = res['Value'][site].keys()
+    ces  =[]
+    for key, items in res['Value'].items():
+        if site !='ALL':
+            if key != site:
+                continue
+        ces.extend(items.keys())
     if not ces:
         return S_ERROR("No CEs for site %s" % site)
     return S_OK(ces)
@@ -88,7 +98,7 @@ class GlastAdditionnalInfoDB ( DB ):
     sitedict = res['Value']
     
     final_sdict = {}
-    for site, s_ces in sitedict:
+    for site, s_ces in sitedict.items():
         for ce in ces:
             if ce in s_ces:
                 if not site in final_sdict:
@@ -107,14 +117,15 @@ class GlastAdditionnalInfoDB ( DB ):
     
     res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
     if not res['OK']:
+        gLogger.error("Tag undefined", res['Message'])
         return S_ERROR("Tag was not found")
     res = self.getFields("SoftwareTags_has_Sites", ["CEName"], 
                          {"Software_Tag": tag, "Status":status}, 
                          conn = self.__getConnection( connection ))
     if not res['OK']:
         return res
-    if not res['Value'][0][0]: #(because if no site is found, this returns ((,))
-        return S_ERROR("No site for this tag/status was found")
+    if not res['Value']: #(because if no site is found, this returns ((,))
+        return S_ERROR("No site for this tag %s with status %s was found" %(tag, status))
       
     ces = [row[0] for row in res['Value']]
     res = self.__getSiteForCEs(ces)
@@ -135,12 +146,16 @@ class GlastAdditionnalInfoDB ( DB ):
     for ce in res['Value']:
         res = self._checkProperty("CEName", ce, self.__getConnection( connection ))
         if not res['OK']:
-            gLogger.error("CE not in the DB:", ce)
+            gLogger.error("CE not in the DB:", res['Message'])
             continue
 
-        res = self.getFields("SoftwareTags_has_Sites", "Software_Tag", 
-                             {"CEName": ce}, {"Status":status}, 
+        res = self.getFields("SoftwareTags_has_Sites", ["Software_Tag"], 
+                             {"CEName": ce, "Status":status}, 
                              conn = self.__getConnection( connection ))
+        if not res['OK']:
+          gLogger.error("Issue getting info", res['Message'])
+          continue
+        
         for row in res['Value']:
             tag = row[0]
             if not tag in tags:
@@ -156,12 +171,13 @@ class GlastAdditionnalInfoDB ( DB ):
     conDict = {'Status':status}
     older = None
     if olderthan:
-      import datetime
-      older= (datetime.datetime.utcnow() - datetime.timedelta( seconds = olderthan ) ).strftime( '%Y-%m-%d %H:%M:%S' )
-    res = self.getFields('Software_Tag', ['Software_Tag','CEName'], 
-                         conDict, older=older, 
+        import datetime
+        older= (datetime.datetime.utcnow() - datetime.timedelta( seconds = olderthan ) ).strftime( '%Y-%m-%d %H:%M:%S' )
+    res = self.getFields('SoftwareTags_has_Sites', ['Software_Tag','CEName'], 
+                         conDict, older=older, timeStamp = 'LastUpdateTime',
                          conn = self.__getConnection( connection ))
     if not res['OK']:
+        gLogger.error("No tag with status %s:" % status, res['Message'])
         return res
     tagsdict = {}
     for row in res['Value']:
@@ -187,6 +203,7 @@ class GlastAdditionnalInfoDB ( DB ):
     res = self.getFields('SoftwareTags_has_Sites', ['Status', 'CEName'], {'Software_Tag':tag,'CEName':ces},  
                            conn = self.__getConnection( connection ))
     if not res['OK']:
+        gLogger.error("Failed checking tag at site", res['Message'])
         return S_ERROR("Failed looking up existence of tag at site")
 
     ces_in_db = [row[1] for row in res['Value']]
@@ -200,6 +217,7 @@ class GlastAdditionnalInfoDB ( DB ):
                                     conn = self.__getConnection( connection ))
             if not res['OK']:
                 self.log.error("Failed inserting new row:", res['Message'])
+                continue
             if not tag in inserted:
                 inserted[tag] = []    
             inserted[tag].append(ce)  
@@ -208,71 +226,76 @@ class GlastAdditionnalInfoDB ( DB ):
   def removeTagAtSite(self, tag, site, connection = False):
     """ Mark the tag at site as Removed. This allows to know that the tag is maybe still there
     """
-    res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
-    if not res['OK']:
-        return S_ERROR("Tag was not found")
-    res = self.__getCESforSite(site)
-    if not res['OK']:
-        return res
-    for ce in res['Value']:
-        res = self._checkProperty("CEName", ce, self.__getConnection( connection ))
-        if not res['OK']:
-          gLogger.error("CE not in DB!")
-          continue
-        res = self.updateFields("SoftwareTags_has_Sites", 
-                                ['Status', 'LastUpdateTime'], 
-                                ['Removed', 'UTC_TIMESTAMP()'],
-                                {"CEName":ce, "Software_Tag":tag},
-                                conn = self.__getConnection( connection ))
-    return S_ERROR()
+    
+    return self.updateStatus(tag, site, 'Removed', connection)
   
   def cleanTagAtSite(self, tag, site, connection = False):
     """ Remove the relation between tag and Site. Should be called only once
     cleanup is really done.
     """
+    if not tag:
+      return S_ERROR("Tag MUST be specified")
     res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
     if not res['OK']:
+        gLogger.error("Tag not found", res['Message'])
         return S_ERROR("Tag was not found")
     res = self.__getCESforSite(site)
     if not res['OK']:
         return res
+    successful = []
+    failed = []
     for ce in res['Value']:
         res = self._checkProperty("CEName", ce, self.__getConnection( connection ))
         if not res['OK']:
-            gLogger.error("CE not in DB!")
+            gLogger.error("CE not in DB!", res['Message'])
             continue
     
-    
+        
         res = self.deleteEntries("SoftwareTags_has_Sites",
                                  {"Software_Tag":tag, "CEName": ce}, 
                                  conn = self.__getConnection( connection ))
-    return res
+        if not res['OK']:
+            failed.append(ce)
+        else:
+            successful.append(ce)
+    return S_OK({"Successful":successful, "Failed":failed})
   
   def updateStatus(self, tag, site, status, connection = False):
-      """ to interact with the status field """
+      """ To interact with the status field """
       if not status in self.tag_statuses:
           return S_ERROR("Status %s undefined." % status)
-      if status == 'Probing' :
-          return S_ERROR("Transition to Probing does not make sense for this method.")
+      if not site:
+          return S_ERROR("Site MUST be specified, even if 'ALL'")  
+      if status == 'Installing' :
+          return S_ERROR("Transition to Installing does not make sense for this method.")
+      condDict = {}
+      if tag:
+        res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
+        if not res['OK']:
+            gLogger.error("Tag not found:", res['Message'])
+            return S_ERROR("Tag was not found")
+        condDict['Software_Tag'] = tag
        
       res = self.__getCESforSite(site)
       if not res['OK']:
           return res
-        
+      updatefields = ['Status', 'LastUpdateTime']
+      updatestatus = [status, 'UTC_TIMESTAMP()']
+      successful = []
+      failed = []
       for ce in res['Value']:
-          if tag:
-              updatefields = ['CEName','Software_Tag','Status', 'LastUpdateTime']
-              updatestatus = [ce, tag, status, 'UTC_TIMESTAMP()']
-          else:
-              updatefields = ['CEName','Status', 'LastUpdateTime']
-              updatestatus = [ce, status, 'UTC_TIMESTAMP()']
+          condDict['CEName'] = ce
           res = self.updateFields("SoftwareTags_has_Sites", 
                                   updatefields,
-                                  updatestatus, 
+                                  updatestatus,
+                                  condDict, 
                                   conn = self.__getConnection( connection ))
           if not res['OK']:
-            return S_ERROR("Error updating Status")
-      return S_OK()
+            failed.append(ce)
+          else:
+            successful.append(ce)
+             
+      return S_OK({'Successful':successful, 'Failed':failed})
 
   def updateCEStatus(self, tag, ce, status, connection = False):
     """ Update the tags at CE relations. Usually through the Agent of the jobs
@@ -282,24 +305,29 @@ class GlastAdditionnalInfoDB ( DB ):
       
     res = self._checkProperty("CEName", ce, self.__getConnection( connection ))
     if not res['OK']:
-      gLogger.error("CE not in DB!")
+      gLogger.error("CE not in DB!", res['Message'])
       return S_ERROR("CE not in DB!")
     
-    updatefields = []
-    updatestatus = []
+    condDict = {}
     if tag:
         res = self._checkProperty("Software_Tag", tag, self.__getConnection( connection ))
         if not res['OK']:
+            gLogger.error("Tag not found:",res['Message'])
             return S_ERROR("Tag was not found")
-        updatefields = ['CEName','Software_Tag','Status', 'LastUpdateTime']
-        updatestatus = [ce, tag, status, 'UTC_TIMESTAMP()']
-    else:
-        updatefields = ['CEName','Status', 'LastUpdateTime']
-        updatestatus = [ce, status, 'UTC_TIMESTAMP()']
+        condDict["Software_Tag"]=tag
+           
+    condDict = {"CEName":ce}    
+
+    updatefields = ['Status', 'LastUpdateTime']
+    updatestatus = [status, 'UTC_TIMESTAMP()']
+    
+
     res = self.updateFields("SoftwareTags_has_Sites", 
                             updatefields,
-                            updatestatus, 
+                            updatestatus,
+                            condDict,
                             conn = self.__getConnection( connection ))
+    return res
 
   def getEntriesFromField(self, field = None, connection = False):
       """ Get all entries for a given field: allows DB dump
