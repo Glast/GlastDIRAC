@@ -24,6 +24,7 @@ class Params(object):
     self.fr = ''
     self.subject = ''
     self.body = ''
+    self.filename = ''
   def setTo(self,opt):
     self.to = opt
     return S_OK()
@@ -36,12 +37,15 @@ class Params(object):
   def setBody(self,opt):
     self.body = opt.replace("\\n","\n")
     return S_OK()
-  
+  def setFileName(self,opt):
+    self.filename = opt
+    return S_OK()
   def registerSwitchs(self):
     Script.registerSwitch("T:", "To=", "mail To", self.setTo)
     Script.registerSwitch("F:","From=","mail from", self.setFrom)
     Script.registerSwitch("S:","Subject=","mail Subject",self.setSubject)
     Script.registerSwitch("B:","Body=","mail Body",self.setBody)
+    Script.registerSwitch("f:","File=","Body content file",self.setFileName)
     Script.setUsageMessage( '$s -T you@mail.com -F me@mail.com -S subject -B "My Body\n is ace"' )
 
 if __name__== "__main__":
@@ -53,10 +57,16 @@ if __name__== "__main__":
   
   from DIRAC.FrameworkSystem.Client.NotificationClient    import NotificationClient
   
-  if not cli.to or not cli.fr or not cli.subject or not cli.body:
+  if not cli.to or not cli.fr or not cli.subject:
     gLogger.error( "Missing argument" )
     DIRACexit( 2 )
-  
+  if not cli.body and not cli.filename:
+    gLogge.error("Missing body")
+    DIRACexit(2)
+    
+  if cli.filename:
+    cli.body = file(cli.filename,"r").readlines()
+    
 
   ntc = NotificationClient()
   gLogger.verbose("Sending:"," ".join([cli.to , cli.subject , cli.body , cli.fr] ))
