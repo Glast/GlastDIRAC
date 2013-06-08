@@ -62,7 +62,7 @@ if __name__ == "__main__":
     if pipeline:
         proxy = None
         # check whether critical email information is available, if any or all of those are not there, raise an exception and fail to submit.
-        required_variables = ["PIPELINE_FROMADDRESS","PIPELINE_TOADDRESS","PIPELINE_PROCESSINSTANCE","PIPELINE_ERRORADDRESS","JOBCONTROL_LOGFILE","PIPELINE_SUMMARY"]
+        required_variables = ["PIPELINE_FROMADDRESS","PIPELINE_TOADDRESS","PIPELINE_PROCESSINSTANCE","PIPELINE_ERRORADDRESS","JOBCONTROL_LOGFILE"]
         res = [i for i in required_variables if i not in pipeline_dict]
         if len(res)!=0:
             gLogger.error("Could not find critical variables for submission:",str(res))
