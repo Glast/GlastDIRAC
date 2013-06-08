@@ -1,3 +1,10 @@
+[v1r1p7]
+
+*PipelineSystem
+NEW: additional logic check, evaluates PIPELINE_* vars and throws exception if not defined
+FIX: logFile.txt is now the application output log, unless specified in $PIPELINE_LOGFILE
+CHANGE: GridAccess uses CS properties rather than hard-coded paths
+
 [v1r1p6]
 
 *ResourceStatusSystem
