@@ -78,7 +78,7 @@ if __name__ == "__main__":
     j = Job(stdout="logFile.txt",stderr="logFile.txt") # specifies the logfile
     
     input_sandbox_files = []
-    output_sandbox_files = ["logFile.txt", "jobmeta.inf"]
+    output_sandbox_files = ["*.log","*.txt", "jobmeta.inf"]
     if pipeline:
         j.setExecutionEnv(pipeline_dict) # that sets the env vars
         if pipeline_dict.has_key("GPL_CONFIGDIR"):
