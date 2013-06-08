@@ -132,7 +132,7 @@ if __name__ == "__main__":
             os.chmod(executable,0755) # make file executable
             input_sandbox_files.append(executable)
         
-        j.setExecutable(str(executable),logFile=log)
+        j.setExecutable(str(executable),logFile=str(log))
     else:
         gLogger.error("No executable defined.")
         dexit(1)
