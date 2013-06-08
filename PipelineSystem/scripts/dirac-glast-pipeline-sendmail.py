@@ -65,7 +65,7 @@ if __name__== "__main__":
     DIRACexit(2)
     
   if cli.filename:
-    cli.body = file(cli.filename,"r").readlines()
+    cli.body = "".join(file(cli.filename,"r").readlines())
     
 
   ntc = NotificationClient()
