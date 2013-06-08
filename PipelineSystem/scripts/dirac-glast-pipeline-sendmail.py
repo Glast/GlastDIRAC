@@ -63,19 +63,25 @@ try:
 except:
   gLogger.error( "Failed to convert string: %s to email headers" % head )
   DIRACexit( 4 )
-
+gLogger.notice("Header: %s" % headers)
 if not "To" in headers:
   gLogger.error( "Failed to get 'To:' field from headers %s" % head )
   DIRACexit( 5 )
 to = headers[ "To" ]
 
+gLogger.notice("To:",to)
+
 origin = "%s@%s" %( os.getenv( "LOGNAME" , "dirac" ) , socket.getfqdn() )
 if "From" in headers:
   origin = headers[ "From" ]
 
+gLogger.notice("From:", origin)
+
 subject = "Sent from %s" % socket.getfqdn()
 if "Subject" in headers:
   subject = headers[ "Subject" ]
+
+gLogger.notice("Subject:", subject)
 
 ntc = NotificationClient()
 gLogger.verbose("Sending:"," ".join(to , subject , body , origin ))
