@@ -1,3 +1,8 @@
+[v1r3p0]
+
+*PipelineSystem
+NEW: Interface/GlastJob : Workflow by S. Poss to move wrapper to DIRAC Node installation
+
 [v1r2p0]
 *Pipeline system
 NEW: added pipeline-wrapper to DIRAC installation. For now this is still being 

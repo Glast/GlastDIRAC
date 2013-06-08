@@ -45,7 +45,8 @@ if __name__ == "__main__":
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')
     Script.parseCommandLine()
     args = Script.getPositionalArgs() 
-    from DIRAC.Interfaces.API.Job import Job
+    #from DIRAC.Interfaces.API.Job import Job
+    from GlastDIRAC.PipelineSystem.Interface import GlastJob as Job
     from DIRAC.Interfaces.API.Dirac import Dirac
     from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
     from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient import SoftwareTagClient
@@ -124,7 +125,8 @@ if __name__ == "__main__":
             os.chmod(executable,0755) # make file executable
             input_sandbox_files.append(executable)
         
-        j.setExecutable(str(executable),logFile=str(log))
+        #j.setExecutable(str(executable),logFile=str(log))
+        j.addWrapper(logFile=log)
     else:
         gLogger.error("No executable defined.")
         dexit(1)
