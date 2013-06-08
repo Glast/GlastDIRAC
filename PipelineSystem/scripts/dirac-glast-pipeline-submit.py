@@ -61,9 +61,6 @@ if __name__ == "__main__":
         
     if pipeline:
         proxy = None
-        # define 2 new pipeline-dirac variables
-        pipeline_dict["P2_ECHO"]="echo" # this is needed to ensure correct functionality together with dirac-sys-sendmail
-        pipeline_dict["P2_SENDMAIL"]="dirac-sys-sendmail -dd" # the sendmail relay
         # check whether critical email information is available, if any or all of those are not there, raise an exception and fail to submit.
         required_variables = ["PIPELINE_FROMADDRESS","PIPELINE_TOADDRESS","PIPELINE_PROCESSINSTANCE","PIPELINE_ERRORADDRESS","JOBCONTROL_LOGFILE","PIPELINE_SUMMARY"]
         res = [i for i in required_variables if i not in pipeline_dict]
@@ -110,19 +107,14 @@ if __name__ == "__main__":
         log = "logFile.txt"
         if pipeline:
             input_sandbox_files.append("jobmeta.inf") # that one is generated with every single job (or at least should be)
-            for key in ["GPL_CONFIGDIR","PIPELINE_WORKDIR"]:
-               if os.path.isfile(os.path.join(pipeline_dict[key],"pipeline_wrapper")): 
-                   pipeline_wrapper = os.path.join(pipeline_dict[key],"pipeline_wrapper")
-                   break
-            if not os.path.isfile(pipeline_wrapper):
-                gLogger.error("file pipeline_wrapper not found in %s"%pipeline_wrapper)
-                dexit(1)
             if os.path.isfile(os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")):
                 script = os.path.join(pipeline_dict["PIPELINE_WORKDIR"],"script")
                 os.chmod(script,0755) # to make sure it's executable.
                 input_sandbox_files.append(script)
+            # here we branch out...
+            pipeline_wrapper = os.path.join(os.environ["DIRAC"],"GlastDIRAC/PipelineSystem/scripts/dirac-glast-pipeline-wrapper.sh")
             input_sandbox_files.append(pipeline_wrapper)
-            executable = "bash %s"%pipeline_wrapper
+            executable = pipeline_wrapper
             log = pipeline_dict["PIPELINE_LOGFILE"]    
         else:
             executable = args[0].replace("bash ","").replace("./","")
