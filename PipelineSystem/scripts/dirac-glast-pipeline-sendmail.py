@@ -59,9 +59,9 @@ if __name__== "__main__":
   
 
   ntc = NotificationClient()
-  gLogger.verbose("Sending:"," ".join(cli.to , cli.subject , cli.body , cli.fr ))
+  gLogger.verbose("Sending:"," ".join([cli.to , cli.subject , cli.body , cli.fr] ))
   print "sendMail(%s,%s,%s,%s,%s)" % ( cli.to , cli.subject , cli.body , cli.fr , False )
-  result = ntc.sendMail( cli.to , cli.subject , cli.body , cli.origin , localAttempt = False )
+  result = ntc.sendMail( cli.to , cli.subject , cli.body , cli.fr , localAttempt = False )
   if not result[ "OK" ]:
     gLogger.error( result[ "Message" ] )
     DIRACexit( 6 )
