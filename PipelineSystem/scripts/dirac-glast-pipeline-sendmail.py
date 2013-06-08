@@ -7,88 +7,63 @@
 
 """
   Utility to send an e-mail using DIRAC notification service. This is for Glast.
-
-  Arguments:
-    Formated text message. The message consists of e-mail headers and e-mail body
-    separated by two newline characters. Headers are key : value pairs separated
-    by newline character. Meaningful headers are "To:", "From:", "Subject:".
-    Other keys will be ommited.
-    Message body is an arbitrary string.
     
-
-  Options:
-    There are no options.
-
-  Examples:
-    dirac-glast-pipeline-sendmail "From: source@email.com\\nTo: destination@email.com\\nSubject: Test\\n\\nMessage body"
-    echo "From: source@email.com\\nSubject: Test\\n\\nMessage body" | dirac-sys-sendmail destination@email.com
 """
 
 __RCSID__ = "$Id$"
 
 import socket , sys , os
 
-from DIRAC                                              import gLogger, exit as DIRACexit
 from DIRAC.Core.Base                                    import Script
-from DIRAC.FrameworkSystem.Client.NotificationClient    import NotificationClient
 
-Script.setUsageMessage( ''.join( __doc__ ) )
+from DIRAC import S_OK
 
-Script.parseCommandLine( ignoreErrors = True )
-args = Script.getPositionalArgs()
+class Params(object):
+  def __init__(self):
+    self.to = ''
+    self.fr = ''
+    self.subject = ''
+    self.body = ''
+  def setTo(self,opt):
+    self.to = opt
+    return S_OK()
+  def setFrom(self,opt):
+    self.fr = opt
+    return S_OK()
+  def setSubject(self,opt):
+    self.subject = opt
+    return S_OK()
+  def setBody(self,opt):
+    self.body = opt.strip()
+    return S_OK()
+  
+  def registerSwitchs(self):
+    Script.registerSwitch("T:", "To=", "mail To", self.setTo)
+    Script.registerSwitch("F:","From=","mail from", self.setFrom)
+    Script.registerSwitch("S:","Subject=","mail Subject",self.setSubject)
+    Script.registerSwitch("B:","Body=","mail Body",self.setBody)
+    Script.setUsageMessage( '$s -T you@mail.com -F me@mail.com -S subject -B "My Body\n is ace"' )
 
-arg = "".join( args )
+if __name__== "__main__":
+  cli = Params()
+  cli.registerSwitchs()
+  Script.parseCommandLine( ignoreErrors = True )
+  
+  from DIRAC                                              import gLogger, exit as DIRACexit
+  
+  from DIRAC.FrameworkSystem.Client.NotificationClient    import NotificationClient
+  
+  if not cli.to or not cli.fr or not cli.subject or not cli.body:
+    gLogger.error( "Missing argument" )
+    DIRACexit( 2 )
+  
 
-if not len( arg ) > 0:
-  gLogger.error( "Missing argument" )
-  DIRACexit( 2 )
-
-try:
-  head , body = arg.split( "\\n\\n" )
-except Exception , x:
-  head = "To: %s" % arg
-  body = sys.stdin.read()
-
-try:
-  tmp , body = body.split( "\\n\\n" )
-  head = tmp + "\\n" + head
-except Exception , x:
-  pass
-
-body = "".join( body.strip() )
-
-try:
-  headers = dict( ( i.strip() , j.strip()) for i , j in 
-              ( item.split( ':' ) for item in head.split( '\\n' ) ) )
-except:
-  gLogger.error( "Failed to convert string: %s to email headers" % head )
-  DIRACexit( 4 )
-gLogger.notice("Header: %s" % headers)
-if not "To" in headers:
-  gLogger.error( "Failed to get 'To:' field from headers %s" % head )
-  DIRACexit( 5 )
-to = headers[ "To" ]
-
-gLogger.notice("To:",to)
-
-origin = "%s@%s" %( os.getenv( "LOGNAME" , "dirac" ) , socket.getfqdn() )
-if "From" in headers:
-  origin = headers[ "From" ]
-
-gLogger.notice("From:", origin)
-
-subject = "Sent from %s" % socket.getfqdn()
-if "Subject" in headers:
-  subject = headers[ "Subject" ]
-
-gLogger.notice("Subject:", subject)
-
-ntc = NotificationClient()
-gLogger.verbose("Sending:"," ".join(to , subject , body , origin ))
-print "sendMail(%s,%s,%s,%s,%s)" % ( to , subject , body , origin , False )
-result = ntc.sendMail( to , subject , body , origin , localAttempt = False )
-if not result[ "OK" ]:
-  gLogger.error( result[ "Message" ] )
-  DIRACexit( 6 )
-
-DIRACexit( 0 )
+  ntc = NotificationClient()
+  gLogger.verbose("Sending:"," ".join(cli.to , cli.subject , cli.body , cli.fr ))
+  print "sendMail(%s,%s,%s,%s,%s)" % ( cli.to , cli.subject , cli.body , cli.fr , False )
+  result = ntc.sendMail( cli.to , cli.subject , cli.body , cli.origin , localAttempt = False )
+  if not result[ "OK" ]:
+    gLogger.error( result[ "Message" ] )
+    DIRACexit( 6 )
+  
+  DIRACexit( 0 )
