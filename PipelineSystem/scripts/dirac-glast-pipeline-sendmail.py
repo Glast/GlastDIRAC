@@ -34,7 +34,7 @@ class Params(object):
     self.subject = opt
     return S_OK()
   def setBody(self,opt):
-    self.body = opt.strip()
+    self.body = opt.replace("\\n","\n")
     return S_OK()
   
   def registerSwitchs(self):
