@@ -57,12 +57,19 @@ if __name__ == "__main__":
         import json
         f = open(specialOptions["env"],"r")
         pipeline_dict = json.load(f)
-        pipeline_dict["P2_ECHO"]="echo" # this is needed to ensure correct functionality together with dirac-sys-sendmail
         pipeline = True
         
     if pipeline:
         proxy = None
-        
+        # define 2 new pipeline-dirac variables
+        pipeline_dict["P2_ECHO"]="echo" # this is needed to ensure correct functionality together with dirac-sys-sendmail
+        pipeline_dict["P2_SENDMAIL"]="dirac-sys-sendmail -dd" # the sendmail relay
+        # check whether critical email information is available, if any or all of those are not there, raise an exception and fail to submit.
+        required_variables = ["PIPELINE_FROMADDRESS","PIPELINE_TOADDRESS","PIPELINE_PROCESSINSTANCE","PIPELINE_ERRORADDRESS","JOBCONTROL_LOGFILE","PIPELINE_SUMMARY"]
+        res = [i for i in required_variables if i not in pipeline_dict]
+        if len(res)!=0:
+            gLogger.error("Could not find critical variables for submission:",str(res))
+            dexit(1)            
         op = Operations()
         #TODO: replace glast.org with VO-agnostic statement
         shifter = op.getValue("Pipeline/Shifter","/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865")
@@ -75,10 +82,10 @@ if __name__ == "__main__":
         os.environ['X509_USER_PROXY'] = proxy
         gLogger.info("using proxy %s"%proxy)
     
-    j = Job(stdout="logFile.txt",stderr="logFile.txt") # specifies the logfile
+    j = Job(stdout="DIRAC_wrapper.txt",stderr="DIRAC_wrapper.txt") # specifies the logfile
     
     input_sandbox_files = []
-    output_sandbox_files = ["logFile.txt", "jobmeta.inf"]
+    output_sandbox_files = ["*.log","*.txt", "jobmeta.inf"]
     if pipeline:
         j.setExecutionEnv(pipeline_dict) # that sets the env vars
         if pipeline_dict.has_key("GPL_CONFIGDIR"):
@@ -100,6 +107,7 @@ if __name__ == "__main__":
     executable = None
     if len(args)>0:
         # BUG: pipeline.process instance creates pipeline_wrapper --> sets automatically 'bash pipeline_wrapper' as cmd
+        log = "logFile.txt"
         if pipeline:
             input_sandbox_files.append("jobmeta.inf") # that one is generated with every single job (or at least should be)
             for key in ["GPL_CONFIGDIR","PIPELINE_WORKDIR"]:
@@ -114,7 +122,8 @@ if __name__ == "__main__":
                 os.chmod(script,0755) # to make sure it's executable.
                 input_sandbox_files.append(script)
             input_sandbox_files.append(pipeline_wrapper)
-            executable = "bash %s"%pipeline_wrapper    
+            executable = "bash %s"%pipeline_wrapper
+            log = pipeline_dict["PIPELINE_LOGFILE"]    
         else:
             executable = args[0].replace("bash ","").replace("./","")
             if not os.path.isfile(executable):
@@ -122,7 +131,8 @@ if __name__ == "__main__":
                 dexit(1)
             os.chmod(executable,0755) # make file executable
             input_sandbox_files.append(executable)
-        j.setExecutable(str(executable))
+        
+        j.setExecutable(str(executable),logfile=log)
     else:
         gLogger.error("No executable defined.")
         dexit(1)
