@@ -1,3 +1,11 @@
+[v1r2p0]
+*Pipeline system
+NEW: added pipeline-wrapper to DIRAC installation. For now this is still being 
+added to the input sandbox but eventually this should be replaced in the workflow
+FIX: minor bugfixes
+CHANGE: get rid of P2_* variables.
+PRODUCTION RELEASE!
+
 [v1r1p10]
 *Pipeline system
 FIX: sendmail.
