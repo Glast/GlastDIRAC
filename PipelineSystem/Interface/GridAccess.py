@@ -9,13 +9,14 @@ Script.parseCommandLine( ignoreErrors = False )
 import DIRAC
 from DIRAC import gLogger, S_OK, S_ERROR
 import os, time
+from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
 from DIRAC.Core.Security.ProxyInfo                          import getProxyInfo
 from DIRAC.DataManagementSystem.Client.ReplicaManager       import ReplicaManager
 from DIRAC.Core.Utilities.List                              import sortList
 
 # Set up message logging
 
-class stageGrid:
+class stageGrid(object):
     """
     provides a container for all the storage elements. the base class any user needs to call
     implements a standard set of functions any user can call directly from pipeline code;
@@ -24,14 +25,40 @@ class stageGrid:
     def __init__(self,dataDir):
         self.stagingArea = dataDir
         self.listFileStaged = []    
-        self.prefixDest = "/glast.org/user/v/vrolland"
-        self.stagingDest = self.prefixDest+"/ServiceChallenge/MC-tasks/"+os.environ['PIPELINE_TASK']+"/"+os.environ['PIPELINE_STREAM']
-        self.nbofSEtried =0;
+        self.nbofSEtried =0
+        self.userprefix = None
+        self.prefixDest = None
+        self.stagingDest = None
         self.listSEs = os.environ['SEs_AVAILABLE'].split(',')
         self.SE = None
         self.log = gLogger.getSubLogger("GPL Staging")
+        if self.__getPrefix()!=0:
+            self.log.error("Failed to initialize staging.")
+            raise Exception("Failed to initialize!")
         self.__pickRandomSE()
-            
+    
+    def __getPrefix(self):
+        op = Operations()
+        self.userprefix = None
+        res = getProxyInfo()
+        if res['OK']:
+            if 'username' in res['Value']:
+                user=res['Value']['username']
+                self.userprefix="/glast.org/user/%s/%s/"%(user[0],user)
+        else:
+            self.log.error("Proxy could not be found")
+            return 1
+        task_category = os.environ["GPL_TASKCATEGORY"]
+        if not task_category:
+            task_category = op.getValue("Pipeline/TaskCategory",None)
+        if not task_category:
+            self.log.error("Could not find task category")
+            return 1
+
+        self.prefixDest = op.getValue("Pipeline/StorageElementBasedDir",self.userprefix)
+        self.stagingDest = self.prefixDest+task_category+os.environ['PIPELINE_TASK']+"/"+os.environ['PIPELINE_STREAM']
+        return 0
+    
     def getStageDir(self):
         """
         @return: string - stage directory
@@ -154,8 +181,7 @@ def getOutputData(baseDir):
     if not res['OK']:
         gLogger.error( "Failed to get client proxy information.", res['Message'] )
         DIRAC.exit( 2 )
-    proxyInfo = res['Value']
-    username = proxyInfo['username']
+        
 
     print  'Will search for files in %s' % baseDir
     activeDirs = [baseDir]
