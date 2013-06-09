@@ -37,7 +37,7 @@ class GlastWrapperCall(object):
         """ Discover and check existence of the wrapper
         """
         bpath = DIRAC.rootPath
-        fname = self.ops("Pipeline/Wrapper","GlastDIRAC/PipelineSystem/scripts/dirac-glast-pipeline-wrapper.sh")
+        fname = self.ops.getValue("Pipeline/Wrapper","GlastDIRAC/PipelineSystem/scripts/dirac-glast-pipeline-wrapper.sh")
         location = os.path.join(bpath, fname)
         if not os.path.isfile(location):
             return S_ERROR("Could not find wrapper at %s"%location)
