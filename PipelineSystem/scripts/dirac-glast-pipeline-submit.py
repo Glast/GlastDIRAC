@@ -46,7 +46,7 @@ if __name__ == "__main__":
     Script.parseCommandLine()
     args = Script.getPositionalArgs() 
     #from DIRAC.Interfaces.API.Job import Job
-    from GlastDIRAC.PipelineSystem.Interface import GlastJob as Job
+    from GlastDIRAC.PipelineSystem.Interface.GlastJob import GlastJob as Job
     from DIRAC.Interfaces.API.Dirac import Dirac
     from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
     from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient import SoftwareTagClient
