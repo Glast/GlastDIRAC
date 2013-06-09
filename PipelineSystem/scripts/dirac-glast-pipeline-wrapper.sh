@@ -64,7 +64,7 @@ gotEXIT()
     if [ -e ${PIPELINE_SUMMARY} ] ; then
        echo -e "${END}" >> ${PIPELINE_SUMMARY}
        if [ "$1" != "rerun" ] ; then
-           dirac-glast-pipeline-sendmail -T ${PIPELINE_TOADDRESS} -F ${PIPELINE_FROMADDRESS} -S ${PIPELINE_PROCESSINSTANCE} -f ${PIPELINE_SUMMARY}
+           dirac-glast-pipeline-sendmail -T ${PIPELINE_TOADDRESS} -F ${PIPELINE_FROMADDRESS} -S ${PIPELINE_PROCESSINSTANCE} -f "${PIPELINE_SUMMARY}"
            fi
     else
        if [ "$1" != "rerun" ] ; then
@@ -81,7 +81,8 @@ fi
 echo "WE STARTED: \n ${MSG}"
  
 # Note this is the first attempt to write to the working dir. Will fail if no disk space.
-export PIPELINE_SUMMARY=`pwd`/pipeline_summary $ echo -e "${MSG}" > ${PIPELINE_SUMMARY}
+export PIPELINE_SUMMARY=`pwd`/pipeline_summary 
+echo -e "${MSG}" > ${PIPELINE_SUMMARY}
 
  
 # Support for allowing user to re-run interactively
