@@ -23,7 +23,7 @@ if __name__ == "__main__":
 	from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
 
 	proxy = None
-	op = Operations()
+	op = Operations("glast.org")
 
 	shifter = op.getValue("Pipeline/Shifter","/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865")
 	shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
@@ -76,14 +76,13 @@ if __name__ == "__main__":
 	for j in job_list_to_handle:
 		print "\t"+j+" => ",
 		if not j in jobid_handled:
-
-		res = w.getJobSummary(int(j))
-		if not res['OK']:
-			print res['Message']
-			sys.stderr.write(time.strftime('%d/%m/%y %H:%M',time.localtime())+" => "+j+" => "+res['Message']+"\n")
-			break
-		summary = res['Value']	
-		status_j = summary['Status']
+			res = w.getJobSummary(int(j))
+			if not res['OK']:
+				print res['Message']
+				sys.stderr.write(time.strftime('%d/%m/%y %H:%M',time.localtime())+" => "+j+" => "+res['Message']+"\n")
+				break
+			summary = res['Value']	
+			status_j = summary['Status']
 
 		# Job we want to handle
 		if status_j in status_to_handle:
@@ -95,17 +94,17 @@ if __name__ == "__main__":
 				sys.stderr.write(time.strftime('%d/%m/%y %H:%M',time.localtime())+" => "+j+" => "+res['Message']+"\n")
 			else:
 
-			# check if 'jobmeta.inf' is present (if not it's not a PIPELINE job )
-			if not os.path.isfile(dir_temp+"/InputSandbox"+j+"/jobmeta.inf"):
-				print "WARNING : not a pipeline task"
-				# notify the job as "already handled"
-				jobid_handled.append(j);
-			else:
+				# check if 'jobmeta.inf' is present (if not it's not a PIPELINE job )
+				if not os.path.isfile(dir_temp+"/InputSandbox"+j+"/jobmeta.inf"):
+					print "WARNING : not a pipeline task"
+					# notify the job as "already handled"
+					jobid_handled.append(j);
+				else:
 			  
-				# Get the working dir of the task from 'jobmeta.inf'
-				file_jobmeta = open( dir_temp+"/InputSandbox"+j+"/jobmeta.inf" , "r")
-				workdir = file_jobmeta.readline()
-				file_jobmeta.close()
+					# Get the working dir of the task from 'jobmeta.inf'
+					file_jobmeta = open( dir_temp+"/InputSandbox"+j+"/jobmeta.inf" , "r")
+					workdir = file_jobmeta.readline()
+					file_jobmeta.close()
 				
 				# retrieve the OUTPUT sandbox
 				res = d.getOutputSandbox(j,dir_temp)

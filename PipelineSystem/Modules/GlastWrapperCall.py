@@ -21,7 +21,7 @@ class GlastWrapperCall(object):
         Constructor
         '''
         self.log = gLogger.getSubLogger("WrapperCall")
-        self.ops = Operations()
+        self.ops = Operations("glast.org")
         self.stdError = ''
         
     def getVariables(self):

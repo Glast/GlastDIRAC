@@ -38,7 +38,7 @@ class stageGrid(object):
         self.__pickRandomSE()
     
     def __getPrefix(self):
-        op = Operations()
+        op = Operations("glast.org")
         self.userprefix = None
         res = getProxyInfo()
         if res['OK']:

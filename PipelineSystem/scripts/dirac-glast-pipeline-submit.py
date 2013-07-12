@@ -68,7 +68,7 @@ if __name__ == "__main__":
         if len(res)!=0:
             gLogger.error("Could not find critical variables for submission:",str(res))
             dexit(1)            
-        op = Operations()
+        op = Operations("glast.org")
         #TODO: replace glast.org with VO-agnostic statement
         shifter = op.getValue("Pipeline/Shifter","/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865")
         shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
@@ -154,22 +154,22 @@ if __name__ == "__main__":
             dexit(1)
         sites = result[ 'Value' ]
         j.setDestination(sites)
-
+    # new feature: add xrootd-keytab file to input list. this one resides on SE
+    xrd_keytab = op.getValue("Pipeline/XrdKey",None)    
+    input_stage_files = []
+    if not xrd_keytab:
+        gLogger.notice("*DEBUG* adding XrdKey file %s to input"%xrd_keytab)
+        input_stage_files.append(xrd_keytab)
     if not opts.stagein is None:
-        input_stage_files = []
         # we do add. input staging
         files = opts.stagein.split(",")
         for f in files:
-            if f.startswith("LFN"):
                 input_stage_files.append(f)
-            else:
-                input_stage_files+=extract_file(f)
-        for f in input_stage_files:
-            if not f.startswith("LFN"):
-                gLogger.error("*ERROR* required inputfiles to be defined through LFN, could not find LFN in %s"%f)
-                dexit(1)
-        j.setInputData(input_stage_files)
-
+    if len(input_stage_files):
+        if len(input_stage_files)==1:
+            j.setInputData(input_stage_files[-1])
+        else:
+            j.setInputData(input_stage_files)
     if opts.debug:
         gLogger.notice('*DEBUG* just showing the JDL of the job to be submitted')
         gLogger.notice(j._toJDL())
