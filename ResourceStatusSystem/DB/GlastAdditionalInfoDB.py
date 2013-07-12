@@ -11,14 +11,12 @@ __RCSID__ = " $Id: $ "
 
 from DIRAC                                                             import gLogger, S_OK, S_ERROR
 from DIRAC.Core.Base.DB                                                import DB
-#from DIRAC.ConfigurationSystem.Client.Helpers.Operations            import Operations
 from DIRAC.ConfigurationSystem.Client.Helpers.Resources                import getQueues
 from DIRAC.ConfigurationSystem.Client.Helpers.Registry import getVO
 class GlastAdditionalInfoDB ( DB ):
   def __init__( self, maxQueueSize = 10 ):
     """ 
     """
-    #self.ops = Operations()
     self.dbname = 'GlastAdditionalInfoDB'
     self.logger = gLogger.getSubLogger('GlastAdditionalInfoDB')
     DB.__init__( self, self.dbname, 'ResourceStatus/GlastAdditionalInfoDB', maxQueueSize  )

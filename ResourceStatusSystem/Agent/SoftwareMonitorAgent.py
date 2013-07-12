@@ -96,7 +96,7 @@ class SoftwareMonitorAgent(AgentModule):
     from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
     import os
     
-    ops = Operations()
+    ops = Operations("glast.org")
     scriptname = ops.getValue("ResourceStatus/SofwareManagementScript", self.script)
     
     j = Job()

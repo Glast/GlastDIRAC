@@ -2,7 +2,7 @@
 
 *Pipeline System
 NEW: added xrootd-key tab file to job. This one takes its values from operations/Pipeline/XrdKey
-
+FIX: Dirac variables for VO specific stuff
 [v1r3p3]
 
 *Pipeline System

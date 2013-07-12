@@ -68,7 +68,7 @@ if __name__ == "__main__":
         if len(res)!=0:
             gLogger.error("Could not find critical variables for submission:",str(res))
             dexit(1)            
-        op = Operations()
+        op = Operations("glast.org")
         #TODO: replace glast.org with VO-agnostic statement
         shifter = op.getValue("Pipeline/Shifter","/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865")
         shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
