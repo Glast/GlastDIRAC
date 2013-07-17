@@ -9,9 +9,10 @@ Script.parseCommandLine( ignoreErrors = False )
 import DIRAC
 from DIRAC import gLogger, S_OK, S_ERROR
 import os, time
-from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
+from DIRAC.ConfigurationSystem.Client.Helpers.Operations    import Operations
 from DIRAC.Core.Security.ProxyInfo                          import getProxyInfo
 from DIRAC.DataManagementSystem.Client.ReplicaManager       import ReplicaManager
+from DIRAC.DataManagementSystem.Client.ReplicaManager       import CatalogFile
 from DIRAC.Core.Utilities.List                              import sortList
 
 # Set up message logging
@@ -23,17 +24,20 @@ class stageGrid(object):
     """
     
     def __init__(self,dataDir):
+        op = Operations("glast.org")
         self.stagingArea = dataDir
         self.listFileStaged = []    
         self.nbofSEtried =0
         self.userprefix = None
         self.prefixDest = None
         self.stagingDest = None
-        self.listSEs = os.environ['SEs_AVAILABLE'].split(',')
+        SEtemporaryStaging = op.getValue( 'Pipeline/StorageElementTemporaryStaging', "" )
+        self.listSEs = SEtemporaryStaging.split(',')
+    
         self.SE = None
         self.log = gLogger.getSubLogger("GPL Staging")
         if self.__getPrefix()!=0:
-            self.log.error("Failed to initialize staging.")
+            print("Failed to initialize staging.")
             raise Exception("Failed to initialize!")
         self.__pickRandomSE()
     
@@ -46,19 +50,22 @@ class stageGrid(object):
                 user=res['Value']['username']
                 self.userprefix="/glast.org/user/%s/%s/"%(user[0],user)
         else:
-            self.log.error("Proxy could not be found")
+            print("Proxy could not be found")
             return 1
         task_category = os.environ["GPL_TASKCATEGORY"]
         if not task_category:
             task_category = op.getValue("Pipeline/TaskCategory",None)
         if not task_category:
-            self.log.error("Could not find task category")
+            print("Could not find task category")
             return 1
 
-        self.prefixDest = op.getValue("Pipeline/StorageElementBasedDir",self.userprefix)
-        self.stagingDest = self.prefixDest+task_category+os.environ['PIPELINE_TASK']+"/"+os.environ['PIPELINE_STREAM']
+        self.prefixDest = op.getValue("Pipeline/StorageElementBasePath",self.userprefix)
+        self.stagingDest = self.prefixDest+"/"+task_category+"/"+os.environ['PIPELINE_TASK']+"/"+os.environ['PIPELINE_STREAM']
         return 0
-    
+   
+    def getDestinationDir(self):
+        return self.stagingDest
+ 
     def getStageDir(self):
         """
         @return: string - stage directory
@@ -76,7 +83,8 @@ class stageGrid(object):
             self.SE = choice(self.listSEs)
         except IndexError:
             self.SE = None
-        
+        print('__pickRandomSE -> self.SE :')
+        print(self.SE) 
             
     def stageOut(self,outfile):
         """
@@ -102,36 +110,36 @@ class stageGrid(object):
         rc = 0
         rm = ReplicaManager()
         for item in self.listFileStaged:   
-            #self.log.info("SE '"+self.SE+"' == : '"+str(self.SE == "False")+"'")
+            #print("SE '"+self.SE+"' == : '"+str(self.SE == "False")+"'")
             if not self.SE:
-                self.log.info("No SE available for '"+item[0]+"'")
+                print("No SE available for '"+item[0]+"'")
                 rc+=1
                 continue
             else:
-                self.log.info("Trying to store '"+item[0]+"' in SE : '"+self.SE+"' ...")
+                print("Trying to store '"+item[0]+"' in SE : '"+self.SE+"' ...")
                 result = rm.putAndRegister( item[1], item[0], self.SE)
                 if not result['OK']:
-                    self.log.warning('ERROR %s' % ( result['Message'] ))
-                    self.listSEs.remove(self.SE) # make sure not to pick the same SE again.             
+                    print('ERROR %s' % ( result['Message'] ))
 
-        self.log.info("Wait 5sec before trying again...")
-        time.sleep(5)
-        result = rm.putAndRegister( item[1], item[0], self.SE)
-        if not result['OK']:
-            self.log.warning('ERROR %s' % ( result['Message'] ))
-            while   not result['OK'] :
-                self.__pickRandomSE()
-                if not self.SE:
-                    break
-                self.log.info("Trying with another SE : '"+self.SE+"' . In 5sec...")
-                time.sleep(5)
-                result = rm.putAndRegister( item[1], item[0], self.SE)
-                if result['OK']:
-                    self.log.info("file stored : '"+item[1]+"' in '"+self.SE+"'")
-                else:
-                    self.log.info("ERROR : failed to store the file '"+item[1]+"' ...")
-                    self.listSEs.remove(self.SE) # make sure not to pick the same SE again. 
-                    rc += 1
+                    print("Wait 5sec before trying again...")
+                    time.sleep(5)
+                    result = rm.putAndRegister( item[1], item[0], self.SE)
+                    if not result['OK']:
+                        print('ERROR %s' % ( result['Message'] ))
+                        while   not result['OK'] :
+                            self.listSEs.remove(self.SE) # make sure not to pick the same SE again.    
+                            self.__pickRandomSE()
+                            if not self.SE:
+                                break
+                            print("Trying with another SE : '"+self.SE+"' . In 5sec...")
+                            time.sleep(5)
+                            result = rm.putAndRegister( item[1], item[0], self.SE)
+                            if result['OK']:
+                                print("file stored : '"+item[1]+"' in '"+self.SE+"'")
+                            else:
+                                print("ERROR : failed to store the file '"+item[1]+"' ...")
+                                rc += 1        
+
         return rc
 
     def dumpStagedFiles(self):
@@ -140,7 +148,7 @@ class stageGrid(object):
         @return:
         """
         for item in self.listFileStaged:
-            self.log.info("* "+item[0]+" - "+item[1])
+            print("* "+item[0]+" - "+item[1])
 
     def listStageDir(self):
         """
@@ -148,14 +156,14 @@ class stageGrid(object):
         @return:
         """
         for item in self.listFileStaged:
-            self.log.info("* "+item[0])
+            print("* "+item[0])
 
     def getChecksums(self,printflag=None):
         """@brief Return a dictionary of: [stagedOut file name,[length,checksum] ].  Call this after creating file(s), but before finish(), if at all.  If the printflag is set to 1, a brief report will be sent to stdout."""
         cksums = {}
         # Compute checksums for all stagedOut files
         
-        self.log.info("Calculating 32-bit CRC checksums for stagedOut files")
+        print("Calculating 32-bit CRC checksums for stagedOut files")
         #print "Calculating 32-bit CRC checksums for stagedOut files"
         
         for stagee in self.listFileStaged:
@@ -166,16 +174,20 @@ class stageGrid(object):
                 foo = fd.read()             # Calculate checksum
                 rc = fd.close()
                 if rc != None:
-                    self.log.warning("Checksum error: return code =  "+str(rc)+" for file "+File)
+                    print("Checksum error: return code =  "+str(rc)+" for file "+File)
                     #print "Checksum error: return code =  "+str(rc)+" for file "+file
                 else:
                     cksumout = foo.split()
                     cksums[cksumout[2]] = [cksumout[0],cksumout[1]]
             else:
-                self.log.warning("Checksum error: file does not exist, "+File)
+                print("Checksum error: file does not exist, "+File)
         return cksums
 
+        
+        
+        
 def getOutputData(baseDir):
+    exitCode = 0    
     listOutputData = []
     res = getProxyInfo( False, False )
     if not res['OK']:
@@ -210,7 +222,6 @@ def getOutputData(baseDir):
             files = dirContents['Files'].keys()
     # ######################################################################################################## #
     # get file
-    listlfn_toremove = []
     ntries = 3
     for lfn in sortList( allFiles ):
         success = False
@@ -224,7 +235,6 @@ def getOutputData(baseDir):
             else:
                 success = True
                 listOutputData.append(result['Value']['Successful'][lfn])
-                listlfn_toremove.append(lfn)
                 print "OK"
                 break
             ntries -= 1
@@ -232,19 +242,54 @@ def getOutputData(baseDir):
             print 'ERROR could not get file after %i trials. Giving up :('%ntries
             exitCode = 2
     # ######################################################################################################## #
-    # remove files
-    print 'Will remove retrieved files' 
-    for lfntoremove in listlfn_toremove:
-        print " - removing : '"+lfntoremove+"'",
-    result = rm.removeFile(listlfn_toremove)      
-    if not result['OK']:
-        print 'ERROR: %s' % (result['Message'] )
-        exitCode = 2
-    else :
-        failed_files = result['Value']['Failed']
-        for key in failed_files:
-            print "Failed file %s: %s"%(key,failed_files[key])
-    # ######################################################################################################## #
     if exitCode:
         return S_ERROR("Failed to finish operations.")
     return S_OK(listOutputData);
+
+
+    
+    
+def removeOutputData(baseDir):
+    res = getProxyInfo( False, False )
+    if not res['OK']:
+        gLogger.error( "Failed to get client proxy information.", res['Message'] )
+        return S_ERROR("Failed to get client proxy information.", res['Message'])
+
+    # ######################################################################################################## #
+    rm = ReplicaManager()
+    
+    result = rm.cleanLogicalDirectory(baseDir);
+    print "Ignore the message about the file '"+baseDir+"dirac_directory'"
+      
+    if not result['OK']:
+        print 'ERROR: %s' % (result['Message'] )
+        return S_ERROR("Failed to Suppress the directory : '"+baseDir+"'")
+
+    return S_OK(baseDir + " has been supressed")
+
+    
+    
+    
+def cleanOldOutputData(baseDir):
+    res = getProxyInfo( False, False )
+    if not res['OK']:
+        gLogger.error( "Failed to get client proxy information.", res['Message'] )
+        return S_ERROR("Failed to get client proxy information.", res['Message'])
+
+    cf = CatalogFile()
+    result = cf.getCatalogExists(baseDir) 
+    
+    if not result['OK']:
+        print 'ERROR: %s' % (result['Message'] )
+        return S_ERROR("Failed to reach the directory : '"+baseDir+"'")
+        
+    if result['Value']['Successful'][baseDir]:
+        res = removeOutputData(baseDir)
+        if not result['OK']:
+            return S_ERROR(result['Message'])
+        else:
+            return S_OK(baseDir + " has been supressed")
+        
+    return S_OK("No previous outpudata found.")
+    
+
