@@ -37,7 +37,7 @@ class stageGrid(object):
         self.SE = None
         self.log = gLogger.getSubLogger("GPL Staging")
         if self.__getPrefix()!=0:
-            print("Failed to initialize staging.")
+            self.log.error("Failed to initialize staging.")
             raise Exception("Failed to initialize!")
         self.__pickRandomSE()
     
@@ -50,13 +50,13 @@ class stageGrid(object):
                 user=res['Value']['username']
                 self.userprefix="/glast.org/user/%s/%s/"%(user[0],user)
         else:
-            print("Proxy could not be found")
+            self.log.error("Proxy could not be found")
             return 1
         task_category = os.environ["GPL_TASKCATEGORY"]
         if not task_category:
             task_category = op.getValue("Pipeline/TaskCategory",None)
         if not task_category:
-            print("Could not find task category")
+            self.log.error("Could not find task category")
             return 1
 
         self.prefixDest = op.getValue("Pipeline/StorageElementBasePath",self.userprefix)
@@ -83,8 +83,8 @@ class stageGrid(object):
             self.SE = choice(self.listSEs)
         except IndexError:
             self.SE = None
-        print('__pickRandomSE -> self.SE :')
-        print(self.SE) 
+        self.log.info('__pickRandomSE -> self.SE :')
+        self.log.info(self.SE) 
             
     def stageOut(self,outfile):
         """
@@ -112,32 +112,32 @@ class stageGrid(object):
         for item in self.listFileStaged:   
             #print("SE '"+self.SE+"' == : '"+str(self.SE == "False")+"'")
             if not self.SE:
-                print("No SE available for '"+item[0]+"'")
+                self.log.info("No SE available for '"+item[0]+"'")
                 rc+=1
                 continue
             else:
-                print("Trying to store '"+item[0]+"' in SE : '"+self.SE+"' ...")
+                self.log.info("Trying to store '"+item[0]+"' in SE : '"+self.SE+"' ...")
                 result = rm.putAndRegister( item[1], item[0], self.SE)
                 if not result['OK']:
-                    print('ERROR %s' % ( result['Message'] ))
+                    self.log.info('ERROR %s' % ( result['Message'] ))
 
-                    print("Wait 5sec before trying again...")
+                    self.log.info("Wait 5sec before trying again...")
                     time.sleep(5)
                     result = rm.putAndRegister( item[1], item[0], self.SE)
                     if not result['OK']:
-                        print('ERROR %s' % ( result['Message'] ))
+                        self.log.info('ERROR %s' % ( result['Message'] ))
                         while   not result['OK'] :
                             self.listSEs.remove(self.SE) # make sure not to pick the same SE again.    
                             self.__pickRandomSE()
                             if not self.SE:
                                 break
-                            print("Trying with another SE : '"+self.SE+"' . In 5sec...")
+                            self.log.info("Trying with another SE : '"+self.SE+"' . In 5sec...")
                             time.sleep(5)
                             result = rm.putAndRegister( item[1], item[0], self.SE)
                             if result['OK']:
-                                print("file stored : '"+item[1]+"' in '"+self.SE+"'")
+                                self.log.info("file stored : '"+item[1]+"' in '"+self.SE+"'")
                             else:
-                                print("ERROR : failed to store the file '"+item[1]+"' ...")
+                                self.log.error("ERROR : failed to store the file '"+item[1]+"' ...")
                                 rc += 1        
 
         return rc
@@ -148,7 +148,7 @@ class stageGrid(object):
         @return:
         """
         for item in self.listFileStaged:
-            print("* "+item[0]+" - "+item[1])
+            self.log.info("* "+item[0]+" - "+item[1])
 
     def listStageDir(self):
         """
@@ -156,7 +156,7 @@ class stageGrid(object):
         @return:
         """
         for item in self.listFileStaged:
-            print("* "+item[0])
+            self.log.info("* "+item[0])
 
     def getChecksums(self,printflag=None):
         """@brief Return a dictionary of: [stagedOut file name,[length,checksum] ].  Call this after creating file(s), but before finish(), if at all.  If the printflag is set to 1, a brief report will be sent to stdout."""
@@ -174,13 +174,13 @@ class stageGrid(object):
                 foo = fd.read()             # Calculate checksum
                 rc = fd.close()
                 if rc != None:
-                    print("Checksum error: return code =  "+str(rc)+" for file "+File)
+                    self.log.error("Checksum error: return code =  "+str(rc)+" for file "+File)
                     #print "Checksum error: return code =  "+str(rc)+" for file "+file
                 else:
                     cksumout = foo.split()
                     cksums[cksumout[2]] = [cksumout[0],cksumout[1]]
             else:
-                print("Checksum error: file does not exist, "+File)
+                self.log.error("Checksum error: file does not exist, "+File)
         return cksums
 
         
