@@ -3,10 +3,11 @@
 
 Created 06/04/2012
 @author: S. Zimmer (OKC/SU)
+@author: V. Rolland (IN2P3/LUPM)
 
 """
 
-import cmd, sys
+import cmd, sys, os
 from GlastDIRAC.ResourceStatusSystem.Client import SoftwareTagClient
 from DIRAC.Core.Utilities import PromptUser
 
@@ -242,7 +243,7 @@ class SoftwareTagCli(cmd.Cmd):
         
     def do_exit(self,args):
         """ quit """
-        sys.exit(0)
+        sys.exit(0)      
     
     def do_removetagfromdb(self,argss):
         """ forget tag (drop in DB)
@@ -275,9 +276,90 @@ class SoftwareTagCli(cmd.Cmd):
                 completed = True
                 ces_removed+=len(res['Value']['Successful'])
         print "Removed %s from %i CEs"%(tag,ces_removed)
+
+
+
+    def do_installonsite(self,argss):
+        """ Install a release on a grid site : 
+            installonsite tag site
+        """
+        args = argss.split()
+        if len(args)<2:
+            print self.do_installonsite.__doc__
+            return
+        tag = args[0]
+        site = args[1]
+        
+        #print "Check if the software with the tag '"+tag+"' exists on the rsync server..." 
+        #res = self.client.getSitesForTag(tag)
+        #if not res['OK']:
+          #print res['Message']
+          #return 
+        #print "tag found !"  
+
+        from DIRAC.Interfaces.API.Dirac import Dirac
+        d = Dirac()
+        from DIRAC.Interfaces.API.Job import Job
+        
+        from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
+        import os
+        
+        ops = Operations()
+        scriptname = "InstallSoftware.py"
+        j = Job()
+        j.setDestination(site)
+        j.setCPUTime(1000)
+        j.setName("Installation "+tag)
+        j.setExecutable(os.environ['DIRAC']+"/GlastDIRAC/ResourceStatusSystem/Client/"+scriptname , logFile='SoftwareInstallation.log')
+        j.setOutputSandbox('*.log')
+        res = d.submit(j)
+        if not res['OK']:
+          print "Could not submit the installation at site %s, message %s"%(site,res['Message'])
+          return
+        
+        print "Job submitted, id = "+str(res['Value'])
+        
+        print "Add tag :"
+        res = self.client.addTagAtSite(tag,site)
+        if not res['OK']:
+            print "Could not register tag %s at site %s, message %s"%(tag,site,res['Message'])
+            return
+        print "Added %s to %i CEs"%(tag,len(res['Value'][tag]))
+        
+
+    def do_preinstall(self,argss):
+        """ Pre-Install a release on the rsync server :
+            preinstall tag 
+        """
+        args = argss.split() 
+        if len(args)<1:
+            print self.do_preinstall.__doc__
+            return
+        tag = args[0].replace("VO-glast.org-","")
+        items = tag.split("/")
+        if len(items)!=4:
+            print "Bad tag structure"
+            return
+
+        tag_os = items[0]
+        variant = items[1]
+        package = items[2]
+        version = items[3]       
+        
+        cmd_preinstall = "/glast/applicat/preinstallGlastRelease/GlastReleasePreinstaller -o "+tag_os+" -v "+version+" -a "+variant
+        cmd_ssh = 'ssh glastpro@ccage.in2p3.fr "ssh ccglast02.in2p3.fr \\"'+cmd_preinstall+'\\" \" '
+        
+        print "Submission of the preinstallation will beginning after you give the password of the glastpro account."
+        print " NB : the installation takes several minutes... be patient !"
+        if os.system(cmd_ssh) != 0 :
+            print "Error during the command '"+cmd_ssh+"'"
+            return
+        print "'"+args[0]+"' pre-installed on the rsync server"
+              
         
 if __name__=="__main__":
     from DIRAC.Core.Base import Script
     Script.parseCommandLine()
     cli = SoftwareTagCli()
     cli.cmdloop()  
+
