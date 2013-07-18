@@ -45,8 +45,11 @@ def InstallSoftware(tag, verbose=True):
   gLogger.notice("Found the following software directory:", base_sw_dir)
   message = None
   
-  # rsync server configuration ( TODO : put in Dirac CS) 
-  rsync_server = "ccglast02.in2p3.fr::VO_GLAST_ORG_SW_DIR"
+
+  from DIRAC.ConfigurationSystem.Client.Helpers.Operations    import Operations
+  op = Operations('glast.org')
+  rsync_server = op.getValue( "Pipeline/RsyncServer", "ccglast02.in2p3.fr::VO_GLAST_ORG_SW_DIR" )
+  #rsync_server = "ccglast02.in2p3.fr::VO_GLAST_ORG_SW_DIR"
   rsync_cmd = "/usr/bin/rsync -az"
   
   # tag parsing
