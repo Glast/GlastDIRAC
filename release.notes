@@ -2,7 +2,15 @@
 
 *Pipeline System
 NEW: added xrootd-key tab file to job. This one takes its values from operations/Pipeline/XrdKey
+NEW: logfile retrieval part of extension
+FIX: GridAccess - bugfixes.
+
+*ResourceStatusSystem
+NEW: InstallSoftwareArea & CLI changes. 
+
+*All
 FIX: Dirac variables for VO specific stuff
+
 
 [v1r3p3]
 
