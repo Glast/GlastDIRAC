@@ -20,7 +20,11 @@ if __name__ == "__main__":
 	status_to_handle = ['Done','Failed','Killed','Deleted']
 	status_to_ignore = ['Running','Waiting','Checking','Stalled','Received']
 	dir_temp = '/tmp'
-	filename_jobhandled = '/glast_data/Pipeline2/grid-service/jobidhandled'
+	
+	from DIRAC.ConfigurationSystem.Client.Helpers.Operations    import Operations
+	op = Operations("glast.org")
+	LogfileRetrievalSummaryPath = p.getValue("Pipeline/LogfileRetrievalSummaryPath", "/glast_data/Pipeline2/grid-service" )
+	filename_jobhandled = LogfileRetrievalSummaryPath + '/LogfileRetrievalSummaryIDjob'
 	#filename_jobhandled = '/afs/in2p3.fr/home/g/glastpro/vrolland/logFile/jobidhandled.list'
 
 	from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
