@@ -187,6 +187,8 @@ if __name__ == "__main__":
             if not new_stat.getEndTime():
                 gLogger.info("Time stamp for ended job %i not provided, setting it to 1 day in the past!"%int(j))
                 new_stat.setEndTime()
+                gLogger.info("Requesting to kill job %i"%int(j))
+                d.kill(j)
         if int(j) in sites:
             new_stat.setSite(sites[int(j)]['Site'])
         #print new_stat._toxml().toprettyxml()
