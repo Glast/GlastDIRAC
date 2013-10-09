@@ -49,6 +49,7 @@ class internalstatus:
     def setSite(self,site):
         self.hostname = site
     def setEndTime(self,deltatimeseconds=86400):
+        #86400 is 1 day!
         local_time = datetime.datetime.utcnow()
         failed_time_stamp = local_time-datetime.timedelta(seconds=deltatimeseconds)
         str_timestamp = failed_time_stamp.strftime("%Y-%m-%d %H:%M:S")
