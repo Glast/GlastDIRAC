@@ -1,3 +1,17 @@
+[v1r3p5]
+
+*Pipeline System
+FIX: Jobs that did not have EndTime attribute, get it assigned automatically. This is to take care of some jobs that should be marked killed/deleted
+FIX: Kill jobs that are marked as Failed but still present in the system.
+NEW: added "--p type" to submission script, allowing to set the jobType
+NEW: mailDebug option, can be enabled via "--p mailDebug", uses test/dirac-glast-pipeline-wrapper-debug.sh as wrapper script
+
+*ResourceStatusSystem
+NEW: List softwares pre-install on ccglast02.in2p3.fr. those software are available to be install on sites
+
+*All
+FIX: various minor bugfixes
+
 [v1r3p4]
 
 *Pipeline System
