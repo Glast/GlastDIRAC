@@ -22,6 +22,7 @@ class Params(object):
   def __init__(self):
     self.to = ''
     self.fr = ''
+    self.debugMail = None
     self.subject = ''
     self.body = ''
     self.filename = ''
@@ -40,12 +41,16 @@ class Params(object):
   def setFileName(self,opt):
     self.filename = opt
     return S_OK()
+  def setDebugMail(self,opt):
+    self.debugMail = opt
+    return S_OK()
   def registerSwitchs(self):
     Script.registerSwitch("T:", "To=", "mail To", self.setTo)
     Script.registerSwitch("F:","From=","mail from", self.setFrom)
     Script.registerSwitch("S:","Subject=","mail Subject",self.setSubject)
     Script.registerSwitch("B:","Body=","mail Body",self.setBody)
     Script.registerSwitch("f:","File=","Body content file",self.setFileName)
+    Script.registerSwitch("dm:","debugMail=","mail address for debugging purposes",self.setDebugMail)
     Script.setUsageMessage( '$s -T you@mail.com -F me@mail.com -S subject -B "My Body\n is ace"' )
 
 if __name__== "__main__":
@@ -71,7 +76,14 @@ if __name__== "__main__":
   ntc = NotificationClient()
   gLogger.verbose("Sending:"," ".join([cli.to , cli.subject , cli.body , cli.fr] ))
   print "sendMail(%s,%s,%s,%s,%s)" % ( cli.to , cli.subject , cli.body , cli.fr , False )
+  if not cli.debugMail:
+      gLogger.info("trying to first submit locally - debug mode.")
+      result = ntc.sendMail( cli.debugMail , cli.subject , cli.body , cli.fr , localAttempt = False )
+      if not result[ "OK" ]:
+          gLogger.error( result[ "Message" ] )
+      gLogger.error("We bravely carry on...")
   result = ntc.sendMail( cli.to , cli.subject , cli.body , cli.fr , localAttempt = False )
+  
   if not result[ "OK" ]:
     gLogger.error( result[ "Message" ] )
     DIRACexit( 6 )

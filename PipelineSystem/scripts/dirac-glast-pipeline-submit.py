@@ -13,7 +13,9 @@ class options:
         self.cpu = 64000
         self.site = None
         self.stagein = None
+        self.mailDebug = False
         self.name = None
+        self.type = None
         self.debug = False
         self.env = None
         self.bannedSites = None
@@ -40,7 +42,7 @@ if __name__ == "__main__":
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
     specialOptions = {}
-    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: release, cpu, site, stagein, name, debug, env, bannedSites) ", setSpecialOption )
+    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: release, cpu, site, stagein, name, debug, mailDebug, env, bannedSites, type) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')
     Script.parseCommandLine()
@@ -85,6 +87,8 @@ if __name__ == "__main__":
     input_sandbox_files = []
     output_sandbox_files = ["*.log","*.txt", "jobmeta.inf"]
     if pipeline:
+        if opts.mailDebug:
+            pipeline_dict["PIPELINE_DEBUG_ADDRESS"]=op.getValue("Pipeline/DebugMailAddress","glastpro@in2p3.fr")
         j.setExecutionEnv(pipeline_dict) # that sets the env vars
         if pipeline_dict.has_key("GPL_CONFIGDIR"):
             GPL_CONFIGDIR = pipeline_dict['GPL_CONFIGDIR']
@@ -114,6 +118,8 @@ if __name__ == "__main__":
                 input_sandbox_files.append(script)
             # here we branch out...
             pipeline_wrapper = os.path.join(os.environ["DIRAC"],"GlastDIRAC/PipelineSystem/scripts/dirac-glast-pipeline-wrapper.sh")
+            if opts.mailDebug:
+                pipeline_wrapper = os.path.join(os.environ["DIRAC"],"GlastDIRAC/PipelineSystem/test/dirac-glast-pipeline-wrapper-debug.sh")
             input_sandbox_files.append(pipeline_wrapper)
             executable = pipeline_wrapper
             log = pipeline_dict["PIPELINE_LOGFILE"]    
@@ -134,7 +140,8 @@ if __name__ == "__main__":
     j.setName("MC job")
     if not opts.name is None:
         j.setName(opts.name)
-
+    if not opts.type is None:
+        j.setType(opts.type)
     j.setInputSandbox(input_sandbox_files) # all input files in the sandbox
     j.setOutputSandbox(output_sandbox_files)
 

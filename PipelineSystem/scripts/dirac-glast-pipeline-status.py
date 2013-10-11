@@ -48,7 +48,19 @@ class internalstatus:
         #print my_dict
     def setSite(self,site):
         self.hostname = site
-        
+    def setEndTime(self,deltatimeseconds=86400):
+        #86400 is 1 day!
+        local_time = datetime.datetime.utcnow()
+        failed_time_stamp = local_time-datetime.timedelta(seconds=deltatimeseconds)
+        str_timestamp = failed_time_stamp.strftime("%Y-%m-%d %H:%M:S")
+        self.ended = str_timestamp
+    def getStatus(self):
+        return self.status
+    def getEndTime(self):
+        return self.ended
+    def getStartTime(self):
+        return self.started
+            # set the time stamp to now
     def __call__(self):
         old_dict = self.__dict__
         for key in self.__dict__.keys():
@@ -169,9 +181,15 @@ if __name__ == "__main__":
                 if l.major_status == 'Application':
                     logging_info['Started']=l.time
             if status_j['Status'] == 'Done':
-                logging_info['Ended']=logging_obj[-1].time
+                logging_info['Ended']=logging_obj[-1].time 
             status_j.update(logging_info)
         new_stat = internalstatus(j,status_j)
+        if new_stat.getStatus()=="Failed":
+            if not new_stat.getEndTime():
+                gLogger.info("Time stamp for ended job %i not provided, setting it to 1 day in the past!"%int(j))
+                new_stat.setEndTime()
+                gLogger.info("Requesting to kill job %i"%int(j))
+                d.kill(j)
         if int(j) in sites:
             new_stat.setSite(sites[int(j)]['Site'])
         #print new_stat._toxml().toprettyxml()
