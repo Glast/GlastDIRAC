@@ -310,7 +310,7 @@ class SoftwareTagCli(cmd.Cmd):
         j.setDestination(site)
         j.setCPUTime(1000)
         j.setName("Installation "+tag)
-        j.setExecutable(os.environ['DIRAC']+"/GlastDIRAC/ResourceStatusSystem/Client/"+scriptname , logFile='SoftwareInstallation.log')
+        j.setExecutable(os.environ['DIRAC']+"/GlastDIRAC/ResourceStatusSystem/Client/externals/"+scriptname , logFile='SoftwareInstallation.log') 
         j.setOutputSandbox('*.log')
         res = d.submit(j)
         if not res['OK']:
@@ -356,7 +356,21 @@ class SoftwareTagCli(cmd.Cmd):
             return
         print "'"+args[0]+"' pre-installed on the rsync server"
               
+
+    def do_listpreinstalled(self,argss):
+        """ List softwares pre-install on ccglast02.in2p3.fr. thoses software are available to be install on sites
+            listpreinstalled
+        """     
         
+        cmd_listpreinstall = "cat /glast/applicat/preinstallGlastRelease/listsoftware.list"
+        cmd_ssh = 'ssh glastpro@ccage.in2p3.fr "ssh ccglast02.in2p3.fr \\"'+cmd_preinstall+'\\" \" '
+   
+        print " - List of softwares pre installed on ccglast02.in2p3.fr available to be install on sites :"
+
+        if os.system(cmd_ssh) != 0 :
+            print "Error during the command '"+cmd_ssh+"'"
+            return
+               
 if __name__=="__main__":
     from DIRAC.Core.Base import Script
     Script.parseCommandLine()
