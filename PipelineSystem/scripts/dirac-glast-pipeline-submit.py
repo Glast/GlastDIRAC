@@ -15,7 +15,7 @@ class options:
         self.stagein = None
         self.mailDebug = False
         self.name = None
-        self.type = None
+        self.group = "user"
         self.debug = False
         self.env = None
         self.bannedSites = None
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
     specialOptions = {}
-    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: release, cpu, site, stagein, name, debug, mailDebug, env, bannedSites, type) ", setSpecialOption )
+    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: release, cpu, site, stagein, name, debug, mailDebug, env, bannedSites, group) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')
     Script.parseCommandLine()
@@ -140,8 +140,8 @@ if __name__ == "__main__":
     j.setName("MC job")
     if not opts.name is None:
         j.setName(opts.name)
-    if not opts.type is None:
-        j.setType(opts.type)
+    if not opts.group is "user":
+        j.setGroup(str(opts.type))
     j.setInputSandbox(input_sandbox_files) # all input files in the sandbox
     j.setOutputSandbox(output_sandbox_files)
 
@@ -162,11 +162,13 @@ if __name__ == "__main__":
         sites = result[ 'Value' ]
         j.setDestination(sites)
     # new feature: add xrootd-keytab file to input list. this one resides on SE
-    xrd_keytab = op.getValue("Pipeline/XrdKey",None)    
+    
     input_stage_files = []
-    if not xrd_keytab:
-        gLogger.notice("*DEBUG* adding XrdKey file %s to input"%xrd_keytab)
-        input_stage_files.append(xrd_keytab)
+    if pipeline:
+        xrd_keytab = op.getValue("Pipeline/XrdKey",None)    
+        if not xrd_keytab:
+            gLogger.notice("*DEBUG* adding XrdKey file %s to input"%xrd_keytab)
+            input_stage_files.append(xrd_keytab)
     if not opts.stagein is None:
         # we do add. input staging
         files = opts.stagein.split(",")
