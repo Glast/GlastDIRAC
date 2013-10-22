@@ -1,3 +1,8 @@
+[v1r3p7]
+
+*Pipeline System
+FIX: change setGroup to setJobGroup() - thanks SP for noticing this!
+
 [v1r3p6]
 
 *Pipeline System
