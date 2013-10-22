@@ -141,7 +141,7 @@ if __name__ == "__main__":
     if not opts.name is None:
         j.setName(opts.name)
     if not opts.group is "user":
-        j.setGroup(str(opts.type))
+        j.setJobGroup(str(opts.type))
     j.setInputSandbox(input_sandbox_files) # all input files in the sandbox
     j.setOutputSandbox(output_sandbox_files)
 
