@@ -325,7 +325,7 @@ class SoftwareTagCli(cmd.Cmd):
         j.setDestination(site)
         j.setCPUTime(1000)
         j.setName("Installation "+tag)
-        j.setExecutable(os.environ['DIRAC']+"/GlastDIRAC/ResourceStatusSystem/Client/"+scriptname , logFile='SoftwareInstallation.log')
+        j.setExecutable(os.environ['DIRAC']+"/GlastDIRAC/ResourceStatusSystem/Client/"+scriptname +" "+tag , logFile='SoftwareInstallation.log')
         j.setOutputSandbox('*.log')
         res = d.submit(j)
         if not res['OK']:
