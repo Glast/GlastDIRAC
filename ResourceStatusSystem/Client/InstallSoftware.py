@@ -101,18 +101,13 @@ def InstallSoftware(tag, verbose=True):
     if site == '':
         return S_ERROR("Fail to retrieve the site name")
         
-    res = swtc.updateStatus(tag,site,"Valid")
-    if not res['OK']:
-        return S_ERROR('Message: %s'%res['Message'])
-    elif res['Value']['Failed']:
-        return S_ERROR('Failed to update %s'%res['Value']['Failed'])
-    else:
-        return S_ERROR('Successfully updated %i CEs'%len(res['Value']['Successful']))
-    return
-  
-  return S_OK()
-
-
+  res = swtc.updateStatus(tag,site,"Valid")
+  if not res['OK']:
+	return S_ERROR('Message: %s'%res['Message'])
+  elif res['Value']['Failed']:
+	return S_ERROR('Failed to update %s'%res['Value']['Failed'])
+  else:
+	return S_OK('Successfully updated %i CEs'%len(res['Value']['Successful']))
 
 
 if __name__ == '__main__':
@@ -143,4 +138,3 @@ if __name__ == '__main__':
       dexit(1)
     
     dexit(0)
-    
