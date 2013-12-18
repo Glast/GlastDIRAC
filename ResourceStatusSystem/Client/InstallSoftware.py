@@ -45,17 +45,20 @@ def InstallSoftware(tag, verbose=True, forceValidate = False):
 
     from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient import SoftwareTagClient
     swtc = SoftwareTagClient()
+    status = "Valid"
     # check if tag is not already present
-    res = swtc.getTagsAtSite(tag,site)
+    res = swtc.getTagsAtSite(site,status)
     if not res['OK']:
         return S_ERROR("Failed to retrieve tags registered for site %s, message: %s"%(site,res["Message"]))
     else:
-        gLogger.notice("Found following tags on site %s:\n%s"%(site,str(res)))
-        if tag in res["value"]: 
+        gLogger.notice("looking to match %s"%tag)
+        gLogger.notice("Found following tags on site %s:\n%s"%(site,str(res["Value"])))
+        if tag in res["Value"]: 
             # we should break here if the tag is already there.
             gLogger.notice("Tag already found on site, doing nothing!")
             return S_OK("Tag found already - nothing to do")
-        
+        else:
+            gLogger.notice("Failed to find %s, assume NEW, proceeding with installing"%tag)
     gLogger.notice("Found the following software directory:", base_sw_dir)
     rsync_server = op.getValue( "Pipeline/RsyncServer", "ccglast02.in2p3.fr::VO_GLAST_ORG_SW_DIR" )
     #rsync_server = "ccglast02.in2p3.fr::VO_GLAST_ORG_SW_DIR"
