@@ -51,18 +51,16 @@ def InstallSoftware(tag, verbose=True, forceValidate = False):
     if not res['OK']:
         return S_ERROR("Failed to retrieve tags registered for site %s, message: %s"%(site,res["Message"]))
     else:
-        gLogger.notice("looking to match %s"%tag)
         gLogger.notice("Found following tags on site %s:\n%s"%(site,str(res["Value"])))
         if tag in res["Value"]: 
             # we should break here if the tag is already there.
             gLogger.notice("Tag already found on site, doing nothing!")
             return S_OK("Tag found already - nothing to do")
-        else:
-            gLogger.notice("Failed to find %s, assume NEW, proceeding with installing"%tag)
+        
     gLogger.notice("Found the following software directory:", base_sw_dir)
     rsync_server = op.getValue( "Pipeline/RsyncServer", "ccglast02.in2p3.fr::VO_GLAST_ORG_SW_DIR" )
     #rsync_server = "ccglast02.in2p3.fr::VO_GLAST_ORG_SW_DIR"
-    rsync_cmd = "/usr/bin/rsync -az"
+    rsync_cmd = "/usr/bin/rsync -azvv"
     # tag parsing
     res = getArrayFromTag(tag)
     if not res['OK']:
@@ -98,10 +96,7 @@ def InstallSoftware(tag, verbose=True, forceValidate = False):
         gLogger.notice(" ... ")
         if os.system(rsync_cmd+array[0]+" "+SW_SHARED_DIR+array[1]) != 0 :
             gLogger.notice(" -> FAILED !")
-            gLogger.error("*** Error during the retrieval of '"+array[1]+"' from '"+rsync_server+"'")
-        if os.path.isdir( SW_SHARED_DIR+array[1] ):
-            shutil.rmtree(SW_SHARED_DIR+array[1]);
-            return S_ERROR("Error during the retrieval of '"+array[1]+"' from '"+rsync_server+"'")
+            return S_ERROR("Error 2 during the retrieval of '"+array[1]+"' from '"+rsync_server+"'")
         gLogger.notice(" -> OK !")  
     # since we install a tag, we should register a new one:
     res = swtc.addTagAtSite(tag,site)
