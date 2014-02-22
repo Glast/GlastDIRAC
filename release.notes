@@ -1,7 +1,4 @@
-[v1r4p0]
-
-*All
-NEW: update to DIRAC-v6r8p24
+[v1r3p8]
 
 *ResourceStatusSystem
 FIX: overhaul of installSoftware.py, addresses LPG-32, https://jira.slac.stanford.edu/browse/LPG-32
