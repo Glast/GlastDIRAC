@@ -13,7 +13,7 @@ def getSiteForCEs(ces,vo="glast.org"):
     """
     res = getVO("glast.org")
     if not res['OK']:
-        return S_ERROR("Coult not get VO")
+        return S_ERROR("Could not get VO")
     vo = res["Value"]
     res = getQueues(community = vo)
     if not res['OK']:
