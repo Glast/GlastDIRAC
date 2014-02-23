@@ -1,3 +1,4 @@
+
 '''
 Created on Jun 6, 2013
 
@@ -5,12 +6,16 @@ Created on Jun 6, 2013
 '''
 from DIRAC import S_OK, S_ERROR
 from DIRAC.ConfigurationSystem.Client.Helpers.Resources                import getQueues
+from DIRAC.ConfigurationSystem.Client.Helpers.Registry import getVO
 
 def getSiteForCEs(ces,vo="glast.org"):
     """ We want to get the site for a given CE because that's what the job expects
     copy of private DB method.
     """
-    
+    res = getVO("glast.org")
+    if not res['OK']:
+        return S_ERROR("Could not get VO")
+    vo = res["Value"]
     res = getQueues(community = vo)
     if not res['OK']:
         return S_ERROR("Could not get site for CE")

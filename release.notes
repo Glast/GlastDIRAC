@@ -1,3 +1,12 @@
+[v1r3p8]
+
+*ResourceStatusSystem
+FIX: overhaul of installSoftware.py, addresses LPG-32, https://jira.slac.stanford.edu/browse/LPG-32
+NEW: added site-mask check to SoftwareMonitorAgent. If CE not in site mask, ignore CE; should reduce number of waiting pilots submitted to sites that are not active
+
+*Core
+NEW: added SiteUtils module
+
 [v1r3p7]
 
 *Pipeline System

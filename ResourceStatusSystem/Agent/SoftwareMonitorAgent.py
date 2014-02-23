@@ -6,9 +6,12 @@ created: 04/06/2013
 @author: S. Poss (CERN)
 
 """
-from DIRAC.Core.Base.AgentModule                         import AgentModule
+from DIRAC.Core.Base.AgentModule                                import AgentModule
 from DIRAC import S_OK
-from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient import SoftwareTagClient
+from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient   import SoftwareTagClient
+from GlastDIRAC.Core.Utilities.SiteUtils                        import getSitesForCE
+from DIRAC.Interfaces.API.DiracAdmin                            import DiracAdmin
+
 
 class SoftwareMonitorAgent(AgentModule):
   """ This agent picks up "New" tags and submits jobs and those that
@@ -21,7 +24,6 @@ class SoftwareMonitorAgent(AgentModule):
     """ Initialize the agent.
     """
     self.am_setOption( "PollingTime", 86400 ) #Once a day is enough
-    
     self.swtc = SoftwareTagClient()
     self.submitjobs = self.am_getOption( 'SubmitJobs', False )
     if self.submitjobs:
@@ -40,9 +42,17 @@ class SoftwareMonitorAgent(AgentModule):
     
     return S_OK()
   
+  
+
   def execute(self):
     """ Get all New tags, mark them as Installing. Old Installing tags are reset to New 
     """
+    #### get site mask ###
+    diracAdmin = DiracAdmin()
+    res = diracAdmin.getSiteMask(printOutput=False)
+    if not res["OK"]:
+        self.log.error("error retrieving site mask: %s"%str(res["Message"]))
+    site_mask = res["Value"]
     res = self.swtc.getTagsWithStatus("New")
     if not res['OK']:
       return res
@@ -50,7 +60,16 @@ class SoftwareMonitorAgent(AgentModule):
       self.log.info("No 'New' tags to consider")
       
     for tag, ces in res['Value'].items():
-      for ce in ces:
+      for ce in ces: 
+        res = getSiteForCEs([ce])
+        if not res["OK"]:
+            self.log.error("could not retrieve Site name for CE %s"%ce)
+        sites = res["Value"].keys()
+        for site in sites:
+            if site not in site_mask:
+                self.log.info("CE/Site disabled %s"%site)
+                continue
+                # ignore this CE
         res = self.swtc.updateCEStatus(tag, ce, 'Installing')
         if not res['OK']:
           self.log.error(res['Message'])
@@ -86,9 +105,7 @@ class SoftwareMonitorAgent(AgentModule):
   def submitProbeJobs(self, ce):
     """ Submit some jobs to the CEs
     """
-    
     #need credentials, should be there since the initialize
-    
     from DIRAC.Interfaces.API.Dirac import Dirac
     d = Dirac()
     from DIRAC.Interfaces.API.Job import Job

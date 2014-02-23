@@ -363,7 +363,7 @@ class SoftwareTagCli(cmd.Cmd):
         """     
         
         cmd_listpreinstall = "cat /glast/applicat/preinstallGlastRelease/listsoftware.list"
-        cmd_ssh = 'ssh glastpro@ccage.in2p3.fr "ssh ccglast02.in2p3.fr \\"'+cmd_preinstall+'\\" \" '
+        cmd_ssh = 'ssh glastpro@ccage.in2p3.fr "ssh ccglast02.in2p3.fr \\"'+cmd_listpreinstall+'\\" \" '
    
         print " - List of softwares pre installed on ccglast02.in2p3.fr available to be install on sites :"
 
