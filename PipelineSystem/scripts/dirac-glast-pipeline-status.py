@@ -95,7 +95,8 @@ def setSpecialOption( optVal ):
     return S_OK()
 
 if __name__ == "__main__":
-
+    stdout = sys.stdout
+    sys.stdout = sys.stderr
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
     specialOptions = {}
@@ -184,6 +185,7 @@ if __name__ == "__main__":
                 logging_info['Ended']=logging_obj[-1].time 
             status_j.update(logging_info)
         new_stat = internalstatus(j,status_j)
+        sys.stdout = stdout
         if new_stat.getStatus()=="Failed":
             if not new_stat.getEndTime():
                 gLogger.info("Time stamp for ended job %i not provided, setting it to 1 day in the past!"%int(j))
@@ -199,5 +201,6 @@ if __name__ == "__main__":
             print(new_stat())
     # TODO:
         # pretty print & parse in java
+    sys.stdout = stdout
     if do_xml:
         print(xmlfile.toprettyxml())
