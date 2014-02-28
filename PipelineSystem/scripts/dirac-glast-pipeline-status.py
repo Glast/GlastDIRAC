@@ -9,7 +9,7 @@ Created 10/2012
 import xml.dom.minidom as xdom
 import sys, getopt, os, StringIO, datetime
 
-class logging:
+class LoggingRecord:
     def __init__(self,ntuple):
         self.main_status = ntuple[0]
         self.major_status = ntuple[1]
@@ -17,7 +17,7 @@ class logging:
         self.time = ntuple[3]
         self.name = ntuple[4]
 
-class internalstatus:
+class InternalJobStatus:
     def __init__(self,job_id,my_dict,**kwargs):
         self.id = job_id
         self.status = None
@@ -176,15 +176,15 @@ if __name__ == "__main__":
             logs = res['Value']
             logging_obj = []
             for l in logs:
-                logging_obj.append(logging(l))
+                logging_obj.append( LoggingRecord(l) )
             logging_info = {'Submitted': logging_obj[0].time, 'Started': None, 'Ended': None, 'JobID': j}
-            for l in logging_obj:
-                if l.major_status == 'Application':
-                    logging_info['Started']=l.time
+            for record in logging_obj:
+                if record.major_status == 'Application':
+                    logging_info['Started'] = record.time
             if status_j['Status'] == 'Done':
                 logging_info['Ended']=logging_obj[-1].time 
             status_j.update(logging_info)
-        new_stat = internalstatus(j,status_j)
+        new_stat = InternalJobStatus(j,status_j)
         sys.stdout = stdout
         if new_stat.getStatus()=="Failed":
             if not new_stat.getEndTime():
