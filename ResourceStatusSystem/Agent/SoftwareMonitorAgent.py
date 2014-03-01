@@ -9,9 +9,10 @@ created: 04/06/2013
 from DIRAC.Core.Base.AgentModule                                import AgentModule
 from DIRAC import S_OK
 from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient   import SoftwareTagClient
-from GlastDIRAC.Core.Utilities.SiteUtils                        import getSitesForCE
+from GlastDIRAC.Core.Utilities.SiteUtils                        import getSiteForCEs
 from DIRAC.Interfaces.API.DiracAdmin                            import DiracAdmin
 
+__RCSID__ = " $Id: $ "
 
 class SoftwareMonitorAgent(AgentModule):
   """ This agent picks up "New" tags and submits jobs and those that

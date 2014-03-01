@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """ Pipeline Submission Script 
 
 Created 10/2012
@@ -137,7 +136,6 @@ if __name__ == "__main__":
     from DIRAC.Interfaces.API.Dirac import Dirac
     import DIRAC.Core.Utilities.Time as Time
     # use stored certificates
-    from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
     from DIRAC.Core.Utilities.List import breakListIntoChunks
     do_xml = False
     
@@ -223,8 +221,9 @@ if __name__ == "__main__":
             if not new_stat.getEndTime():
                 gLogger.info("Time stamp for ended job %i not provided, setting it to 1 day in the past!" %job)
                 new_stat.setEndTime()
-                gLogger.info("Requesting to kill job %i" %job)
-                d.kill(job)
+                  # addresses LPG-35
+#                 gLogger.info("Requesting to kill job %i" %job)
+#                 d.kill(job)
         if job in sites:
             new_stat.setSite(sites[job]['Site'])
         #print new_stat._toxml().toprettyxml()
