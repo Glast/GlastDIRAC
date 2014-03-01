@@ -1,3 +1,13 @@
+[v1r3p9]
+
+*All
+NEW: transition to DIRAC v6r8p24 as base system
+
+*PipelineSystem
+FIX: dirac-glast-pipeline-status (bvan): use job summary instead of status because it's more complete. Added some translation logic for start times and end times.
+CHANGE: extended logging features only on demand, otherwise report standard jobs - reduces RPC calls
+FIX: remove zombie-killing; jobs that have reported 'failed' are not 're-killed' again.
+
 [v1r3p8]
 
 *ResourceStatusSystem
@@ -9,17 +19,17 @@ NEW: added SiteUtils module
 
 [v1r3p7]
 
-*Pipeline System
+*PipelineSystem
 FIX: change setGroup to setJobGroup() - thanks SP for noticing this!
 
 [v1r3p6]
 
-*Pipeline System
+*PipelineSystem
 FIX: change type to group
 
 [v1r3p5]
 
-*Pipeline System
+*PipelineSystem
 FIX: Jobs that did not have EndTime attribute, get it assigned automatically. This is to take care of some jobs that should be marked killed/deleted
 FIX: Kill jobs that are marked as Failed but still present in the system.
 NEW: added "--p type" to submission script, allowing to set the jobType
@@ -33,7 +43,7 @@ FIX: various minor bugfixes
 
 [v1r3p4]
 
-*Pipeline System
+*PipelineSystem
 NEW: added xrootd-key tab file to job. This one takes its values from operations/Pipeline/XrdKey
 NEW: logfile retrieval part of extension
 FIX: GridAccess - bugfixes.
@@ -47,17 +57,17 @@ FIX: Dirac variables for VO specific stuff
 
 [v1r3p3]
 
-*Pipeline System
+*PipelineSystem
 FIX: bugfixes.
 
 [v1r3p2]
 
-*Pipeline System
+*PipelineSystem
 FIX: bugfixes.
 
 [v1r3p1]
 
-*Pipeline System
+*PipelineSystem
 FIX: bugfixes. 
 
 [v1r3p0]
@@ -66,7 +76,7 @@ FIX: bugfixes.
 NEW: Interface/GlastJob : Workflow by S. Poss to move wrapper to DIRAC Node installation
 
 [v1r2p0]
-*Pipeline system
+*PipelineSystem
 NEW: added pipeline-wrapper to DIRAC installation. For now this is still being 
 added to the input sandbox but eventually this should be replaced in the workflow
 FIX: minor bugfixes
@@ -74,16 +84,16 @@ CHANGE: get rid of P2_* variables.
 PRODUCTION RELEASE!
 
 [v1r1p10]
-*Pipeline system
+*PipelineSystem
 FIX: sendmail.
 
 [v1r1p9]
-*Pipeline system
+*PipelineSystem
 FIX: sendmail.
 
 [v1r1p8]
 
-*Pipeline system
+*PipelineSystem
 NEW: sendmail utility
 
 [v1r1p7]

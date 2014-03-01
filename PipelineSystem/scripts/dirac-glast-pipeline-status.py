@@ -136,7 +136,6 @@ if __name__ == "__main__":
     from DIRAC.Interfaces.API.Dirac import Dirac
     import DIRAC.Core.Utilities.Time as Time
     # use stored certificates
-    from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
     from DIRAC.Core.Utilities.List import breakListIntoChunks
     do_xml = False
     
