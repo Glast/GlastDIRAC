@@ -10,7 +10,7 @@ Created 10/2012
 class options:
     def __init__(self,DICT,**kwargs):
         self.release = None
-        self.cpu = 64000
+        self.cpu = 86400
         self.site = None
         self.stagein = None
         self.mailDebug = False
@@ -151,7 +151,6 @@ if __name__ == "__main__":
         
     if not opts.bannedSites is None:
         j.setBannedSites(opts.bannedSites.split(","))
-
     if not opts.release is None:
         tag = opts.release
         cl = SoftwareTagClient()
