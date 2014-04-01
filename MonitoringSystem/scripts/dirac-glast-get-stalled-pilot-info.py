@@ -91,6 +91,9 @@ for i,job in enumerate(pilot_refs):
     gLogger.info("Pilot for %s: %s"%(str(job),str(pilot_refs[job])))
     pilotInfo = getPilotLoggingInfo(pilot_refs[job])
     #gLogger.info("%s,%s"%(str(job),str(pilotInfo)))
+    gLogger.debug("Detailed Pilot Logging Info for %s below:"%pilot_refs[job])
+    for line in pilotInfo.split("\n"):
+        gLogger.debug(str(line))
     val = ingestPilot(pilotInfo,iKey)
     print "%s\t:\t%s"%(str(job),str(val))
     if not val is None:
