@@ -10,7 +10,7 @@ Created 10/2012
 class options:
     def __init__(self,DICT,**kwargs):
         self.release = None
-        self.cpu = 64000
+        self.cpu = 86400
         self.site = None
         self.stagein = None
         self.mailDebug = False
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     if not opts.name is None:
         j.setName(opts.name)
     if not opts.group is "user":
-        j.setJobGroup(str(opts.type))
+        j.setJobGroup(str(opts.group))
     j.setInputSandbox(input_sandbox_files) # all input files in the sandbox
     j.setOutputSandbox(output_sandbox_files)
 
@@ -151,7 +151,6 @@ if __name__ == "__main__":
         
     if not opts.bannedSites is None:
         j.setBannedSites(opts.bannedSites.split(","))
-
     if not opts.release is None:
         tag = opts.release
         cl = SoftwareTagClient()
