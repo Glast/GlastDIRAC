@@ -1,21 +1,10 @@
 [v1r3p10]
 
-*MonitoringSystem
-NEW: dirac-glast-get-stalled-pilot-info: monitoring tool to get stalled job info (particularly pilot info)
-
-[v1r3p9]
-
-*All
-NEW: transition to DIRAC v6r8p24 as base system
-
 *PipelineSystem
-FIX: dirac-glast-pipeline-status (bvan): use job summary instead of status because it's more complete. Added some translation logic for start times and end times.
-CHANGE: extended logging features only on demand, otherwise report standard jobs - reduces RPC calls
-FIX: remove zombie-killing; jobs that have reported 'failed' are not 're-killed' again.
-
-[v1r3p10]
+NEW: dirac-glast-pipeline-kill: shadows dirac-wms-job-kill but uses shifter certificate (like submit)
 
 *MonitoringSystem
+NEW: added MonitoringSystem module
 NEW: dirac-glast-get-stalled-pilot-info: monitoring tool to get stalled job info (particularly pilot info)
 
 [v1r3p9]
