@@ -9,7 +9,7 @@ Created 10/2012
 import xml.dom.minidom as xdom
 import sys, getopt, os, StringIO, datetime
 
-class logging:
+class LoggingRecord:
     def __init__(self,ntuple):
         self.main_status = ntuple[0]
         self.major_status = ntuple[1]
@@ -17,9 +17,16 @@ class logging:
         self.time = ntuple[3]
         self.name = ntuple[4]
 
-class internalstatus:
+class InternalJobStatus:
+    SERIALIZABLE = ("StandardOutput", "CPUMHz", "CPUNormalizationFactor", "CPUScalingFactor", "CacheSizekB", 
+                    "Ended", "HostName", "JobID", "JobPath", "JobSanityCheck", "JobWrapperPID", "LocalAccount", 
+                    "LocalBatchID", "LocalJobID", "MemorykB", "MinorStatus", "ModelName", "NormCPUTimes", 
+                    "OK", "OutputSandboxMissingFiles", "PayloadPID", "PilotAgent", "Pilot_Reference", 
+                    "ScaledCPUTime", "Site", "Started", "Status", "Submitted", "TotalCPUTimes")
+
     def __init__(self,job_id,my_dict,**kwargs):
-        self.id = job_id
+        translateJobSummary(my_dict)
+        self.id = str(job_id)
         self.status = None
         self.started = None
         self.submitted = None
@@ -43,9 +50,15 @@ class internalstatus:
             if self.hostname is None:
                 self.hostname = ""
             self.hostname+=my_dict['Site']
-        self.mydict = my_dict
+        if my_dict['Status'] in ('Done','Failed') and 'LastUpdateTime' in my_dict:
+            self.ended = my_dict['LastUpdateTime']
+        self.mydict = {}
+        for key in my_dict:
+            if key in self.SERIALIZABLE:
+                self.mydict[key] = my_dict[key]
+        #self.mydict = my_dict
         self.__dict__.update(kwargs)
-        #print my_dict
+
     def setSite(self,site):
         self.hostname = site
 
@@ -211,8 +224,8 @@ if __name__ == "__main__":
                   # addresses LPG-35
 #                 gLogger.info("Requesting to kill job %i" %job)
 #                 d.kill(job)
-        if int(j) in sites:
-            new_stat.setSite(sites[int(j)]['Site'])
+        if job in sites:
+            new_stat.setSite(sites[job]['Site'])
         #print new_stat._toxml().toprettyxml()
         if do_xml:
             firstChild.appendChild(new_stat._toxml())
@@ -223,4 +236,3 @@ if __name__ == "__main__":
     sys.stdout = stdout
     if do_xml:
         print(xmlfile.toprettyxml())
-
