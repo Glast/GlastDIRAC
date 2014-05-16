@@ -41,7 +41,7 @@ class stageGrid(object):
             raise Exception("Failed to initialize!")
         self.__pickRandomSE()
     def setLogLevel(self,logLevel):
-        self.log.setLogLevel(logLevel)
+        self.log.setLevel(logLevel)
     def __getPrefix(self):
         op = Operations("glast.org")
         self.userprefix = None
@@ -189,7 +189,7 @@ class stageGrid(object):
         
         
 def getOutputData(baseDir,logLevel="INFO"):
-    gLogger.setLogLevel(logLevel)
+    gLogger.setLevel(logLevel)
     exitCode = 0    
     listOutputData = []
     res = getProxyInfo( False, False )
@@ -253,7 +253,7 @@ def getOutputData(baseDir,logLevel="INFO"):
     
     
 def removeOutputData(baseDir,logLevel="INFO"):
-    gLogger.setLogLevel(logLevel)
+    gLogger.setLevel(logLevel)
     res = getProxyInfo( False, False )
     if not res['OK']:
         gLogger.error( "Failed to get client proxy information.", res['Message'] )
@@ -275,7 +275,7 @@ def removeOutputData(baseDir,logLevel="INFO"):
     
     
 def cleanOldOutputData(baseDir,logLevel="INFO"):
-    gLogger.setLogLevel(logLevel)
+    gLogger.setLevel(logLevel)
     res = getProxyInfo( False, False )
     if not res['OK']:
         gLogger.error( "Failed to get client proxy information.", res['Message'] )
