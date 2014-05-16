@@ -1,3 +1,20 @@
+[v1r3p12]
+
+*All
+NEW: bump to DIRAC-v6r11 integration
+
+*PipelineSystem
+FIX: bugfix in GridAccess module causing code to break while it should return !=0 exit code
+
+[v1r3p11]
+
+*All
+NEW: bump to DIRAC-v6r10p15
+NEW: bump to python 2.7
+
+*PipelineSystem
+FIX: bugfix in dirac-glast-pipeline-kill
+
 [v1r3p10]
 
 *PipelineSystem

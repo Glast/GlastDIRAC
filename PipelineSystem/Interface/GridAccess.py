@@ -35,12 +35,13 @@ class stageGrid(object):
         self.listSEs = SEtemporaryStaging.split(',')
     
         self.SE = None
-        self.log = gLogger.getSubLogger("GPL Staging")
+        self.log = gLogger.getSubLogger("GridAccess")
         if self.__getPrefix()!=0:
             self.log.error("Failed to initialize staging.")
             raise Exception("Failed to initialize!")
         self.__pickRandomSE()
-    
+    def setLogLevel(self,logLevel):
+        self.log.setLogLevel(logLevel)
     def __getPrefix(self):
         op = Operations("glast.org")
         self.userprefix = None
@@ -130,6 +131,7 @@ class stageGrid(object):
                             self.listSEs.remove(self.SE) # make sure not to pick the same SE again.    
                             self.__pickRandomSE()
                             if not self.SE:
+                                rc+=1
                                 break
                             self.log.info("Trying with another SE : '"+self.SE+"' . In 5sec...")
                             time.sleep(5)
@@ -186,7 +188,8 @@ class stageGrid(object):
         
         
         
-def getOutputData(baseDir):
+def getOutputData(baseDir,logLevel="INFO"):
+    gLogger.setLogLevel(logLevel)
     exitCode = 0    
     listOutputData = []
     res = getProxyInfo( False, False )
@@ -249,7 +252,8 @@ def getOutputData(baseDir):
 
     
     
-def removeOutputData(baseDir):
+def removeOutputData(baseDir,logLevel="INFO"):
+    gLogger.setLogLevel(logLevel)
     res = getProxyInfo( False, False )
     if not res['OK']:
         gLogger.error( "Failed to get client proxy information.", res['Message'] )
@@ -270,7 +274,8 @@ def removeOutputData(baseDir):
     
     
     
-def cleanOldOutputData(baseDir):
+def cleanOldOutputData(baseDir,logLevel="INFO"):
+    gLogger.setLogLevel(logLevel)
     res = getProxyInfo( False, False )
     if not res['OK']:
         gLogger.error( "Failed to get client proxy information.", res['Message'] )
