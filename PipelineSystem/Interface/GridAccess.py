@@ -36,7 +36,7 @@ class stageGrid(object):
     
         self.SE = None
         self.log = gLogger.getSubLogger("GridAccess")
-        if self.__getPrefix()!=0:
+        if self.__getPrefix():
             self.log.error("Failed to initialize staging.")
             raise Exception("Failed to initialize!")
         self.__pickRandomSE()
@@ -195,7 +195,7 @@ def getOutputData(baseDir,logLevel="INFO"):
     res = getProxyInfo( False, False )
     if not res['OK']:
         gLogger.error( "Failed to get client proxy information.", res['Message'] )
-        DIRAC.exit( 2 )
+        DIRAC.exit( 71 )
         
 
     print  'Will search for files in %s' % baseDir
@@ -229,7 +229,7 @@ def getOutputData(baseDir,logLevel="INFO"):
     for lfn in sortList( allFiles ):
         success = False
         while ntries:
-            print " - getting '"+lfn+"'... ",
+            gLogger.info(" - getting '"+lfn+"'... ")
             result = rm.getFile( lfn )
             if not result['OK']:
                 print 'ERROR %s' % ( result['Message'] )
@@ -238,15 +238,15 @@ def getOutputData(baseDir,logLevel="INFO"):
             else:
                 success = True
                 listOutputData.append(result['Value']['Successful'][lfn])
-                print "OK"
+                gLogger.info("OK")
                 break
             ntries -= 1
         if not success:
             print 'ERROR could not get file after %i trials. Giving up :('%ntries
-            exitCode = 2
+            exitCode = 23
     # ######################################################################################################## #
     if exitCode:
-        return S_ERROR("Failed to finish operations.")
+        return {"OK":False,"Message":"Failed to finish operations.","RC":exitCode}    
     return S_OK(listOutputData);
 
 
@@ -257,41 +257,37 @@ def removeOutputData(baseDir,logLevel="INFO"):
     res = getProxyInfo( False, False )
     if not res['OK']:
         gLogger.error( "Failed to get client proxy information.", res['Message'] )
-        return S_ERROR("Failed to get client proxy information.", res['Message'])
+        return {"OK":False,"Message":"Failed to get client proxy information: %s"%str(res['Message']),"RC":71}
 
     # ######################################################################################################## #
     rm = ReplicaManager()
     
     result = rm.cleanLogicalDirectory(baseDir);
     print "Ignore the message about the file '"+baseDir+"dirac_directory'"
-      
     if not result['OK']:
         print 'ERROR: %s' % (result['Message'] )
-        return S_ERROR("Failed to Suppress the directory : '"+baseDir+"'")
+        return {"OK":False,"Message":"Cleanup failed : %s"%baseDir,"RC":37}
+    return S_OK(baseDir + " has been suppressed")
 
-    return S_OK(baseDir + " has been supressed")
-
-    
-    
     
 def cleanOldOutputData(baseDir,logLevel="INFO"):
     gLogger.setLevel(logLevel)
     res = getProxyInfo( False, False )
     if not res['OK']:
         gLogger.error( "Failed to get client proxy information.", res['Message'] )
-        return S_ERROR("Failed to get client proxy information.", res['Message'])
+        return {"OK":False,"Message":"Failed to get client proxy information: %s"%str(res['Message']),"RC":71}
 
     cf = CatalogFile()
     result = cf.getCatalogExists(baseDir) 
     
     if not result['OK']:
         print 'ERROR: %s' % (result['Message'] )
-        return S_ERROR("Failed to reach the directory : '"+baseDir+"'")
+        return {"OK":False,"Message":"Failed to access directory : %s"%baseDir,"RC":31}
         
     if result['Value']['Successful'][baseDir]:
         res = removeOutputData(baseDir)
         if not result['OK']:
-            return S_ERROR(result['Message'])
+            return {"OK":False,"Message":"Failed to remove files %s"%result["Message"],"RC":41}
         else:
             return S_OK(baseDir + " has been supressed")
         

@@ -1,3 +1,11 @@
+[v1r3p14]
+
+*All
+NEW: bump to DIRAC-v6r11p1
+
+*PipelineSystem
+NEW: return codes for GridAccess module `here <https://confluence.slac.stanford.edu/x/s4ItCg>`_
+
 [v1r3p13]
 
 *PipelineSystem
