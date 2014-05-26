@@ -74,14 +74,9 @@ if __name__== "__main__":
     
 
   ntc = NotificationClient()
-  gLogger.verbose("Sending:"," ".join([cli.to , cli.subject , cli.body , cli.fr] ))
-  print "sendMail(%s,%s,%s,%s,%s)" % ( cli.to , cli.subject , cli.body , cli.fr , False )
-  if not cli.debugMail:
-      gLogger.info("trying to first submit locally - debug mode.")
-      result = ntc.sendMail( cli.debugMail , cli.subject , cli.body , cli.fr , localAttempt = False )
-      if not result[ "OK" ]:
-          gLogger.error( result[ "Message" ] )
-      gLogger.error("We bravely carry on...")
+  gLogger.notice("Sending:"," ".join([cli.to , cli.subject , cli.body , cli.fr] ))
+  gLogger.verbose("sendMail(%s,%s,%s,%s,%s)" % ( cli.to , cli.subject , cli.body , cli.fr , False ))
+  
   result = ntc.sendMail( cli.to , cli.subject , cli.body , cli.fr , localAttempt = False )
   
   if not result[ "OK" ]:
