@@ -1,3 +1,8 @@
+[v1r3p15]
+
+*PipelineSystem
+FIX: GridAccess - use bulk retrieval as much as possible, fixes 'https://github.com/Glast/GlastDIRAC/issues/118'_ providing right return codes
+
 [v1r3p14]
 
 *All
