@@ -225,33 +225,42 @@ def getOutputData(baseDir,logLevel="INFO"):
             files = dirContents['Files'].keys()
     # ######################################################################################################## #
     # get file
-    ntries = 3
-    for lfn in sortList( allFiles ):
-        success = False
-        while ntries:
-            gLogger.info(" - getting '"+lfn+"'... ")
-            result = rm.getFile( lfn )
-            if not result['OK']:
-                print 'ERROR %s' % ( result['Message'] )
-                print 'sleep for 10s and try again.'
-                time.sleep(10)
-            else:
-                success = True
-                listOutputData.append(result['Value']['Successful'][lfn])
-                gLogger.info("OK")
-                break
-            ntries -= 1
-        if not success:
-            print 'ERROR could not get file after %i trials. Giving up :('%ntries
-            exitCode = 23
-    # ######################################################################################################## #
+    ntries = 5
+    # getFile supports bulk requests
+    files_to_transfer = sortList(allFiles)
+    successful_files = []
+    failed_files = []
+    while ntries>0:
+        if len(failed_files):
+            files_to_transfer = failed_files
+        gLogger.info("getting the following *list* of files %s"%str(files_to_transfer))
+        result = rm.getFile(files_to_transfer)
+        if not result["OK"]:
+            gLogger.error("Could not complete ReplicaManager request")
+            gLogger.error(str(result["Message"]))
+            gLogger.info('sleep for 10s and re-try')
+            time.sleep(10)
+            break 
+        # next is to check what files we got
+        successful_files = result["Value"]["Successful"]
+        failed_files = result["Value"]["Failed"]
+        if len(failed_files):
+            gLogger.info("Could not retrieve one or more files")
+            for s in successful_files:
+                files_to_transfer.remove(s)
+            for f in failed_files:
+                gLogger.verbose("could not retrieve: %s"%f)
+        else: 
+            break
+        ntries -= 1
+    if len(failed_files):
+        gLogger.error('ERROR could not get all files after %i trials. Giving up :('%ntries)
+        exitCode = 23
+
     if exitCode:
         return {"OK":False,"Message":"Failed to finish operations.","RC":exitCode}    
-    return S_OK(listOutputData);
-
-
-    
-    
+    return S_OK(successful_files);
+       
 def removeOutputData(baseDir,logLevel="INFO"):
     gLogger.setLevel(logLevel)
     res = getProxyInfo( False, False )
@@ -291,6 +300,6 @@ def cleanOldOutputData(baseDir,logLevel="INFO"):
         else:
             return S_OK(baseDir + " has been supressed")
         
-    return S_OK("No previous outpudata found.")
+    return S_OK("No previous outputdata found.")
     
 
