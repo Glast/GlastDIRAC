@@ -270,8 +270,10 @@ def removeOutputData(baseDir,logLevel="INFO"):
 
     # ######################################################################################################## #
     rm = ReplicaManager()
-    
-    result = rm.cleanLogicalDirectory(baseDir);
+    try:
+        result = rm.cleanLogicalDirectory(baseDir);
+    except KeyError,ke:
+        return {"OK":False,"Message":"Caught key error, full stacktrace below\n%s"%str(ke),"RC":137}
     print "Ignore the message about the file '"+baseDir+"dirac_directory'"
     if not result['OK']:
         print 'ERROR: %s' % (result['Message'] )
