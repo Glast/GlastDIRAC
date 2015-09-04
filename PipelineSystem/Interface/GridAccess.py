@@ -1,8 +1,6 @@
 """ Grid Storage Access Library to be used instead of GPL.staging.
-
 @author: V. Rolland (LUPM/IN2P3)
 @author: S. Zimmer (OKC/SU)
-
 """
 from DIRAC.Core.Base import Script
 Script.parseCommandLine( ignoreErrors = False )
@@ -11,7 +9,7 @@ from DIRAC import gLogger, S_OK, S_ERROR
 import os, time
 from DIRAC.ConfigurationSystem.Client.Helpers.Operations    import Operations
 from DIRAC.Core.Security.ProxyInfo                          import getProxyInfo
-from DIRAC.DataManagementSystem.Client.DataManager       import DataManager
+from DIRAC.DataManagementSystem.Client.DataManager          import DataManager
 from DIRAC.Core.Utilities.List                              import sortList
 
 # Set up message logging
@@ -292,5 +290,3 @@ def cleanOldOutputData(baseDir,logLevel="INFO"):
     else:
         return S_OK(baseDir + " has been supressed")
     return S_OK("No previous outputdata found.")
-    
-
