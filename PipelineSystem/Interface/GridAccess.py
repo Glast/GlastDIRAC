@@ -11,8 +11,7 @@ from DIRAC import gLogger, S_OK, S_ERROR
 import os, time
 from DIRAC.ConfigurationSystem.Client.Helpers.Operations    import Operations
 from DIRAC.Core.Security.ProxyInfo                          import getProxyInfo
-from DIRAC.DataManagementSystem.Client.ReplicaManager       import ReplicaManager
-from DIRAC.DataManagementSystem.Client.ReplicaManager       import CatalogFile
+from DIRAC.DataManagementSystem.Client.DataManager       import DataManager
 from DIRAC.Core.Utilities.List                              import sortList
 
 # Set up message logging
@@ -207,7 +206,7 @@ def getOutputData(baseDir,logLevel="INFO"):
     allFiles = []
     while len( activeDirs ) > 0:
         currentDir = activeDirs[0]
-        res = rm.getCatalogListDirectory( currentDir, False )
+        res = rm.getFilesFromDirectory( currentDir )
         activeDirs.remove( currentDir )
         if not res['OK']:
             gLogger.error( "Error retrieving directory contents", "%s %s" % ( currentDir, res['Message'] ) )
@@ -287,21 +286,11 @@ def cleanOldOutputData(baseDir,logLevel="INFO"):
     if not res['OK']:
         gLogger.error( "Failed to get client proxy information.", res['Message'] )
         return {"OK":False,"Message":"Failed to get client proxy information: %s"%str(res['Message']),"RC":71}
-
-    cf = CatalogFile()
-    result = cf.getCatalogExists(baseDir) 
-    
+    result = removeOutputData(baseDir)
     if not result['OK']:
-        print 'ERROR: %s' % (result['Message'] )
-        return {"OK":False,"Message":"Failed to access directory : %s"%baseDir,"RC":31}
-        
-    if result['Value']['Successful'][baseDir]:
-        res = removeOutputData(baseDir)
-        if not result['OK']:
-            return {"OK":False,"Message":"Failed to remove files %s"%result["Message"],"RC":41}
-        else:
-            return S_OK(baseDir + " has been supressed")
-        
+        return {"OK":False,"Message":"Failed to remove files %s"%result["Message"],"RC":41}
+    else:
+        return S_OK(baseDir + " has been supressed")
     return S_OK("No previous outputdata found.")
     
 
