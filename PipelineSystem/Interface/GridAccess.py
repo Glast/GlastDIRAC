@@ -11,7 +11,7 @@ from DIRAC import gLogger, S_OK, S_ERROR
 import os, time
 from DIRAC.ConfigurationSystem.Client.Helpers.Operations    import Operations
 from DIRAC.Core.Security.ProxyInfo                          import getProxyInfo
-from DIRAC.DataManagementSystem.Client.DataManager       import DataManager
+from DIRAC.DataManagementSystem.Client.DataManager          import DataManager
 from DIRAC.Core.Utilities.List                              import sortList
 
 # Set up message logging
