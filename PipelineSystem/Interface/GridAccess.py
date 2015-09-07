@@ -106,7 +106,7 @@ class stageGrid(object):
         @return:
         """
         rc = 0
-        rm = ReplicaManager()
+        rm = DataManager()
         for item in self.listFileStaged:   
             #print("SE '"+self.SE+"' == : '"+str(self.SE == "False")+"'")
             if not self.SE:
@@ -200,7 +200,7 @@ def getOutputData(baseDir,logLevel="INFO"):
     import fnmatch
     # ######################################################################################################## #
     # before is from dirac-dms-user-lfns
-    rm = ReplicaManager()
+    rm = DataManager()
     allFiles = []
     while len( activeDirs ) > 0:
         currentDir = activeDirs[0]
@@ -233,7 +233,7 @@ def getOutputData(baseDir,logLevel="INFO"):
         gLogger.info("getting the following *list* of files %s"%str(files_to_transfer))
         result = rm.getFile(files_to_transfer)
         if not result["OK"]:
-            gLogger.error("Could not complete ReplicaManager request")
+            gLogger.error("Could not complete DataManager request")
             gLogger.error(str(result["Message"]))
             gLogger.info('sleep for 10s and re-try')
             time.sleep(10)
@@ -266,7 +266,7 @@ def removeOutputData(baseDir,logLevel="INFO"):
         return {"OK":False,"Message":"Failed to get client proxy information: %s"%str(res['Message']),"RC":71}
 
     # ######################################################################################################## #
-    rm = ReplicaManager()
+    rm = DataManager()
     try:
         result = rm.cleanLogicalDirectory(baseDir);
     except KeyError,ke:
