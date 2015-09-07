@@ -1,3 +1,11 @@
+[v1r4p0]
+
+*All
+NEW: bump to DIRAC-v6r14
+FIX: use DataManager instead of ReplicaManager (deprecated since v6r14)
+FIX: updated global glast.cfg
+FIX: removed ResourceStatusSystem (deprecated and unused)
+
 [v1r3p17]
 
 *All
