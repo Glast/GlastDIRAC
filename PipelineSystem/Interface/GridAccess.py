@@ -233,6 +233,7 @@ def getOutputData(baseDir,logLevel="INFO"):
         failed_files = result["Value"]["Failed"]
         if len(failed_files):
             gLogger.info("Could not retrieve one or more files")
+            gLogger.info(result['Message'])
             for s in successful_files:
                 files_to_transfer.remove(s)
             for f in failed_files:
