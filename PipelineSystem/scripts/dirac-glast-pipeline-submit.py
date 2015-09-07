@@ -9,7 +9,6 @@ Created 10/2012
 
 class options:
     def __init__(self,DICT,**kwargs):
-        self.release = None
         self.cpu = 86400
         self.site = None
         self.stagein = None
@@ -42,7 +41,7 @@ if __name__ == "__main__":
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
     specialOptions = {}
-    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: release, cpu, site, stagein, name, debug, mailDebug, env, bannedSites, group) ", setSpecialOption )
+    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: cpu, site, stagein, name, debug, mailDebug, env, bannedSites, group) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')
     Script.parseCommandLine()
@@ -51,7 +50,6 @@ if __name__ == "__main__":
     from GlastDIRAC.PipelineSystem.Interface.GlastJob import GlastJob as Job
     from DIRAC.Interfaces.API.Dirac import Dirac
     from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
-    from GlastDIRAC.ResourceStatusSystem.Client.SoftwareTagClient import SoftwareTagClient
     from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
     opts = options(specialOptions) # converts the "DIRAC registerSwitch()" to something similar to OptionParser
     pipeline = False
@@ -151,15 +149,6 @@ if __name__ == "__main__":
         
     if not opts.bannedSites is None:
         j.setBannedSites(opts.bannedSites.split(","))
-    if not opts.release is None:
-        tag = opts.release
-        cl = SoftwareTagClient()
-        result = cl.getSitesForTag(tag,'Valid') # keyword doesn't work there.
-        if not result['OK']:
-            gLogger.error("*ERROR* Could not get sites for Tag %s"%tag,result['Message'])
-            dexit(1)
-        sites = result[ 'Value' ]
-        j.setDestination(sites)
     # new feature: add xrootd-keytab file to input list. this one resides on SE
     
     input_stage_files = []
