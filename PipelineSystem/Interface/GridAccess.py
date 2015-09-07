@@ -1,8 +1,6 @@
 """ Grid Storage Access Library to be used instead of GPL.staging.
-
 @author: V. Rolland (LUPM/IN2P3)
 @author: S. Zimmer (OKC/SU)
-
 """
 from DIRAC.Core.Base import Script
 Script.parseCommandLine( ignoreErrors = False )
@@ -292,5 +290,3 @@ def cleanOldOutputData(baseDir,logLevel="INFO"):
     else:
         return S_OK(baseDir + " has been supressed")
     return S_OK("No previous outputdata found.")
-    
-
