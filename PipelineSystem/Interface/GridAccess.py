@@ -208,18 +208,8 @@ def getOutputData(baseDir,logLevel="INFO"):
         activeDirs.remove( currentDir )
         if not res['OK']:
             gLogger.error( "Error retrieving directory contents", "%s %s" % ( currentDir, res['Message'] ) )
-        elif res['Value']['Failed'].has_key( currentDir ):
-            gLogger.error( "Error retrieving directory contents", "%s %s" % ( currentDir, res['Value']['Failed'][currentDir] ) )
         else:
-            dirContents = res['Value']['Successful'][currentDir]
-            subdirs = dirContents['SubDirs']    
-            for subdir, metadata in subdirs.items():
-                activeDirs.append( subdir )
-            for filename, fileInfo in dirContents['Files'].items():
-                metadata = fileInfo['MetaData']
-                if fnmatch.fnmatch( filename, "*"):
-                    allFiles.append( filename )
-            files = dirContents['Files'].keys()
+            allFiles = res['Value']
     # ######################################################################################################## #
     # get file
     ntries = 5
