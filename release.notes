@@ -1,3 +1,9 @@
+[v1r4p1]
+
+*All
+NEW: bump to DIRAC-v6r14p21
+FIX: DIRAC release upgrade required to address https://github.com/Glast/GlastDIRAC/issues/133
+
 [v1r4p0]
 
 *All
