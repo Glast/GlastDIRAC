@@ -48,4 +48,3 @@ class GlastJob(Job):
         stepInstance.setValue( "logFile", logFile )
 
         return S_OK()
-      
