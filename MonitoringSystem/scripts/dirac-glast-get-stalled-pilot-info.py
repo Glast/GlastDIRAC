@@ -4,7 +4,7 @@ Script.parseCommandLine( ignoreErrors = True )
 import DIRAC
 from DIRAC.Interfaces.API.Dirac import Dirac
 from DIRAC.Interfaces.API.DiracAdmin                         import DiracAdmin
-from DIRAC import gLogger, exit as dexit
+from DIRAC import gLogger
 
 def getPilotLoggingInfo(gridID):
     output = ""

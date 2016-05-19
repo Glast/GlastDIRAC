@@ -8,6 +8,7 @@ Created 10/2012
 
 import xml.dom.minidom as xdom
 import sys, os, StringIO, datetime
+from __builtin__ import None
 
 specialOptions = {}
 
@@ -25,6 +26,17 @@ class InternalJobStatus(object):
                     "LocalBatchID", "LocalJobID", "MemorykB", "MinorStatus", "ModelName", "NormCPUTimes", 
                     "OK", "OutputSandboxMissingFiles", "PayloadPID", "PilotAgent", "Pilot_Reference", 
                     "ScaledCPUTime", "Site", "Started", "Status", "Submitted", "TotalCPUTimes")
+    id          = None
+    status      = None
+    started     = None
+    submitted   = None
+    ended       = None
+    cputime     = None
+    mem         = None
+    hostname    = None
+    
+    def set(self,key,value):
+        self.__dict__[key]=value
 
     def __init__(self,job_id,my_dict,**kwargs):
         translateJobSummary(my_dict)
@@ -36,19 +48,13 @@ class InternalJobStatus(object):
         self.cputime = None
         self.mem = None
         self.hostname = None
-        if my_dict.has_key("Status"):
-            self.status = my_dict['Status']
-        if my_dict.has_key("Started"):
-            self.started = my_dict['Started']
-        if my_dict.has_key("Submitted"):
-            self.submitted = my_dict['Submitted']
-        if my_dict.has_key("Ended"):
-            self.ended = my_dict['Ended']
-        if my_dict.has_key('NormCPUTime(s)'):
-            self.cputime = my_dict['NormCPUTime(s)']
-        if my_dict.has_key('CacheSize(kB)'):
-            self.mem = my_dict['CacheSize(kB)']
-        if my_dict.has_key("Site"):
+        variable_map = {"status":"Status", "started":"Started",
+                        "submitted":"Submitted", "ended":"Ended",
+                        "cputime":"NormCPUTime(s)", "mem":"ChacheSize(kB)",
+                        }
+        for key,value in variable_map.iteritems():
+            self.set(key,my_dict.get(value,None))
+        if "Site" in my_dict:
             if self.hostname is None:
                 self.hostname = ""
             self.hostname+=my_dict['Site']
@@ -145,19 +151,16 @@ if __name__ == "__main__":
     
     user = os.getenv("USER")
     doLogging = False
-    if specialOptions.has_key("xml"):
-        do_xml = specialOptions["xml"]
-    if specialOptions.has_key("user"):
-        user = specialOptions["user"]
-    if specialOptions.has_key("logging"):
-        doLogging = specialOptions["logging"]
+    if "xml" in specialOptions:     do_xml = specialOptions["xml"]
+    if "user" in specialOptions:    user = specialOptions["user"]
+    if "logging" in specialOptions: doLogging = specialOptions["logging"]
     if do_xml:
         xmlfile = xdom.parse(StringIO.StringIO('<?xml version="1.0" ?><joblist/>'))
         firstChild = xmlfile.firstChild
     d = Dirac()
     w = RPCClient("WorkloadManagement/JobMonitoring")
 
-    if not specialOptions.has_key("JobID"):
+    if not "JobID" in specialOptions:
         my_dict = {}
         #my_dict['Status']=['Matched','Staging','Completed','Done','Failed','Rescheduled','Stalled','Waiting','Running','Checking'] # monitor all states
         my_dict['Owner']=[user]
@@ -225,9 +228,6 @@ if __name__ == "__main__":
             if not new_stat.getEndTime():
                 gLogger.info("Time stamp for ended job %i not provided, setting it to 1 day in the past!" %job)
                 new_stat.setEndTime()
-                  # addresses LPG-35
-#                 gLogger.info("Requesting to kill job %i" %job)
-#                 d.kill(job)
         if job in sites:
             new_stat.setSite(sites[job]['Site'])
         #print new_stat._toxml().toprettyxml()

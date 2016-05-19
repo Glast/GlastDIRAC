@@ -22,7 +22,7 @@ if __name__ == "__main__":
     
     from DIRAC.ConfigurationSystem.Client.Helpers.Operations    import Operations
     op = Operations("glast.org")
-    LogfileRetrievalSummaryPath = p.getValue("Pipeline/LogfileRetrievalSummaryPath", "/glast_data/Pipeline2/grid-service" )
+    LogfileRetrievalSummaryPath = op.getValue("Pipeline/LogfileRetrievalSummaryPath", "/glast_data/Pipeline2/grid-service" )
     filename_jobhandled = LogfileRetrievalSummaryPath + '/LogfileRetrievalSummaryIDjob'
     #filename_jobhandled = '/afs/in2p3.fr/home/g/glastpro/vrolland/logFile/jobidhandled.list'
 
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     for j in job_list_to_handle:
         print "\t"+j+" => ",
-        if not j in jobid_handled:
+        if j not in jobid_handled:
         
             res = w.getJobSummary(int(j))
             if not res['OK']:

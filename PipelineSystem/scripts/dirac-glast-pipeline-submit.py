@@ -39,7 +39,8 @@ if __name__ == "__main__":
     import os, shutil, glob
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
-    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: cpu, site, stagein, name, debug, mailDebug, env, bannedSites, group) ", setSpecialOption )
+    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: cpu, site, \
+                            stagein, name, debug, mailDebug, env, bannedSites, group) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')
     Script.parseCommandLine()
@@ -52,7 +53,7 @@ if __name__ == "__main__":
     opts = options(specialOptions) # converts the "DIRAC registerSwitch()" to something similar to OptionParser
     pipeline = False
     pipeline_dict = None
-    if not opts.env is None:
+    if opts.env is not None:
         import json
         f = open(specialOptions["env"],"r")
         pipeline_dict = json.load(f)
@@ -86,7 +87,7 @@ if __name__ == "__main__":
         if opts.mailDebug:
             pipeline_dict["PIPELINE_DEBUG_ADDRESS"]=op.getValue("Pipeline/DebugMailAddress","glastpro@in2p3.fr")
         j.setExecutionEnv(pipeline_dict) # that sets the env vars
-        if pipeline_dict.has_key("GPL_CONFIGDIR"):
+        if "GPL_CONFIGDIR" in pipeline_dict:
             GPL_CONFIGDIR = pipeline_dict['GPL_CONFIGDIR']
             files = []
             if os.path.isdir(GPL_CONFIGDIR):
@@ -96,7 +97,7 @@ if __name__ == "__main__":
                         input_sandbox_files.append(os.path.abspath(f))
                     else:
                         input_sandbox_files.append(f)
-        if pipeline_dict.has_key("DIRAC_OSB"):
+        if "DIRAC_OSB" in pipeline_dict:
             DIRAC_OUTPUTSANDBOX = pipeline_dict["DIRAC_OSB"]
             files = DIRAC_OUTPUTSANDBOX.split(",")
             for f in files:
@@ -134,18 +135,18 @@ if __name__ == "__main__":
         dexit(1)
         
     j.setName("MC job")
-    if not opts.name is None:
+    if opts.name is not None:
         j.setName(opts.name)
-    if not opts.group is "user":
+    if opts.group is not "user":
         j.setJobGroup(str(opts.group))
     j.setInputSandbox(input_sandbox_files) # all input files in the sandbox
     j.setOutputSandbox(output_sandbox_files)
 
     j.setCPUTime(opts.cpu)
-    if not opts.site is None:
+    if opts.site is not None:
         j.setDestination(opts.site.split(","))#can also be a list
         
-    if not opts.bannedSites is None:
+    if opts.bannedSites is not None:
         j.setBannedSites(opts.bannedSites.split(","))
     # new feature: add xrootd-keytab file to input list. this one resides on SE
     
@@ -155,11 +156,10 @@ if __name__ == "__main__":
         if not xrd_keytab:
             gLogger.notice("*DEBUG* adding XrdKey file %s to input"%xrd_keytab)
             input_stage_files.append(xrd_keytab)
-    if not opts.stagein is None:
+    if opts.stagein is not None:
         # we do add. input staging
         files = opts.stagein.split(",")
-        for f in files:
-                input_stage_files.append(f)
+        for f in files: input_stage_files.append(f)
     if len(input_stage_files):
         if len(input_stage_files)==1:
             j.setInputData(input_stage_files[-1])
