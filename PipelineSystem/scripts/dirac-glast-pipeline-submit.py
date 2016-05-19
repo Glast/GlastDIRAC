@@ -6,7 +6,7 @@ Created 10/2012
 @author: S. Zimmer (OKC/SU)
 
 """
-
+specialOptions = {}
 class options:
     def __init__(self,DICT,**kwargs):
         self.cpu = 86400
@@ -23,7 +23,6 @@ class options:
 
 def setSpecialOption( optVal ):
     from DIRAC import S_OK
-    global specialOptions
     option,value = optVal.split('=')
     specialOptions[option] = value
     return S_OK()
@@ -40,7 +39,6 @@ if __name__ == "__main__":
     import sys, os, shutil, glob
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
-    specialOptions = {}
     Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: cpu, site, stagein, name, debug, mailDebug, env, bannedSites, group) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')

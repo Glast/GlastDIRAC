@@ -9,7 +9,6 @@ Created 10/2012
 import xml.dom.minidom as xdom
 from copy import deepcopy
 import sys, getopt, os, StringIO, datetime
-from __builtin__ import None
 
 specialOptions = {}
 
