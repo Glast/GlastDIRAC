@@ -58,8 +58,8 @@ class GlastWrapperCall(object):
         exec_name = os.path.basename(loc)
         try:
             shutil.copy(loc, os.path.join(".",exec_name))
-        except:
-            return S_ERROR("Could not copy the executable to run directory")
+        except Exception as ex:
+            return S_ERROR("Could not copy the executable to run directory %s"%str(ex))
         os.chmod(exec_name, 0755) #executable for all
         comm = 'bash "./%s"' % exec_name
         self.log.info("Will execute", comm)

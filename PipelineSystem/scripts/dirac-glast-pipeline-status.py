@@ -7,12 +7,11 @@ Created 10/2012
 """
 
 import xml.dom.minidom as xdom
-from copy import deepcopy
-import sys, getopt, os, StringIO, datetime
+import sys, os, StringIO, datetime
 
 specialOptions = {}
 
-class LoggingRecord:
+class LoggingRecord(object):
     def __init__(self,ntuple):
         self.main_status = ntuple[0]
         self.major_status = ntuple[1]
@@ -20,7 +19,7 @@ class LoggingRecord:
         self.time = ntuple[3]
         self.name = ntuple[4]
 
-class InternalJobStatus:
+class InternalJobStatus(object):
     SERIALIZABLE = ("StandardOutput", "CPUMHz", "CPUNormalizationFactor", "CPUScalingFactor", "CacheSizekB", 
                     "Ended", "HostName", "JobID", "JobPath", "JobSanityCheck", "JobWrapperPID", "LocalAccount", 
                     "LocalBatchID", "LocalJobID", "MemorykB", "MinorStatus", "ModelName", "NormCPUTimes", 
@@ -94,7 +93,7 @@ class InternalJobStatus:
         k = "\t".join([str(self.get(key,as_str=True)) for key in keys])
         return k
 
-    def _toxml(self):
+    def toxml(self):
         xf = xdom.parse(StringIO.StringIO('<?xml version="1.0" ?><some_tag/>'))
         job = xf.createElement("job")
         job.setAttribute("JobID",self.id)
@@ -139,7 +138,7 @@ if __name__ == "__main__":
     #print specialOptions
     from DIRAC.Core.DISET.RPCClient import RPCClient
     from DIRAC.Interfaces.API.Dirac import Dirac
-    import DIRAC.Core.Utilities.Time as Time
+    #import DIRAC.Core.Utilities.Time as Time
     # use stored certificates
     from DIRAC.Core.Utilities.List import breakListIntoChunks
     do_xml = False
@@ -233,7 +232,7 @@ if __name__ == "__main__":
             new_stat.setSite(sites[job]['Site'])
         #print new_stat._toxml().toprettyxml()
         if do_xml:
-            firstChild.appendChild(new_stat._toxml())
+            firstChild.appendChild(new_stat.toxml())
         else:
             print(new_stat)
     # TODO:

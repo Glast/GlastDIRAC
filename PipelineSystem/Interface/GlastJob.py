@@ -21,7 +21,10 @@ class GlastJob(Job):
         Constructor
         '''
         super(GlastJob,self).__init__(script, stdout, stderr)
-        
+    
+    def toJDL(self):
+        super(GlastJob,self)._toJDL()
+    
     def addWrapper(self, logFile = ''):
         """ Overload the DIRAC.Job.setExecutable
         """
@@ -37,7 +40,7 @@ class GlastJob(Job):
         # Create Step definition
         step = StepDefinition( stepDefn )
         step.addModule( module )
-        moduleInstance = step.createModuleInstance( 'GlastWrapperCall', stepDefn )
+        #moduleInstance = step.createModuleInstance( 'GlastWrapperCall', stepDefn )
         # Define step parameters
         step.addParameter( Parameter( "logFile", "", "string", "", "", False, False, 'Log file name' ) )
         self.addToOutputSandbox.append( logFile )

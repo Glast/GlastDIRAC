@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """ Get LogFile from Dirac Sandboxes
 @author: V. Rolland (LUPM/IN2P3)
+@author: S. Zimmer (UniGE/CERN)
 """
-import sys, os, shutil, commands, time
+import sys, os, shutil, time
 
 if __name__ == "__main__":
 
@@ -164,7 +165,8 @@ if __name__ == "__main__":
                                         except ValueError:
                                             print "WARNING : Previous id job is not a number '"+str_last_jobid+"'"
                                             raise
-                                    except: # if we don't find the previous id we fix it like "UnknownIDX" 
+                                    except Exception as e: # if we don't find the previous id we fix it like "UnknownIDX" 
+                                        print "WARNING: %s"%str(e)
                                         #last_jobid = 'UnknownID' 
                                         suffix = 1
                                         while os.path.isdir(workdir+"/archive/"+last_jobid+str(suffix)):

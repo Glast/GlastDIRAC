@@ -7,7 +7,7 @@ Created 10/2012
 
 """
 specialOptions = {}
-class options:
+class options(object):
     def __init__(self,DICT,**kwargs):
         self.cpu = 86400
         self.site = None
@@ -36,7 +36,7 @@ def extract_inputfiles(fname):
     return file_list
 
 if __name__ == "__main__":
-    import sys, os, shutil, glob
+    import os, shutil, glob
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
     Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: cpu, site, stagein, name, debug, mailDebug, env, bannedSites, group) ", setSpecialOption )
@@ -167,7 +167,7 @@ if __name__ == "__main__":
             j.setInputData(input_stage_files)
     if opts.debug:
         gLogger.notice('*DEBUG* just showing the JDL of the job to be submitted')
-        gLogger.notice(j._toJDL())
+        gLogger.notice(j.toJDL())
     
     d = Dirac(True,"myRepo.rep")
     res = d.submit(j)

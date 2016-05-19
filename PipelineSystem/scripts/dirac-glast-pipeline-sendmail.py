@@ -12,7 +12,7 @@
 
 __RCSID__ = "$Id$"
 
-import socket , os
+import socket 
 
 from DIRAC.Core.Base                                    import Script
 

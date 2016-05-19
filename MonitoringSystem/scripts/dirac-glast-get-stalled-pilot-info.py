@@ -4,7 +4,7 @@ Script.parseCommandLine( ignoreErrors = True )
 import DIRAC
 from DIRAC.Interfaces.API.Dirac import Dirac
 from DIRAC.Interfaces.API.DiracAdmin                         import DiracAdmin
-from DIRAC import gConfig, gLogger, exit as dexit
+from DIRAC import gLogger, exit as dexit
 
 def getPilotLoggingInfo(gridID):
     output = ""
@@ -17,10 +17,10 @@ def getPilotLoggingInfo(gridID):
         output = result['Value']
     return output
 
-def removeStr(string,filter):
+def removeStr(string,fil):
     out = ""
-    while filter in string:
-        out = string.replace(filter,"")
+    while fil in string:
+        out = string.replace(fil,"")
         string = out
     return out
             
