@@ -5,8 +5,8 @@ Created on Jun 6, 2013
 @author: S. Zimmer (OKC/SU)
 '''
 from DIRAC import S_OK, S_ERROR
-from DIRAC.ConfigurationSystem.Client.Helpers.Resources                import getQueues
-from DIRAC.ConfigurationSystem.Client.Helpers.Registry import getVO
+from DIRAC.ConfigurationSystem.Client.Helpers.Resources import getQueues
+from DIRAC.ConfigurationSystem.Client.Helpers.Registry  import getVO
 
 def getSiteForCEs(ces,vo="glast.org"):
     """ We want to get the site for a given CE because that's what the job expects
@@ -25,7 +25,7 @@ def getSiteForCEs(ces,vo="glast.org"):
     for site, s_ces in sitedict.items():
         for ce in ces:
             if ce in s_ces:
-                if not site in final_sdict:
+                if site not in final_sdict:
                     final_sdict[site] = []
                 final_sdict[site].append(ce)
     

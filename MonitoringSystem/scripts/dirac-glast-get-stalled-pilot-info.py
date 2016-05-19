@@ -96,7 +96,7 @@ for i,job in enumerate(pilot_refs):
         gLogger.debug(str(line))
     val = ingestPilot(pilotInfo,iKey)
     print "%s\t:\t%s"%(str(job),str(val))
-    if not val is None:
+    if val is not None:
         pilot_info[job]=val
     
 DIRAC.exit( exitCode )

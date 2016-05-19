@@ -158,7 +158,10 @@ class stageGrid(object):
             self.log.info("* "+item[0])
 
     def getChecksums(self,printflag=None):
-        """@brief Return a dictionary of: [stagedOut file name,[length,checksum] ].  Call this after creating file(s), but before finish(), if at all.  If the printflag is set to 1, a brief report will be sent to stdout."""
+        """@brief Return a dictionary of: [stagedOut file name,[length,checksum] ]. 
+           Call this after creating file(s), but before finish(), if at all.  
+           If the printflag is set to 1, a brief report will be sent to stdout.
+        """
         cksums = {}
         # Compute checksums for all stagedOut files
         
@@ -170,13 +173,13 @@ class stageGrid(object):
             if os.access(File,os.R_OK):
                 cksum = "cksum "+File
                 fd = os.popen(cksum,'r')    # Capture output from unix command
-                foo = fd.read()             # Calculate checksum
+                fread = fd.read()             # Calculate checksum
                 rc = fd.close()
-                if rc != None:
+                if rc is not None:
                     self.log.error("Checksum error: return code =  "+str(rc)+" for file "+File)
                     #print "Checksum error: return code =  "+str(rc)+" for file "+file
                 else:
-                    cksumout = foo.split()
+                    cksumout = fread.split()
                     cksums[cksumout[2]] = [cksumout[0],cksumout[1]]
             else:
                 self.log.error("Checksum error: file does not exist, "+File)
