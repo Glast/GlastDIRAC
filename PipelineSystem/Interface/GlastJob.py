@@ -1,3 +1,4 @@
+# pylint: disable=E1002
 '''
 Created on Jun 8, 2013
 
