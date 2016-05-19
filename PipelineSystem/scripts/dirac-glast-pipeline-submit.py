@@ -30,7 +30,7 @@ def setSpecialOption( optVal ):
 
 def extract_inputfiles(fname):
     file_list = []
-    lines = open(fname,'read').readlines()
+    lines = open(fname,'r').readlines()
     for line in lines:
         thisLine = line.replace("\n","")
         file_list.append(thisLine)

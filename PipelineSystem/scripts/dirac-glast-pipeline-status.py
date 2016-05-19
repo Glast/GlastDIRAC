@@ -7,7 +7,11 @@ Created 10/2012
 """
 
 import xml.dom.minidom as xdom
+from copy import deepcopy
 import sys, getopt, os, StringIO, datetime
+from __builtin__ import None
+
+specialOptions = {}
 
 class LoggingRecord:
     def __init__(self,ntuple):
@@ -78,13 +82,17 @@ class InternalJobStatus:
     def getStartTime(self):
         return self.started
 
+    def setDict(self,t):
+        if not isinstance(t,dict): raise Exception("must be dictionary")
+        self.__dict__.update(t)
+
+    def get(self,key,as_str=False):
+        default = "-" if as_str else None
+        return self.__dict__.get(key,default)
+
     def __str__(self):
-        old_dict = self.__dict__
-        for key in self.__dict__.keys():
-            if self.__dict__[key] is None:
-                self.__dict__[key]="-"
-        k = '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(self.id,self.hostname,self.status,self.submitted,self.started,self.ended,self.cputime,self.mem)
-        self.__dict__ = old_dict
+        keys = ['id','hostname','status','submitted','started','ended','cputime','mem']
+        k = "\t".join([str(self.get(key,as_str=True)) for key in keys])
         return k
 
     def _toxml(self):
@@ -116,7 +124,6 @@ def translateJobSummary(job_dict):
 
 def setSpecialOption( optVal ):
     from DIRAC import S_OK
-    global specialOptions
     option,value = optVal.split('=')
     specialOptions[option] = value
     return S_OK()
@@ -126,7 +133,6 @@ if __name__ == "__main__":
     sys.stdout = sys.stderr
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
-    specialOptions = {}
     Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: user, xml, dayspassed, logging, JobID) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')

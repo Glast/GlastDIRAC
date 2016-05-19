@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 """ Get LogFile from Dirac Sandboxes
-
 @author: V. Rolland (LUPM/IN2P3)
-
+@author: S. Zimmer (UniGE/CERN)
 """
 import sys, getopt, os, shutil, commands, time
 
@@ -23,7 +22,7 @@ if __name__ == "__main__":
 	
 	from DIRAC.ConfigurationSystem.Client.Helpers.Operations    import Operations
 	op = Operations("glast.org")
-	LogfileRetrievalSummaryPath = p.getValue("Pipeline/LogfileRetrievalSummaryPath", "/glast_data/Pipeline2/grid-service" )
+	LogfileRetrievalSummaryPath = op.getValue("Pipeline/LogfileRetrievalSummaryPath", "/glast_data/Pipeline2/grid-service" )
 	filename_jobhandled = LogfileRetrievalSummaryPath + '/LogfileRetrievalSummaryIDjob'
 	#filename_jobhandled = '/afs/in2p3.fr/home/g/glastpro/vrolland/logFile/jobidhandled.list'
 

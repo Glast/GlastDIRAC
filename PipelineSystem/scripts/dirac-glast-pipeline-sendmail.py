@@ -66,7 +66,7 @@ if __name__== "__main__":
     gLogger.error( "Missing argument" )
     DIRACexit( 2 )
   if not cli.body and not cli.filename:
-    gLogge.error("Missing body")
+    gLogger.error("Missing body")
     DIRACexit(2)
     
   if cli.filename:
