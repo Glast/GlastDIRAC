@@ -36,7 +36,7 @@ def extract_inputfiles(fname):
     return file_list
 
 if __name__ == "__main__":
-    import os, shutil, glob
+    import os, glob
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
     Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: cpu, site, \

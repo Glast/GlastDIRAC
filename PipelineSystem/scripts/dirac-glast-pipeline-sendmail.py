@@ -3,6 +3,7 @@
 # $HeadURL$
 # File :    dirac-sys-sendmail
 # Author :  Matvey Sapunov
+# Author :  Stephan Zimmer
 ########################################################################
 
 """
@@ -11,8 +12,6 @@
 """
 
 __RCSID__ = "$Id$"
-
-import socket 
 
 from DIRAC.Core.Base                                    import Script
 

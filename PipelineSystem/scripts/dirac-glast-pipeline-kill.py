@@ -7,7 +7,7 @@ Created 03/2014
 """
 
 if __name__ == "__main__":
-    import os, shutil, glob
+    import os, shutil
     from DIRAC.Core.Base import Script
     # thanks to Stephane for suggesting this fix!
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')

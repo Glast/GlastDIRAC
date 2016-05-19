@@ -8,7 +8,6 @@ Created 10/2012
 
 import xml.dom.minidom as xdom
 import sys, os, StringIO, datetime
-from __builtin__ import None
 
 specialOptions = {}
 
@@ -107,7 +106,7 @@ class InternalJobStatus(object):
             xmlkey = key.replace("(","").replace(")","").replace(" ","")
             new_node = xf.createElement(xmlkey)
             dict_value = self.mydict[key]
-            if not dict_value is None:
+            if dict_value is not None:
                 if "\n" in dict_value:
                     textnode = xf.createTextNode(dict_value)
                     new_node.appendChild(textnode)
@@ -160,13 +159,13 @@ if __name__ == "__main__":
     d = Dirac()
     w = RPCClient("WorkloadManagement/JobMonitoring")
 
-    if not "JobID" in specialOptions:
+    if "JobID" not in specialOptions:
         my_dict = {}
         #my_dict['Status']=['Matched','Staging','Completed','Done','Failed','Rescheduled','Stalled','Waiting','Running','Checking'] # monitor all states
         my_dict['Owner']=[user]
         local_time = datetime.datetime.utcnow()
         timedelta = local_time-datetime.timedelta(seconds=86400)
-        if specialOptions.has_key("dayspassed"):
+        if "dayspassed" in specialOptions:
             timedelta = local_time-datetime.timedelta(seconds=float(specialOptions["dayspassed"])*3600)
         res = w.getJobs(my_dict,timedelta.strftime( '%Y-%m-%d %H:%M:%S' ))
 
