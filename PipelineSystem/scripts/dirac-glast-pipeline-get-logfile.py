@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" Get LogFile from Dirac Sandboxes
+""" Logfile retrieval from DIRAC Sandbox
 @author: V. Rolland (LUPM/IN2P3)
 @author: S. Zimmer (UniGE/CERN)
 """
