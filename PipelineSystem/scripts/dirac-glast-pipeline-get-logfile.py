@@ -10,11 +10,11 @@ if __name__ == "__main__":
 	from DIRAC.Core.Base import Script
 	Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')
 	Script.parseCommandLine()
-
+	
 	from DIRAC.Core.DISET.RPCClient import RPCClient
 	from DIRAC.Interfaces.API.Dirac import Dirac
 	import DIRAC.Core.Utilities.Time as Time
-
+	
 	delay_job_handled = 3
 	status_to_handle = ['Done','Failed','Killed','Deleted']
 	status_to_ignore = ['Running','Waiting','Checking','Stalled','Received']
@@ -25,13 +25,13 @@ if __name__ == "__main__":
 	LogfileRetrievalSummaryPath = op.getValue("Pipeline/LogfileRetrievalSummaryPath", "/glast_data/Pipeline2/grid-service" )
 	filename_jobhandled = LogfileRetrievalSummaryPath + '/LogfileRetrievalSummaryIDjob'
 	#filename_jobhandled = '/afs/in2p3.fr/home/g/glastpro/vrolland/logFile/jobidhandled.list'
-
+	
 	from DIRAC.FrameworkSystem.Client.ProxyManagerClient import gProxyManager
 	from DIRAC.ConfigurationSystem.Client.Helpers.Operations import Operations
-
+	
 	proxy = None
 	op = Operations("glast.org")
-
+	
 	shifter = op.getValue("Pipeline/Shifter","/DC=org/DC=doegrids/OU=People/CN=Stephan Zimmer 799865")
 	shifter_group = op.getValue("Pipeline/ShifterGroup","glast_user")
 	
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 	
 	print "*********************************************************************************************************"
 	print "Execution at : '"+time.strftime('%d/%m/%y %H:%M',time.localtime())+"'"
-
+	
 	try:
 		d = Dirac()
 	except AttributeError:
@@ -57,17 +57,17 @@ if __name__ == "__main__":
 		raise Exception("Error loading Dirac monitor")
 
 	w = RPCClient("WorkloadManagement/JobMonitoring")
-
+	
 	delTime = str( Time.dateTime() - delay_job_handled * Time.day )
-
+	
 	jobid_handled = []
-
+	
 	file_jobhandled = open(filename_jobhandled, "r")
 	for line in file_jobhandled:
 		try:
-		    jobid_handled.append(str(int(line)));
+			jobid_handled.append(str(int(line)));
 		except ValueError:
-		    print "WARNING : the file '"+filename_jobhandled+"' contains a NaN line : '"+line+"'"
+			print "WARNING : the file '"+filename_jobhandled+"' contains a NaN line : '"+line+"'"
 	file_jobhandled.close()
 	
 	my_dict = {}
@@ -95,10 +95,10 @@ if __name__ == "__main__":
 				break
 			summary = res['Value']	
 			status_j = summary['Status']
-
+			
 			# Job we want to handle
 			if status_j in status_to_handle:
-			  
+				
 				# retrieve the INPUT sandbox
 				res = d.getInputSandbox(j,dir_temp)
 				if not res['OK']:
@@ -109,14 +109,12 @@ if __name__ == "__main__":
 						sys.stderr.write(time.strftime('%d/%m/%y %H:%M',time.localtime())+" => "+j+" => "+res['Message']+"\n")
 						
 				else:
-
 					# check if 'jobmeta.inf' is present (if not it's not a PIPELINE job )
 					if not os.path.isfile(dir_temp+"/InputSandbox"+j+"/jobmeta.inf"):
 						print "WARNING : not a pipeline task"
 						# notify the job as "already handled"
 						jobid_handled.append(j);
 					else:
-				  
 						# Get the working dir of the task from 'jobmeta.inf'
 						file_jobmeta = open( dir_temp+"/InputSandbox"+j+"/jobmeta.inf" , "r")
 						workdir = file_jobmeta.readline().splitlines()[0]
@@ -131,7 +129,7 @@ if __name__ == "__main__":
 						elif not os.path.isfile(dir_temp+"/"+j+"/jobmeta.inf"):
 							print "ERROR : no jobmeta.inf file in the outpusandbox"
 							sys.stderr.write(time.strftime('%d/%m/%y %H:%M',time.localtime())+" => "+j+" => "+"ERROR : no jobmeta.inf file in the outpusandbox\n")
-
+						
 						else: # everything is right about the outpusandbox
 			      
 							# if the working directory don't exist, create it
@@ -168,12 +166,8 @@ if __name__ == "__main__":
 									except: # if we don't find the previous id we fix it like "UnknownIDX" 
 										#last_jobid = 'UnknownID' 
 										suffix = 1
-										while os.path.isdir(workdir+"/archive/"+last_jobid+str(suffix)):
-											suffix+=1 
+										while os.path.isdir(workdir+"/archive/"+last_jobid+str(suffix)): suffix+=1 
 										last_jobid = last_jobid+str(suffix)
-								
-							
-						
 									if last_jobid != "FIRST_RUN": # It's a rollback
 										# start the copy to a sub directory in working directory "archive"
 										print "archive the last run in '"+workdir+"/archive/"+last_jobid+"'",
@@ -189,15 +183,11 @@ if __name__ == "__main__":
 										else:
 											print "ERROR : '"+workdir+"/archive/"+last_jobid+"' already exists."
 											sys.stderr.write(time.strftime('%d/%m/%y %H:%M',time.localtime())+" => "+j+" => "+"ERROR : '"+workdir+"/archive/"+last_jobid+"' already exists.\n")
-
-								
-							
 									# copy the job outpusandbox in the working directory
 									print "move output sandbox to '"+workdir+"'... ",
 									for f in os.listdir(dir_temp+"/"+j):
 										shutil.copy( dir_temp+"/"+j+"/"+f , workdir )
 									print "done"
-				
 									# notify the job as "already handled"
 									jobid_handled.append(j);
 						# Suppress the outputSandbox in the tmp directory
@@ -205,12 +195,9 @@ if __name__ == "__main__":
 						
 				# Suppress the inputSandbox in the tmp directory
 				shutil.rmtree(dir_temp+"/InputSandbox"+j)
-				
-	  
 			# Job we want to ignore
 			elif status_j in status_to_ignore: 
 				print status_j+" ignored"
-	    
 			# Status not anticipateds !
 			else:
 				print "ERROR : The job '"+j+"' has an unknown status : '"+status_j+"'"
