@@ -7,7 +7,7 @@ Created 03/2014
 """
 
 if __name__ == "__main__":
-    import sys, os, shutil, glob
+    from os import environ
     from DIRAC.Core.Base import Script
     # thanks to Stephane for suggesting this fix!
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         gLogger.error("ERROR: No valid proxy found; ",result['Message'])
         dexit(1)
     proxy = result[ 'Value' ]
-    os.environ['X509_USER_PROXY'] = proxy
+    environ['X509_USER_PROXY'] = proxy
     gLogger.info("using proxy %s"%proxy)
     dirac = Dirac(True,"myRepo.rep")
     exitCode = 0

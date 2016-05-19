@@ -4,7 +4,7 @@ Script.parseCommandLine( ignoreErrors = True )
 import DIRAC
 from DIRAC.Interfaces.API.Dirac import Dirac
 from DIRAC.Interfaces.API.DiracAdmin                         import DiracAdmin
-from DIRAC import gConfig, gLogger, exit as dexit
+from DIRAC import gLogger
 
 def getPilotLoggingInfo(gridID):
     output = ""
@@ -17,10 +17,10 @@ def getPilotLoggingInfo(gridID):
         output = result['Value']
     return output
 
-def removeStr(string,filter):
+def removeStr(string,fil):
     out = ""
-    while filter in string:
-        out = string.replace(filter,"")
+    while fil in string:
+        out = string.replace(fil,"")
         string = out
     return out
             
@@ -96,7 +96,7 @@ for i,job in enumerate(pilot_refs):
         gLogger.debug(str(line))
     val = ingestPilot(pilotInfo,iKey)
     print "%s\t:\t%s"%(str(job),str(val))
-    if not val is None:
+    if val is not None:
         pilot_info[job]=val
     
 DIRAC.exit( exitCode )

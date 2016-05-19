@@ -5,7 +5,7 @@
 from DIRAC.Core.Base import Script
 Script.parseCommandLine( ignoreErrors = False )
 import DIRAC
-from DIRAC import gLogger, S_OK, S_ERROR
+from DIRAC import gLogger, S_OK
 import os, time
 from DIRAC.ConfigurationSystem.Client.Helpers.Operations    import Operations
 from DIRAC.Core.Security.ProxyInfo                          import getProxyInfo
@@ -157,8 +157,10 @@ class stageGrid(object):
         for item in self.listFileStaged:
             self.log.info("* "+item[0])
 
-    def getChecksums(self,printflag=None):
-        """@brief Return a dictionary of: [stagedOut file name,[length,checksum] ].  Call this after creating file(s), but before finish(), if at all.  If the printflag is set to 1, a brief report will be sent to stdout."""
+    def getChecksums(self):
+        """@brief Return a dictionary of: [stagedOut file name,[length,checksum] ]. 
+           Call this after creating file(s), but before finish(), if at all.  
+        """
         cksums = {}
         # Compute checksums for all stagedOut files
         
@@ -170,13 +172,13 @@ class stageGrid(object):
             if os.access(File,os.R_OK):
                 cksum = "cksum "+File
                 fd = os.popen(cksum,'r')    # Capture output from unix command
-                foo = fd.read()             # Calculate checksum
+                fread = fd.read()             # Calculate checksum
                 rc = fd.close()
-                if rc != None:
+                if rc is not None:
                     self.log.error("Checksum error: return code =  "+str(rc)+" for file "+File)
                     #print "Checksum error: return code =  "+str(rc)+" for file "+file
                 else:
-                    cksumout = foo.split()
+                    cksumout = fread.split()
                     cksums[cksumout[2]] = [cksumout[0],cksumout[1]]
             else:
                 self.log.error("Checksum error: file does not exist, "+File)
@@ -188,7 +190,6 @@ class stageGrid(object):
 def getOutputData(baseDir,logLevel="INFO"):
     gLogger.setLevel(logLevel)
     exitCode = 0    
-    listOutputData = []
     res = getProxyInfo( False, False )
     if not res['OK']:
         gLogger.error( "Failed to get client proxy information.", res['Message'] )
@@ -197,7 +198,6 @@ def getOutputData(baseDir,logLevel="INFO"):
 
     print  'Will search for files in %s' % baseDir
     activeDirs = [baseDir]
-    import fnmatch
     # ######################################################################################################## #
     # before is from dirac-dms-user-lfns
     rm = DataManager()

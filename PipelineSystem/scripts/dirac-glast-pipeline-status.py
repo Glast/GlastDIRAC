@@ -7,9 +7,11 @@ Created 10/2012
 """
 
 import xml.dom.minidom as xdom
-import sys, getopt, os, StringIO, datetime
+import sys, os, StringIO, datetime
 
-class LoggingRecord:
+specialOptions = {}
+
+class LoggingRecord(object):
     def __init__(self,ntuple):
         self.main_status = ntuple[0]
         self.major_status = ntuple[1]
@@ -17,12 +19,23 @@ class LoggingRecord:
         self.time = ntuple[3]
         self.name = ntuple[4]
 
-class InternalJobStatus:
+class InternalJobStatus(object):
     SERIALIZABLE = ("StandardOutput", "CPUMHz", "CPUNormalizationFactor", "CPUScalingFactor", "CacheSizekB", 
                     "Ended", "HostName", "JobID", "JobPath", "JobSanityCheck", "JobWrapperPID", "LocalAccount", 
                     "LocalBatchID", "LocalJobID", "MemorykB", "MinorStatus", "ModelName", "NormCPUTimes", 
                     "OK", "OutputSandboxMissingFiles", "PayloadPID", "PilotAgent", "Pilot_Reference", 
                     "ScaledCPUTime", "Site", "Started", "Status", "Submitted", "TotalCPUTimes")
+    id          = None
+    status      = None
+    started     = None
+    submitted   = None
+    ended       = None
+    cputime     = None
+    mem         = None
+    hostname    = None
+    
+    def set(self,key,value):
+        self.__dict__[key]=value
 
     def __init__(self,job_id,my_dict,**kwargs):
         translateJobSummary(my_dict)
@@ -34,19 +47,13 @@ class InternalJobStatus:
         self.cputime = None
         self.mem = None
         self.hostname = None
-        if my_dict.has_key("Status"):
-            self.status = my_dict['Status']
-        if my_dict.has_key("Started"):
-            self.started = my_dict['Started']
-        if my_dict.has_key("Submitted"):
-            self.submitted = my_dict['Submitted']
-        if my_dict.has_key("Ended"):
-            self.ended = my_dict['Ended']
-        if my_dict.has_key('NormCPUTime(s)'):
-            self.cputime = my_dict['NormCPUTime(s)']
-        if my_dict.has_key('CacheSize(kB)'):
-            self.mem = my_dict['CacheSize(kB)']
-        if my_dict.has_key("Site"):
+        variable_map = {"status":"Status", "started":"Started",
+                        "submitted":"Submitted", "ended":"Ended",
+                        "cputime":"NormCPUTime(s)", "mem":"ChacheSize(kB)",
+                        }
+        for key,value in variable_map.iteritems():
+            self.set(key,my_dict.get(value,None))
+        if "Site" in my_dict:
             if self.hostname is None:
                 self.hostname = ""
             self.hostname+=my_dict['Site']
@@ -78,16 +85,20 @@ class InternalJobStatus:
     def getStartTime(self):
         return self.started
 
+    def setDict(self,t):
+        if not isinstance(t,dict): raise Exception("must be dictionary")
+        self.__dict__.update(t)
+
+    def get(self,key,as_str=False):
+        default = "-" if as_str else None
+        return self.__dict__.get(key,default)
+
     def __str__(self):
-        old_dict = self.__dict__
-        for key in self.__dict__.keys():
-            if self.__dict__[key] is None:
-                self.__dict__[key]="-"
-        k = '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(self.id,self.hostname,self.status,self.submitted,self.started,self.ended,self.cputime,self.mem)
-        self.__dict__ = old_dict
+        keys = ['id','hostname','status','submitted','started','ended','cputime','mem']
+        k = "\t".join([str(self.get(key,as_str=True)) for key in keys])
         return k
 
-    def _toxml(self):
+    def toxml(self):
         xf = xdom.parse(StringIO.StringIO('<?xml version="1.0" ?><some_tag/>'))
         job = xf.createElement("job")
         job.setAttribute("JobID",self.id)
@@ -95,7 +106,7 @@ class InternalJobStatus:
             xmlkey = key.replace("(","").replace(")","").replace(" ","")
             new_node = xf.createElement(xmlkey)
             dict_value = self.mydict[key]
-            if not dict_value is None:
+            if dict_value is not None:
                 if "\n" in dict_value:
                     textnode = xf.createTextNode(dict_value)
                     new_node.appendChild(textnode)
@@ -116,7 +127,6 @@ def translateJobSummary(job_dict):
 
 def setSpecialOption( optVal ):
     from DIRAC import S_OK
-    global specialOptions
     option,value = optVal.split('=')
     specialOptions[option] = value
     return S_OK()
@@ -126,7 +136,6 @@ if __name__ == "__main__":
     sys.stdout = sys.stderr
     from DIRAC.Core.Base import Script
     from DIRAC import gLogger, exit as dexit
-    specialOptions = {}
     Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: user, xml, dayspassed, logging, JobID) ", setSpecialOption )
     # thanks to Stephane for suggesting this fix!
     Script.addDefaultOptionValue('/DIRAC/Security/UseServerCertificate','y')
@@ -134,32 +143,29 @@ if __name__ == "__main__":
     #print specialOptions
     from DIRAC.Core.DISET.RPCClient import RPCClient
     from DIRAC.Interfaces.API.Dirac import Dirac
-    import DIRAC.Core.Utilities.Time as Time
+    #import DIRAC.Core.Utilities.Time as Time
     # use stored certificates
     from DIRAC.Core.Utilities.List import breakListIntoChunks
     do_xml = False
     
     user = os.getenv("USER")
     doLogging = False
-    if specialOptions.has_key("xml"):
-        do_xml = specialOptions["xml"]
-    if specialOptions.has_key("user"):
-        user = specialOptions["user"]
-    if specialOptions.has_key("logging"):
-        doLogging = specialOptions["logging"]
+    if "xml" in specialOptions:     do_xml = specialOptions["xml"]
+    if "user" in specialOptions:    user = specialOptions["user"]
+    if "logging" in specialOptions: doLogging = specialOptions["logging"]
     if do_xml:
         xmlfile = xdom.parse(StringIO.StringIO('<?xml version="1.0" ?><joblist/>'))
         firstChild = xmlfile.firstChild
     d = Dirac()
     w = RPCClient("WorkloadManagement/JobMonitoring")
 
-    if not specialOptions.has_key("JobID"):
+    if "JobID" not in specialOptions:
         my_dict = {}
         #my_dict['Status']=['Matched','Staging','Completed','Done','Failed','Rescheduled','Stalled','Waiting','Running','Checking'] # monitor all states
         my_dict['Owner']=[user]
         local_time = datetime.datetime.utcnow()
         timedelta = local_time-datetime.timedelta(seconds=86400)
-        if specialOptions.has_key("dayspassed"):
+        if "dayspassed" in specialOptions:
             timedelta = local_time-datetime.timedelta(seconds=float(specialOptions["dayspassed"])*3600)
         res = w.getJobs(my_dict,timedelta.strftime( '%Y-%m-%d %H:%M:%S' ))
 
@@ -221,14 +227,11 @@ if __name__ == "__main__":
             if not new_stat.getEndTime():
                 gLogger.info("Time stamp for ended job %i not provided, setting it to 1 day in the past!" %job)
                 new_stat.setEndTime()
-                  # addresses LPG-35
-#                 gLogger.info("Requesting to kill job %i" %job)
-#                 d.kill(job)
         if job in sites:
             new_stat.setSite(sites[job]['Site'])
         #print new_stat._toxml().toprettyxml()
         if do_xml:
-            firstChild.appendChild(new_stat._toxml())
+            firstChild.appendChild(new_stat.toxml())
         else:
             print(new_stat)
     # TODO:
